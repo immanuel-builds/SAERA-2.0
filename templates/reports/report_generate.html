@@ -1,0 +1,79 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Generate Report - Network Vulnerability Scanner{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-md-8">
+        <div class="card shadow">
+            <div class="card-header bg-primary text-white">
+                <h4 class="mb-0"><i class="bi bi-file-earmark-pdf"></i> Generate Report</h4>
+            </div>
+            <div class="card-body">
+                <h5>Scan: {{ scan.target.name }}</h5>
+                <p class="text-muted">Target: {{ scan.target.target }}</p>
+                <p>Vulnerabilities Found: <strong class="text-danger">{{ scan.vulnerabilities_found }}</strong></p>
+
+                <form method="post">
+                    {% csrf_token %}
+
+                    <div class="mb-4">
+                        <label class="form-label">Report Format</label>
+                        <div class="row g-3">
+                            <div class="col-md-4">
+                                <div class="card">
+                                    <div class="card-body text-center">
+                                        <input type="radio" name="format" value="pdf" id="formatPdf" checked
+                                            class="form-check-input">
+                                        <label for="formatPdf" class="d-block mt-2">
+                                            <i class="bi bi-file-pdf display-4 text-danger"></i>
+                                            <h6 class="mt-2">PDF</h6>
+                                            <small class="text-muted">Professional report document</small>
+                                        </label>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-md-4">
+                                <div class="card">
+                                    <div class="card-body text-center">
+                                        <input type="radio" name="format" value="csv" id="formatCsv"
+                                            class="form-check-input">
+                                        <label for="formatCsv" class="d-block mt-2">
+                                            <i class="bi bi-filetype-csv display-4 text-success"></i>
+                                            <h6 class="mt-2">CSV</h6>
+                                            <small class="text-muted">Spreadsheet data export</small>
+                                        </label>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-md-4">
+                                <div class="card">
+                                    <div class="card-body text-center">
+                                        <input type="radio" name="format" value="json" id="formatJson"
+                                            class="form-check-input">
+                                        <label for="formatJson" class="d-block mt-2">
+                                            <i class="bi bi-filetype-json display-4 text-info"></i>
+                                            <h6 class="mt-2">JSON</h6>
+                                            <small class="text-muted">Machine-readable format</small>
+                                        </label>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="d-grid gap-2">
+                        <button type="submit" class="btn btn-primary btn-lg">
+                            <i class="bi bi-file-earmark-arrow-down"></i> Generate Report
+                        </button>
+                        <a href="{% url 'scan_detail' scan.id %}" class="btn btn-secondary">
+                            <i class="bi bi-arrow-left"></i> Cancel
+                        </a>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

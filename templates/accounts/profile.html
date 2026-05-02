@@ -1,0 +1,122 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Security Clearance Profile - SAERA{% endblock %}
+
+{% block content %}
+<div class="row g-4">
+    <div class="col-md-4">
+        <div class="cyber-card h-100">
+            <div class="card-body text-center p-5">
+                <div class="position-relative d-inline-block mb-4">
+                    <div class="rounded-circle d-flex align-items-center justify-content-center text-white"
+                        style="width: 120px; height: 120px; background: linear-gradient(135deg, var(--primary-color), var(--accent-red)); font-size: 3rem; font-weight: 800; box-shadow: 0 0 30px rgba(168, 85, 247, 0.3);">
+                        {{ user.username|make_list|first|upper }}
+                    </div>
+                    <div class="position-absolute bottom-0 end-0 bg-success rounded-circle border border-dark" style="width: 25px; height: 25px;"></div>
+                </div>
+                
+                <h3 class="h4 mb-1 text-white">{{ user.get_full_name|default:user.username }}</h3>
+                <p class="text-primary small text-uppercase tracking-wider fw-bold mb-4">{{ user.get_role_display }}</p>
+                
+                <div class="text-start mt-5 border-top border-secondary pt-4 opacity-75">
+                    <div class="mb-3">
+                        <label class="text-muted small text-uppercase fw-bold">Email Address</label>
+                        <div class="text-white">{{ user.email }}</div>
+                    </div>
+                    <div class="mb-3">
+                        <label class="text-muted small text-uppercase fw-bold">Organization Unit</label>
+                        <div class="text-white">{{ user.organization|default:"Not specified" }}</div>
+                    </div>
+                    <div class="mb-3">
+                        <label class="text-muted small text-uppercase fw-bold">Department</label>
+                        <div class="text-white">{{ user.department|default:"Not specified" }}</div>
+                    </div>
+                    <div class="mb-0">
+                        <label class="text-muted small text-uppercase fw-bold">Commissioned Date</label>
+                        <div class="text-white">{{ user.date_joined|date:"M d, Y" }}</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-md-8">
+        <div class="cyber-card mb-4">
+            <div class="card-header d-flex justify-content-between align-items-center">
+                <h5 class="mb-0 text-white"><i class="bi bi-activity me-2"></i> Operational History</h5>
+                <span class="badge bg-info">Recent Logs</span>
+            </div>
+            <div class="card-body p-0">
+                <div class="table-responsive">
+                    <table class="table table-hover align-middle">
+                        <thead>
+                            <tr>
+                                <th>Directive</th>
+                                <th>Intelligence Output</th>
+                                <th>Timestamp</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for log in audit_logs %}
+                            <tr>
+                                <td><span class="badge bg-secondary">{{ log.get_action_display }}</span></td>
+                                <td class="text-white small">{{ log.description|truncatewords:10 }}</td>
+                                <td class="text-muted small">{{ log.created_at|date:"M d, H:i" }}</td>
+                            </tr>
+                            {% empty %}
+                            <tr>
+                                <td colspan="3" class="text-center py-5 text-muted">No operational data available</td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <div class="cyber-card">
+            <div class="card-header d-flex justify-content-between align-items-center">
+                <h5 class="mb-0 text-white"><i class="bi bi-shield-check me-2"></i> Security Assessments</h5>
+                <a href="{% url 'scan_list' %}" class="btn btn-sm btn-outline-cyan">Access Archive</a>
+            </div>
+            <div class="card-body p-0">
+                <div class="table-responsive">
+                    <table class="table table-hover align-middle">
+                        <thead>
+                            <tr>
+                                <th>Strategic Target</th>
+                                <th>Integrity Status</th>
+                                <th>Threat Count</th>
+                                <th>Date</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for scan in recent_scans %}
+                            <tr>
+                                <td><a href="{% url 'scan_detail' scan.id %}" class="text-white fw-bold text-decoration-none hover-primary">{{ scan.target.name }}</a></td>
+                                <td>
+                                    <span class="badge {% if scan.status == 'completed' %}bg-success{% else %}bg-info{% endif %}">
+                                        {{ scan.status|upper }}
+                                    </span>
+                                </td>
+                                <td class="text-center">
+                                    <span class="{% if scan.vulnerabilities_found > 0 %}text-danger fw-bold{% else %}text-success{% endif %}">
+                                        {{ scan.vulnerabilities_found }}
+                                    </span>
+                                </td>
+                                <td class="text-muted small">{{ scan.created_at|date:"M d" }}</td>
+                            </tr>
+                            {% empty %}
+                            <tr>
+                                <td colspan="4" class="text-center py-5 text-muted">No assessments initiated</td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

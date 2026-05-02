@@ -1,0 +1,108 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Login - SAERA Scanner{% endblock %}
+
+{% block extra_css %}
+<style>
+    body {
+        background: url("{% static 'img/login_bg_purple.png' %}") no-repeat center center fixed;
+        background-size: cover;
+    }
+    .login-container {
+        backdrop-filter: blur(8px);
+        -webkit-backdrop-filter: blur(8px);
+        min-height: 100vh;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        background: radial-gradient(circle at center, rgba(2, 6, 23, 0.6) 0%, rgba(2, 6, 23, 0.95) 100%);
+    }
+    .login-card {
+        width: 100%;
+        max-width: 450px;
+        padding: 3rem;
+    }
+    .form-control {
+        background: rgba(255, 255, 255, 0.08);
+        border: 1px solid rgba(255, 255, 255, 0.2);
+        color: white;
+        padding: 0.8rem 1.2rem;
+        border-radius: 12px;
+        transition: all 0.3s ease;
+    }
+    .form-control:focus {
+        background: rgba(255, 255, 255, 0.08);
+        border-color: var(--primary-color);
+        box-shadow: 0 0 15px rgba(59, 130, 246, 0.2);
+        color: white;
+    }
+    .input-group-text {
+        background: rgba(255, 255, 255, 0.05);
+        border: 1px solid rgba(255, 255, 255, 0.1);
+        color: var(--text-secondary);
+        border-radius: 12px 0 0 12px;
+    }
+    .form-control {
+        border-radius: 0 12px 12px 0;
+    }
+    .brand-logo {
+        width: 80px;
+        height: 80px;
+        background: linear-gradient(135deg, var(--primary-color), var(--accent-red));
+        border-radius: 20px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        margin: 0 auto 1.5rem;
+        box-shadow: 0 10px 30px rgba(59, 130, 246, 0.4);
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="login-container">
+    <div class="cyber-card login-card">
+        <div class="text-center mb-5">
+            <div class="brand-logo">
+                <i class="bi bi-shield-lock-fill text-white fs-1"></i>
+            </div>
+            <h2 class="h3 mb-2 text-white">SAERA Console</h2>
+            <p class="text-muted small text-uppercase tracking-widest">Authorized Intelligence Only</p>
+        </div>
+
+        <form method="post" class="needs-validation" novalidate>
+            {% csrf_token %}
+
+            <div class="mb-4">
+                <label for="id_username" class="form-label text-muted small fw-bold text-uppercase">Username</label>
+                <div class="input-group">
+                    <span class="input-group-text"><i class="bi bi-person"></i></span>
+                    <input type="text" name="username" class="form-control" id="id_username" placeholder="Enter identity" required>
+                </div>
+            </div>
+
+            <div class="mb-5">
+                <label for="id_password" class="form-label text-muted small fw-bold text-uppercase">Access Key</label>
+                <div class="input-group">
+                    <span class="input-group-text"><i class="bi bi-key"></i></span>
+                    <input type="password" name="password" class="form-control" id="id_password" placeholder="••••••••" required>
+                </div>
+            </div>
+
+            <div class="d-grid">
+                <button type="submit" class="btn btn-primary btn-lg py-3">
+                    Establish Secure Link <i class="bi bi-arrow-right ms-2"></i>
+                </button>
+            </div>
+        </form>
+
+        <div class="text-center mt-5">
+            <p class="text-muted small">Need access clearance? <a href="{% url 'register' %}" class="text-primary text-decoration-none fw-bold">Create Profile</a></p>
+            <div class="text-muted" style="font-size: 0.7rem;">
+                <i class="bi bi-info-circle me-1"></i> All interactions are logged and monitored.
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

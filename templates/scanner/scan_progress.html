@@ -1,0 +1,171 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Scan Intelligence - SAERA{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center py-5">
+    <div class="col-md-9">
+        <div class="gold-premium-card">
+            <!-- Decorative Gold Header -->
+            <div class="p-5 text-center border-bottom border-light">
+                <div class="d-inline-flex align-items-center justify-content-center mb-3 rounded-circle" 
+                     style="width: 80px; height: 80px; background: #fffbeb; border: 2px solid #fbbf24; box-shadow: 0 10px 25px rgba(251, 191, 36, 0.2);">
+                    <i class="bi bi-shield-lock-fill fs-1 text-warning"></i>
+                </div>
+                <h1 class="display-5 gold-text-gradient mb-2">Neural Security Scan</h1>
+                <p class="text-muted fw-bold text-uppercase tracking-widest small">Active Session: #{{ scan.id }}</p>
+            </div>
+            
+            <div class="p-5">
+                <div class="mb-5 text-center">
+                    <h4 class="text-dark mb-1">Target Analysis: <span class="fw-normal">{{ scan.target.target }}</span></h4>
+                    <span class="badge rounded-pill px-3 py-2" style="background: #fffbeb; color: #b45309; border: 1px solid #fde68a;">
+                        <i class="bi bi-broadcast me-2"></i> {{ scan.target.name }}
+                    </span>
+                </div>
+                
+                <!-- Main Progress Visualization -->
+                <div class="mb-5">
+                    <div class="d-flex justify-content-between align-items-end mb-3">
+                        <div class="text-start">
+                            <label class="text-muted small text-uppercase fw-bold mb-1 d-block">Current Operation</label>
+                            <h5 class="mb-0 text-dark" id="currentPhase" style="font-weight: 700;">{{ scan.current_phase }}</h5>
+                        </div>
+                        <div class="text-end">
+                            <span class="display-6 fw-bold text-dark" id="progressText">{{ scan.progress }}%</span>
+                        </div>
+                    </div>
+                    
+                    <div class="progress" style="height: 40px; background: #f1f5f9; border-radius: 20px; padding: 6px; box-shadow: inset 0 2px 4px rgba(0,0,0,0.05);">
+                        <div id="progressBar" class="progress-bar progress-bar-striped progress-bar-animated"
+                            role="progressbar" 
+                            style="width: {{ scan.progress }}%; background: linear-gradient(90deg, #d97706, #fbbf24); border-radius: 15px; box-shadow: 0 4px 10px rgba(217, 119, 6, 0.3);">
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Stats Grid -->
+                <div class="row g-4 mb-5">
+                    <div class="col-md-4">
+                        <div class="gold-stat-box text-center">
+                            <i class="bi bi-cpu fs-2 text-warning mb-2 d-block"></i>
+                            <div class="text-muted small text-uppercase fw-bold">Ports Scanned</div>
+                            <div class="h2 mb-0 text-dark fw-bold" id="portsScanned">{{ scan.total_ports_scanned }}</div>
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="gold-stat-box text-center">
+                            <i class="bi bi-hdd-network fs-2 text-info mb-2 d-block"></i>
+                            <div class="text-muted small text-uppercase fw-bold">Open Ports</div>
+                            <div class="h2 mb-0 text-dark fw-bold" id="openPorts">{{ scan.open_ports_found }}</div>
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="gold-stat-box text-center" style="border-color: #fca5a5; background: #fff1f2;">
+                            <i class="bi bi-exclamation-triangle fs-2 text-danger mb-2 d-block"></i>
+                            <div class="text-muted small text-uppercase fw-bold">Threats Found</div>
+                            <div class="h2 mb-0 text-danger fw-bold" id="vulnsFound">{{ scan.vulnerabilities_found }}</div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Live Feed Console (Gold Theme) -->
+                <div class="p-4 rounded-4 mb-5" style="background: #0f172a; border: 4px solid #fbbf24; box-shadow: 0 10px 30px rgba(0,0,0,0.15);">
+                    <div class="d-flex align-items-center justify-content-between mb-3">
+                        <div class="d-flex align-items-center gap-2">
+                            <span class="spinner-grow spinner-grow-sm text-warning" role="status"></span>
+                            <span class="text-warning small fw-bold text-uppercase tracking-widest">Secure Link Feed</span>
+                        </div>
+                        <span class="badge bg-warning text-dark small">LOGGING ACTIVE</span>
+                    </div>
+                    <div class="text-light small font-monospace" id="statusConsole" style="height: 120px; overflow-y: auto; line-height: 1.6;">
+                        <span class="text-muted">[{{ now|date:"H:i:s" }}]</span> Initializing core scanner components...<br>
+                        <span class="text-muted">[{{ now|date:"H:i:s" }}]</span> Handshake established with <span class="text-info">{{ scan.target.target }}</span><br>
+                        <span class="text-muted">[{{ now|date:"H:i:s" }}]</span> Running: <span class="text-warning">{{ scan.current_phase }}</span>
+                    </div>
+                </div>
+
+                <!-- Footer Actions -->
+                <div class="d-flex gap-3">
+                    <a href="{% url 'scan_detail' scan.id %}" id="viewResultsBtn" class="btn btn-lg btn-dark d-none flex-grow-1 py-3" 
+                       style="background: #0f172a; border: none; border-radius: 12px; font-weight: 700;">
+                        <i class="bi bi-arrow-right-circle-fill me-2"></i> View Intelligence Report
+                    </a>
+                    <a href="{% url 'dashboard' %}" class="btn btn-lg btn-outline-secondary flex-grow-1 py-3" style="border-radius: 12px; font-weight: 700;">
+                        <i class="bi bi-x-lg me-2"></i> Abort Mission
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+    /* Ensure this page looks like a premium standout from the dark background */
+    body {
+        background: #020617 !important; /* Force keep body dark for contrast */
+    }
+    
+    .gold-stat-box {
+        background: white;
+        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+    
+    #statusConsole::-webkit-scrollbar {
+        width: 4px;
+    }
+    #statusConsole::-webkit-scrollbar-thumb {
+        background: #fbbf24;
+        border-radius: 2px;
+    }
+</style>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    const scanId = {{ scan.id }};
+    const progressApiUrl = "{% url 'scan_progress_api' scan.id %}";
+    let lastPhase = "{{ scan.current_phase }}";
+
+    function updateProgress() {
+        fetch(progressApiUrl)
+            .then(response => response.json())
+            .then(data => {
+                const progressBar = document.getElementById('progressBar');
+                progressBar.style.width = data.progress + '%';
+                document.getElementById('progressText').textContent = data.progress + '%';
+                document.getElementById('currentPhase').textContent = data.current_phase;
+
+                document.getElementById('portsScanned').textContent = data.total_ports_scanned;
+                document.getElementById('openPorts').textContent = data.open_ports_found;
+                document.getElementById('vulnsFound').textContent = data.vulnerabilities_found;
+
+                if (data.current_phase !== lastPhase) {
+                    const consoleText = document.getElementById('statusConsole');
+                    const time = new Date().toLocaleTimeString([], {hour: '2-digit', minute:'2-digit', second:'2-digit'});
+                    const newLine = document.createElement('div');
+                    newLine.innerHTML = `<span class="text-muted">[${time}]</span> Phase Shift: <span class="text-warning">${data.current_phase}</span>`;
+                    consoleText.appendChild(newLine);
+                    consoleText.scrollTop = consoleText.scrollHeight;
+                    lastPhase = data.current_phase;
+                }
+
+                if (data.status === 'completed') {
+                    progressBar.classList.remove('progress-bar-animated');
+                    progressBar.style.background = '#10b981';
+                    document.getElementById('viewResultsBtn').classList.remove('d-none');
+                    clearInterval(progressInterval);
+                } else if (data.status === 'failed') {
+                    progressBar.classList.remove('progress-bar-animated');
+                    progressBar.style.background = '#ef4444';
+                    clearInterval(progressInterval);
+                }
+            })
+            .catch(error => console.error('Error:', error));
+    }
+
+    const progressInterval = setInterval(updateProgress, 2000);
+    updateProgress();
+</script>
+{% endblock %}

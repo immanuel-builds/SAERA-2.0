@@ -1,0 +1,177 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Register - SAERA Scanner{% endblock %}
+
+{% block extra_css %}
+<style>
+    body {
+        background: url("{% static 'img/login_bg_purple.png' %}") no-repeat center center fixed;
+        background-size: cover;
+    }
+    .register-container {
+        backdrop-filter: blur(8px);
+        -webkit-backdrop-filter: blur(8px);
+        min-height: 100vh;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        background: radial-gradient(circle at center, rgba(2, 6, 23, 0.6) 0%, rgba(2, 6, 23, 0.95) 100%);
+        padding: 2rem 0;
+    }
+    .register-card {
+        width: 100%;
+        max-width: 550px;
+        padding: 3rem;
+    }
+    .form-control {
+        background: rgba(255, 255, 255, 0.08);
+        border: 1px solid rgba(255, 255, 255, 0.2);
+        color: white;
+        padding: 0.8rem 1.2rem;
+        border-radius: 12px;
+        transition: all 0.3s ease;
+    }
+    .form-control:focus {
+        background: rgba(255, 255, 255, 0.08);
+        border-color: var(--primary-color);
+        box-shadow: 0 0 15px rgba(168, 85, 247, 0.2);
+        color: white;
+    }
+    .input-group-text {
+        background: rgba(255, 255, 255, 0.05);
+        border: 1px solid rgba(255, 255, 255, 0.1);
+        color: var(--text-secondary);
+        border-radius: 12px 0 0 12px;
+    }
+    .form-control {
+        border-radius: 0 12px 12px 0;
+    }
+    .brand-logo {
+        width: 60px;
+        height: 60px;
+        background: linear-gradient(135deg, var(--primary-color), var(--accent-red));
+        border-radius: 15px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        margin: 0 auto 1.5rem;
+        box-shadow: 0 10px 30px rgba(168, 85, 247, 0.4);
+    }
+    .help-text {
+        font-size: 0.7rem;
+        color: var(--text-muted);
+        margin-top: 0.25rem;
+    }
+    .errorlist {
+        list-style: none;
+        padding: 0;
+        margin: 0.5rem 0;
+        color: var(--accent-red);
+        font-size: 0.75rem;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="register-container">
+    <div class="cyber-card register-card">
+        <div class="text-center mb-4">
+            <div class="brand-logo">
+                <i class="bi bi-shield-plus text-white fs-2"></i>
+            </div>
+            <h2 class="h4 mb-1 text-white">Create Security Profile</h2>
+            <p class="text-muted small text-uppercase tracking-widest">Enroll in the Intelligence Network</p>
+        </div>
+
+        <form method="post" class="needs-validation" novalidate>
+            {% csrf_token %}
+
+            <div class="row g-3">
+                <div class="col-md-12 mb-2">
+                    <label class="form-label text-muted small fw-bold text-uppercase">Identification (Username)</label>
+                    <div class="input-group">
+                        <span class="input-group-text"><i class="bi bi-person"></i></span>
+                        {{ form.username }}
+                    </div>
+                    {% if form.username.errors %}{{ form.username.errors }}{% endif %}
+                </div>
+
+                <div class="col-md-12 mb-2">
+                    <label class="form-label text-muted small fw-bold text-uppercase">Communication Channel (Email)</label>
+                    <div class="input-group">
+                        <span class="input-group-text"><i class="bi bi-envelope"></i></span>
+                        {{ form.email }}
+                    </div>
+                    {% if form.email.errors %}{{ form.email.errors }}{% endif %}
+                </div>
+
+                <div class="col-md-6 mb-2">
+                    <label class="form-label text-muted small fw-bold text-uppercase">Organization</label>
+                    <div class="input-group">
+                        <span class="input-group-text"><i class="bi bi-building"></i></span>
+                        {{ form.organization }}
+                    </div>
+                </div>
+
+                <div class="col-md-6 mb-2">
+                    <label class="form-label text-muted small fw-bold text-uppercase">Department</label>
+                    <div class="input-group">
+                        <span class="input-group-text"><i class="bi bi-diagram-2"></i></span>
+                        {{ form.department }}
+                    </div>
+                </div>
+
+                <div class="col-md-6 mb-2">
+                    <label class="form-label text-muted small fw-bold text-uppercase">Access Key</label>
+                    <div class="input-group">
+                        <span class="input-group-text"><i class="bi bi-key"></i></span>
+                        {{ form.password1 }}
+                    </div>
+                    {% if form.password1.errors %}{{ form.password1.errors }}{% endif %}
+                </div>
+
+                <div class="col-md-6 mb-4">
+                    <label class="form-label text-muted small fw-bold text-uppercase">Confirm Key</label>
+                    <div class="input-group">
+                        <span class="input-group-text"><i class="bi bi-shield-lock"></i></span>
+                        {{ form.password2 }}
+                    </div>
+                    {% if form.password2.errors %}{{ form.password2.errors }}{% endif %}
+                </div>
+            </div>
+
+            {% if form.non_field_errors %}
+                <div class="alert alert-danger bg-opacity-10 border-danger small py-2">
+                    {{ form.non_field_errors }}
+                </div>
+            {% endif %}
+
+            <div class="d-grid mt-3">
+                <button type="submit" class="btn btn-primary btn-lg py-3">
+                    Initialize Profile <i class="bi bi-person-check ms-2"></i>
+                </button>
+            </div>
+        </form>
+
+        <div class="text-center mt-4">
+            <p class="text-muted small">Already have clearance? <a href="{% url 'login' %}" class="text-primary text-decoration-none fw-bold">Sign In Here</a></p>
+            <div class="text-muted" style="font-size: 0.6rem; opacity: 0.6;">
+                <i class="bi bi-info-circle me-1"></i> Account creation is subject to administrative approval.
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    // Add bootstrap classes to django form fields
+    document.addEventListener('DOMContentLoaded', function() {
+        const inputs = document.querySelectorAll('input:not([type="checkbox"])');
+        inputs.forEach(input => {
+            if (!input.classList.contains('form-control')) {
+                input.classList.add('form-control');
+            }
+        });
+    });
+</script>
+{% endblock %}

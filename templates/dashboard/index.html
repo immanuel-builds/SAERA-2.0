@@ -1,0 +1,390 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Command Center - SAERA{% endblock %}
+
+{% block content %}
+<!-- Top Header -->
+<div class="top-header align-items-end">
+    <div>
+        <h1 class="display-6 mb-1 text-white">Security Command Center</h1>
+        <div class="d-flex align-items-center gap-3">
+            <div class="text-success small text-uppercase fw-bold tracking-wider d-flex align-items-center">
+                <span class="pulse-dot me-2"></span> System Online
+            </div>
+            <div class="text-muted small text-uppercase fw-bold tracking-wider">
+                &bull; Monitoring Active &bull; <span id="current-time"></span>
+            </div>
+        </div>
+    </div>
+    <div class="d-flex gap-3">
+        <button class="btn btn-outline-cyan d-flex align-items-center gap-2" onclick="location.reload()">
+            <i class="bi bi-arrow-clockwise"></i> Refresh
+        </button>
+        <a href="{% url 'scan_create' %}" class="btn btn-primary d-flex align-items-center gap-2">
+            <i class="bi bi-plus-lg"></i> New Scan
+        </a>
+    </div>
+</div>
+
+<style>
+    .pulse-dot {
+        width: 8px;
+        height: 8px;
+        background-color: var(--success-color);
+        border-radius: 50%;
+        display: inline-block;
+        box-shadow: 0 0 0 rgba(16, 185, 129, 0.4);
+        animation: pulse 2s infinite;
+    }
+    @keyframes pulse {
+        0% { box-shadow: 0 0 0 0 rgba(16, 185, 129, 0.4); }
+        70% { box-shadow: 0 0 0 10px rgba(16, 185, 129, 0); }
+        100% { box-shadow: 0 0 0 0 rgba(16, 185, 129, 0); }
+    }
+</style>
+
+<script>
+    function updateClock() {
+        const now = new Date();
+        document.getElementById('current-time').textContent = now.toLocaleTimeString([], {hour: '2-digit', minute:'2-digit', second:'2-digit'});
+    }
+    setInterval(updateClock, 1000);
+    updateClock();
+</script>
+
+<!-- HUD Stats -->
+<div class="row g-4 mb-4">
+    <div class="col-md-3">
+        <div class="cyber-card p-4">
+            <div class="hud-stat">
+                <div>
+                    <div class="hud-value">{{ total_scans }}</div>
+                    <div class="hud-label">Total Scans</div>
+                </div>
+                <div class="hud-icon text-primary">
+                    <i class="bi bi-crosshair"></i>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="cyber-card p-4">
+            <div class="hud-stat">
+                <div>
+                    <div class="hud-value">{{ total_vulnerabilities }}</div>
+                    <div class="hud-label">Threats Detected</div>
+                </div>
+                <div class="hud-icon text-warning">
+                    <i class="bi bi-shield-exclamation"></i>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="cyber-card p-4 danger-border">
+            <div class="hud-stat">
+                <div>
+                    <div class="hud-value text-danger">{{ critical_vulns }}</div>
+                    <div class="hud-label text-danger">Critical Alerts</div>
+                </div>
+                <div class="hud-icon text-danger">
+                    <i class="bi bi-exclamation-triangle-fill"></i>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="cyber-card p-4">
+            <div class="hud-stat">
+                <div>
+                    <div class="hud-value text-info">{{ running_scans }}</div>
+                    <div class="hud-label text-info">Active Scans</div>
+                </div>
+                <div class="hud-icon text-info">
+                    <i class="bi bi-activity"></i>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row g-4 mb-4">
+    <!-- Network Topology Map -->
+    <!-- <div class="col-lg-8">
+        <div class="cyber-card h-100">
+            <div class="card-header">
+                <h5 class="card-title"><i class="bi bi-diagram-3 me-2 text-primary"></i> Network Topology</h5>
+                <span class="badge bg-info"><i class="bi bi-circle-fill me-1 small"></i> Live View</span>
+            </div>
+            <div class="card-body p-0">
+                <div id="networkMap"></div>
+            </div>
+        </div>
+    </div> -->
+
+    <!-- Vulnerability Distribution -->
+    <!-- <div class="col-lg-4">
+        <div class="cyber-card h-100">
+            <div class="card-header">
+                <h5 class="card-title"><i class="bi bi-pie-chart me-2 text-primary"></i> Threat Distribution</h5>
+            </div>
+            <div class="card-body d-flex align-items-center justify-content-center" style="min-height: 300px;">
+                <canvas id="vulnChart"></canvas>
+            </div>
+        </div>
+    </div> -->
+</div>
+
+<div class="row g-4">
+    <!-- Recent Scans -->
+    <div class="col-lg-6">
+        <div class="cyber-card h-100">
+            <div class="card-header">
+                <h5 class="card-title"><i class="bi bi-clock-history me-2 text-primary"></i> Recent Operations</h5>
+                <a href="{% url 'scan_list' %}" class="btn btn-sm btn-outline-cyan">View All</a>
+            </div>
+            <div class="card-body p-0">
+                <div class="table-responsive">
+                    <table class="table table-hover align-middle">
+                        <thead>
+                            <tr>
+                                <th>Target</th>
+                                <th>Status</th>
+                                <th>Findings</th>
+                                <th>Time</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for scan in recent_scans %}
+                            <tr>
+                                <td class="fw-bold text-white">
+                                    <a href="{% url 'scan_detail' scan.id %}" class="text-decoration-none text-white">
+                                        {{ scan.target.name }}
+                                    </a>
+                                </td>
+                                <td>
+                                    {% if scan.status == 'completed' %}
+                                    <span class="badge bg-success">COMPLETED</span>
+                                    {% elif scan.status == 'running' %}
+                                    <span class="badge bg-info">RUNNING</span>
+                                    {% elif scan.status == 'failed' %}
+                                    <span class="badge bg-danger">FAILED</span>
+                                    {% else %}
+                                    <span class="badge bg-secondary">{{ scan.status|upper }}</span>
+                                    {% endif %}
+                                </td>
+                                <td>
+                                    <span
+                                        class="{% if scan.vulnerabilities_found > 0 %}text-danger fw-bold{% else %}text-success{% endif %}">
+                                        {{ scan.vulnerabilities_found }}
+                                    </span>
+                                </td>
+                                <td class="text-muted small">{{ scan.created_at|date:"H:i" }}</td>
+                            </tr>
+                            {% empty %}
+                            <tr>
+                                <td colspan="4" class="text-center py-4 text-muted">No recent operations</td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Critical Alerts -->
+    <div class="col-lg-6">
+        <div class="cyber-card h-100 danger-border">
+            <div class="card-header">
+                <h5 class="card-title text-danger"><i class="bi bi-exclamation-octagon me-2"></i> Critical Alerts</h5>
+                <a href="{% url 'vulnerability_list' %}" class="btn btn-sm btn-outline-cyan">View All</a>
+            </div>
+            <div class="card-body p-0">
+                <div class="table-responsive">
+                    <table class="table table-hover align-middle">
+                        <thead>
+                            <tr>
+                                <th>Severity</th>
+                                <th>Vulnerability</th>
+                                <th>Target</th>
+                                <th>Detected</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for vuln in recent_vulns %}
+                            <tr>
+                                <td>
+                                    <span class="badge severity-{{ vuln.severity }}">
+                                        {{ vuln.severity|upper }}
+                                    </span>
+                                </td>
+                                <td class="text-white fw-medium">{{ vuln.title|truncatewords:5 }}</td>
+                                <td>{{ vuln.scan_job.target.name }}</td>
+                                <td class="text-muted small">{{ vuln.created_at|date:"M d" }}</td>
+                            </tr>
+                            {% empty %}
+                            <tr>
+                                <td colspan="4" class="text-center py-4 text-muted">
+                                    <i class="bi bi-check-circle text-success fs-4 d-block mb-2"></i>
+                                    No active threats detected
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    // --- Vulnerability Distribution Chart ---
+    const chartCanvas = document.getElementById('vulnChart');
+    if (chartCanvas && window.Chart) {
+        const ctx = chartCanvas.getContext('2d');
+        Chart.defaults.color = '#94a3b8';
+        Chart.defaults.font.family = "'Inter', sans-serif";
+        Chart.defaults.borderColor = 'rgba(255, 255, 255, 0.05)';
+
+        new Chart(ctx, {
+            type: 'doughnut',
+            data: {
+                labels: ['Critical', 'High', 'Medium', 'Low', 'Info'],
+                datasets: [{
+                    data: [
+                        {{ severity_counts.critical|default:0 }},
+                        {{ severity_counts.high|default:0 }},
+                        {{ severity_counts.medium|default:0 }},
+                        {{ severity_counts.low|default:0 }},
+                        {{ severity_counts.info|default:0 }}
+                    ],
+                    backgroundColor: [
+                        '#ef4444', // Critical (Red)
+                        '#f43f5e', // High (Rose)
+                        '#a855f7', // Medium (Purple)
+                        '#6366f1', // Low (Indigo)
+                        '#d946ef'  // Info (Magenta)
+                    ],
+                    hoverBackgroundColor: [
+                        '#f87171',
+                        '#fb7185',
+                        '#c084fc',
+                        '#818cf8',
+                        '#e879f9'
+                    ],
+                    borderWidth: 8,
+                    borderColor: '#0f172a',
+                    hoverOffset: 15
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                cutout: '75%',
+                plugins: {
+                    legend: {
+                        position: 'bottom',
+                        labels: {
+                            usePointStyle: true,
+                            pointStyle: 'circle',
+                            padding: 25,
+                            font: {
+                                size: 11,
+                                weight: '600'
+                            }
+                        }
+                    },
+                    tooltip: {
+                        backgroundColor: 'rgba(15, 23, 42, 0.9)',
+                        titleFont: { size: 14, weight: '700' },
+                        bodyFont: { size: 13 },
+                        padding: 12,
+                        cornerRadius: 10,
+                        displayColors: true
+                    }
+                }
+            }
+        });
+    }
+
+    // --- Network Topology Map (Vis.js) ---
+    const mapContainer = document.getElementById('networkMap');
+    if (mapContainer && window.vis) {
+        const nodes = new vis.DataSet([
+            { id: 0, label: 'Scanner Host', group: 'scanner', value: 20 },
+        {% for scan in recent_scans %}
+            { id: {{ scan.id }}, label: '{{ scan.target.name|escapejs }}', group: 'target', value: 10 },
+        {% endfor %}
+        ]);
+
+        const edges = new vis.DataSet([
+        {% for scan in recent_scans %}
+            { from: 0, to: {{ scan.id }} },
+        {% endfor %}
+        ]);
+
+        const data = {
+            nodes: nodes,
+            edges: edges
+        };
+        const options = {
+            nodes: {
+                shape: 'dot',
+                font: {
+                    color: '#f1f5f9',
+                    face: 'Outfit'
+                },
+                borderWidth: 2
+            },
+            groups: {
+                scanner: {
+                    color: { 
+                        background: '#a855f7', 
+                        border: 'rgba(168, 85, 247, 0.5)'
+                    },
+                    shadow: { enabled: true, color: 'rgba(168, 85, 247, 0.4)', size: 15 },
+                    shape: 'diamond'
+                },
+                target: {
+                    color: { 
+                        background: 'rgba(15, 23, 42, 0.8)', 
+                        border: '#f43f5e'
+                    },
+                    shadow: { enabled: true, color: 'rgba(244, 63, 94, 0.2)', size: 10 }
+                }
+            },
+            edges: {
+                color: { color: 'rgba(168, 85, 247, 0.2)', highlight: '#f43f5e' },
+                width: 1,
+                smooth: {
+                    type: 'cubicBezier',
+                    forceDirection: 'none',
+                    roundness: 0.5
+                }
+            },
+            physics: {
+                forceAtlas2Based: {
+                    gravitationalConstant: -50,
+                    centralGravity: 0.01,
+                    springLength: 100,
+                    springConstant: 0.08
+                },
+                maxVelocity: 50,
+                solver: 'forceAtlas2Based',
+                stabilization: { iterations: 150 }
+            },
+            interaction: {
+                hover: true,
+                tooltipDelay: 200,
+                hideEdgesOnDrag: true
+            }
+        };
+        new vis.Network(mapContainer, data, options);
+    }
+</script>
+{% endblock %}

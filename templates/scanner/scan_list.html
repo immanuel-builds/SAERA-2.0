@@ -1,0 +1,120 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}My Scans - Network Vulnerability Scanner{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-12 mb-4">
+        <div class="d-flex justify-content-between align-items-center">
+            <h1><i class="bi bi-list-check"></i> My Scans</h1>
+            <a href="{% url 'scan_create' %}" class="btn btn-primary">
+                <i class="bi bi-plus-circle"></i> New Scan
+            </a>
+        </div>
+    </div>
+
+    <!-- Filters -->
+    <div class="col-12 mb-4">
+        <div class="card">
+            <div class="card-body">
+                <form method="get" class="row g-3">
+                    <div class="col-md-4">
+                        <label for="statusFilter" class="form-label">Filter by Status</label>
+                        <select name="status" id="statusFilter" class="form-select" onchange="this.form.submit()">
+                            <option value="">All Statuses</option>
+                            <option value="pending" {% if request.GET.status == 'pending' %}selected{% endif %}>Pending
+                            </option>
+                            <option value="running" {% if request.GET.status == 'running' %}selected{% endif %}>Running
+                            </option>
+                            <option value="completed" {% if request.GET.status == 'completed' %}selected{% endif %}>
+                                Completed
+                            </option>
+                            <option value="failed" {% if request.GET.status == 'failed' %}selected{% endif %}>Failed
+                            </option>
+                        </select>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- Scans Table -->
+    <div class="col-12">
+        <div class="card shadow">
+            <div class="card-body">
+                <div class="table-responsive">
+                    <table class="table table-hover">
+                        <thead>
+                            <tr>
+                                <th>ID</th>
+                                <th>Target</th>
+                                <th>Status</th>
+                                <th>Progress</th>
+                                <th>Vulnerabilities</th>
+                                <th>Date</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for scan in scans %}
+                            <tr>
+                                <td>#{{ scan.id }}</td>
+                                <td>
+                                    <strong>{{ scan.target.name }}</strong><br>
+                                    <small class="text-muted">{{ scan.target.target }}</small>
+                                </td>
+                                <td>
+                                    {% if scan.status == 'completed' %}
+                                    <span class="badge bg-success">Completed</span>
+                                    {% elif scan.status == 'running' %}
+                                    <span class="badge bg-info">Running</span>
+                                    {% elif scan.status == 'failed' %}
+                                    <span class="badge bg-danger">Failed</span>
+                                    {% elif scan.status == 'pending' %}
+                                    <span class="badge bg-secondary">Pending</span>
+                                    {% else %}
+                                    <span class="badge bg-secondary">{{ scan.status }}</span>
+                                    {% endif %}
+                                </td>
+                                <td>
+                                    <div class="progress" style="height: 20px;">
+                                        <div class="progress-bar" style="width: {{ scan.progress }}%">{{ scan.progress
+                                            }}%</div>
+                                    </div>
+                                </td>
+                                <td>
+                                    {% if scan.vulnerabilities_found > 0 %}
+                                    <span class="badge bg-danger">{{ scan.vulnerabilities_found }}</span>
+                                    {% else %}
+                                    <span class="text-muted">0</span>
+                                    {% endif %}
+                                </td>
+                                <td>{{ scan.created_at|date:"M d, Y H:i" }}</td>
+                                <td>
+                                    {% if scan.status == 'running' %}
+                                    <a href="{% url 'scan_progress' scan.id %}" class="btn btn-sm btn-info">
+                                        <i class="bi bi-hourglass-split"></i> Progress
+                                    </a>
+                                    {% elif scan.status == 'completed' %}
+                                    <a href="{% url 'scan_detail' scan.id %}" class="btn btn-sm btn-primary">
+                                        <i class="bi bi-eye"></i> View
+                                    </a>
+                                    {% endif %}
+                                </td>
+                            </tr>
+                            {% empty %}
+                            <tr>
+                                <td colspan="7" class="text-center text-muted py-4">
+                                    No scans found. <a href="{% url 'scan_create' %}">Create your first scan</a>
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
