@@ -290,12 +290,25 @@ class PortScanner:
 
         def _probe(label, ip, port):
             try:
-                with socket.create_connection((ip, port), timeout=timeout):
-                    return label, ip, port, 'open'
+                # Use a slightly longer timeout for banner grabbing
+                with socket.create_connection((ip, port), timeout=timeout) as sock:
+                    banner = ""
+                    try:
+                        # Some services (SSH, FTP) send a banner immediately
+                        sock.settimeout(1.5)
+                        banner = sock.recv(1024).decode('utf-8', errors='ignore').strip()
+                        
+                        # If no banner, try a simple HTTP probe for common web ports
+                        if not banner and port in [80, 8080, 8000]:
+                            sock.send(b"HEAD / HTTP/1.0\r\n\r\n")
+                            banner = sock.recv(1024).decode('utf-8', errors='ignore').strip()
+                    except:
+                        pass
+                    return label, ip, port, 'open', banner
             except ConnectionRefusedError:
-                return label, ip, port, 'closed'
+                return label, ip, port, 'closed', ""
             except OSError:
-                return label, ip, port, 'filtered'
+                return label, ip, port, 'filtered', ""
 
         with ThreadPoolExecutor(max_workers=max_workers) as executor:
             futures = {
@@ -304,7 +317,7 @@ class PortScanner:
                 for port in port_list
             }
             for future in as_completed(futures):
-                label, ip, port, state = future.result()
+                label, ip, port, state, banner = future.result()
                 results['total_ports_scanned'] += 1
                 if state == 'open':
                     results['open_ports'] += 1
@@ -315,6 +328,7 @@ class PortScanner:
                         'product': '',
                         'version': '',
                         'extrainfo': 'socket scan',
+                        'banner': banner,
                         'cpe': '',
                     })
                 elif state == 'closed':

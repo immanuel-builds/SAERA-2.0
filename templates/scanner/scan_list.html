@@ -1,112 +1,113 @@
 {% extends 'base.html' %}
 {% load static %}
 
-{% block title %}My Scans - Network Vulnerability Scanner{% endblock %}
+{% block title %}Archives - Operation Chronicles{% endblock %}
+
+{% block body_class %}intel-page{% endblock %}
 
 {% block content %}
-<div class="row">
-    <div class="col-12 mb-4">
-        <div class="d-flex justify-content-between align-items-center">
-            <h1><i class="bi bi-list-check"></i> My Scans</h1>
-            <a href="{% url 'scan_create' %}" class="btn btn-primary">
-                <i class="bi bi-plus-circle"></i> New Scan
+<div class="row g-4">
+    <div class="col-12">
+        <div class="d-flex justify-content-between align-items-center mb-5">
+            <h1 class="mb-0">Operation Chronicles</h1>
+            {% if user.is_analyst %}
+            <a href="{% url 'scan_create' %}" class="btn btn-primary d-flex align-items-center gap-2">
+                <i class="bi bi-plus-circle-fill"></i> Initiate New Scan
             </a>
-        </div>
-    </div>
-
-    <!-- Filters -->
-    <div class="col-12 mb-4">
-        <div class="card">
-            <div class="card-body">
-                <form method="get" class="row g-3">
-                    <div class="col-md-4">
-                        <label for="statusFilter" class="form-label">Filter by Status</label>
-                        <select name="status" id="statusFilter" class="form-select" onchange="this.form.submit()">
-                            <option value="">All Statuses</option>
-                            <option value="pending" {% if request.GET.status == 'pending' %}selected{% endif %}>Pending
-                            </option>
-                            <option value="running" {% if request.GET.status == 'running' %}selected{% endif %}>Running
-                            </option>
-                            <option value="completed" {% if request.GET.status == 'completed' %}selected{% endif %}>
-                                Completed
-                            </option>
-                            <option value="failed" {% if request.GET.status == 'failed' %}selected{% endif %}>Failed
-                            </option>
-                        </select>
-                    </div>
-                </form>
-            </div>
+            {% endif %}
         </div>
     </div>
 
     <!-- Scans Table -->
     <div class="col-12">
-        <div class="card shadow">
-            <div class="card-body">
+        <div class="cyber-card">
+            <div class="card-header">
+                <h5 class="card-title">All Operations</h5>
+                <div class="d-flex gap-2">
+                    <form method="get" class="d-flex gap-2">
+                        <select name="status" class="form-select form-select-sm bg-dark text-muted border-secondary" style="min-width: 150px;" onchange="this.form.submit()">
+                            <option value="">All Statuses</option>
+                            <option value="pending" {% if request.GET.status == 'pending' %}selected{% endif %}>Pending</option>
+                            <option value="running" {% if request.GET.status == 'running' %}selected{% endif %}>Running</option>
+                            <option value="completed" {% if request.GET.status == 'completed' %}selected{% endif %}>Completed</option>
+                            <option value="failed" {% if request.GET.status == 'failed' %}selected{% endif %}>Failed</option>
+                        </select>
+                    </form>
+                </div>
+            </div>
+            <div class="card-body p-0">
                 <div class="table-responsive">
-                    <table class="table table-hover">
+                    <table class="table table-hover align-middle">
                         <thead>
                             <tr>
-                                <th>ID</th>
-                                <th>Target</th>
+                                <th class="ps-4">ID</th>
+                                <th>Target System</th>
                                 <th>Status</th>
                                 <th>Progress</th>
-                                <th>Vulnerabilities</th>
-                                <th>Date</th>
-                                <th>Actions</th>
+                                <th>Threats</th>
+                                <th>Timestamp</th>
+                                <th class="text-end pe-4">Operations</th>
                             </tr>
                         </thead>
                         <tbody>
                             {% for scan in scans %}
                             <tr>
-                                <td>#{{ scan.id }}</td>
+                                <td class="ps-4 text-muted small">#{{ scan.id }}</td>
                                 <td>
-                                    <strong>{{ scan.target.name }}</strong><br>
-                                    <small class="text-muted">{{ scan.target.target }}</small>
+                                    <div class="fw-bold text-white">{{ scan.target.name }}</div>
+                                    <div class="text-muted small">{{ scan.target.target }}</div>
                                 </td>
                                 <td>
                                     {% if scan.status == 'completed' %}
-                                    <span class="badge bg-success">Completed</span>
+                                    <span class="badge bg-success">COMPLETED</span>
                                     {% elif scan.status == 'running' %}
-                                    <span class="badge bg-info">Running</span>
+                                    <span class="badge bg-info">RUNNING</span>
                                     {% elif scan.status == 'failed' %}
-                                    <span class="badge bg-danger">Failed</span>
+                                    <span class="badge bg-danger">FAILED</span>
                                     {% elif scan.status == 'pending' %}
-                                    <span class="badge bg-secondary">Pending</span>
+                                    <span class="badge bg-secondary">PENDING</span>
                                     {% else %}
-                                    <span class="badge bg-secondary">{{ scan.status }}</span>
+                                    <span class="badge bg-secondary">{{ scan.status|upper }}</span>
                                     {% endif %}
                                 </td>
                                 <td>
-                                    <div class="progress" style="height: 20px;">
-                                        <div class="progress-bar" style="width: {{ scan.progress }}%">{{ scan.progress
-                                            }}%</div>
+                                    <div class="progress" style="height: 6px; background: rgba(255,255,255,0.05); border-radius: 3px; width: 100px;">
+                                        <div class="progress-bar {% if scan.status == 'running' %}progress-bar-striped progress-bar-animated{% endif %}" 
+                                             style="width: {{ scan.progress }}%; background: var(--primary-color);"></div>
                                     </div>
+                                    <div class="text-muted small mt-1">{{ scan.progress }}% Complete</div>
                                 </td>
                                 <td>
                                     {% if scan.vulnerabilities_found > 0 %}
-                                    <span class="badge bg-danger">{{ scan.vulnerabilities_found }}</span>
+                                    <span class="badge bg-danger">{{ scan.vulnerabilities_found }} DETECTED</span>
                                     {% else %}
-                                    <span class="text-muted">0</span>
+                                    <span class="text-success small"><i class="bi bi-shield-check me-1"></i> Clean</span>
                                     {% endif %}
                                 </td>
-                                <td>{{ scan.created_at|date:"M d, Y H:i" }}</td>
-                                <td>
-                                    {% if scan.status == 'running' %}
-                                    <a href="{% url 'scan_progress' scan.id %}" class="btn btn-sm btn-info">
-                                        <i class="bi bi-hourglass-split"></i> Progress
-                                    </a>
-                                    {% elif scan.status == 'completed' %}
-                                    <a href="{% url 'scan_detail' scan.id %}" class="btn btn-sm btn-primary">
-                                        <i class="bi bi-eye"></i> View
-                                    </a>
-                                    {% endif %}
+                                <td class="text-muted small">{{ scan.created_at|date:"M d, H:i" }}</td>
+                                <td class="text-end pe-4">
+                                    <div class="btn-group">
+                                        {% if scan.status == 'running' %}
+                                        <a href="{% url 'scan_progress' scan.id %}" class="btn btn-sm btn-outline-cyan">
+                                            <i class="bi bi-activity"></i>
+                                        </a>
+                                        {% elif scan.status == 'completed' %}
+                                        <a href="{% url 'scan_detail' scan.id %}" class="btn btn-sm btn-outline-cyan">
+                                            <i class="bi bi-eye-fill"></i>
+                                        </a>
+                                        {% endif %}
+                                    </div>
                                 </td>
                             </tr>
                             {% empty %}
                             <tr>
-                                <td colspan="7" class="text-center text-muted py-4">
-                                    No scans found. <a href="{% url 'scan_create' %}">Create your first scan</a>
+                                <td colspan="7" class="text-center py-5">
+                                    <div class="text-muted mb-3">No operational history found</div>
+                                    {% if user.is_analyst %}
+                                    <a href="{% url 'scan_create' %}" class="btn btn-outline-primary btn-sm">
+                                        Initiate First Scan
+                                    </a>
+                                    {% endif %}
                                 </td>
                             </tr>
                             {% endfor %}

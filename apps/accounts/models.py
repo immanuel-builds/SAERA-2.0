@@ -11,10 +11,9 @@ class User(AbstractUser):
     ROLE_CHOICES = [
         ('admin', 'Administrator'),
         ('analyst', 'Security Analyst'),
-        ('viewer', 'Viewer'),
     ]
     
-    role = models.CharField(max_length=20, choices=ROLE_CHOICES, default='viewer')
+    role = models.CharField(max_length=20, choices=ROLE_CHOICES, default='analyst')
     organization = models.CharField(max_length=255, blank=True)
     department = models.CharField(max_length=255, blank=True)
     can_initiate_scans = models.BooleanField(default=True)
@@ -30,11 +29,11 @@ class User(AbstractUser):
     
     @property
     def is_admin(self):
-        return self.role == 'admin'
+        return self.role == 'admin' or self.is_superuser
     
     @property
     def is_analyst(self):
-        return self.role == 'analyst'
+        return self.role in ['analyst', 'admin'] or self.is_superuser
 
 
 class AuditLog(models.Model):
@@ -49,6 +48,9 @@ class AuditLog(models.Model):
         ('user_login', 'User Login'),
         ('user_logout', 'User Logout'),
         ('user_signup', 'User Account Created'),
+        ('user_deleted', 'User Account Decommissioned'),
+        ('user_updated', 'User Account Modified'),
+        ('security_event', 'Security Alert / Validation Failure'),
     ]
     
     user = models.ForeignKey(User, on_delete=models.SET_NULL, null=True, related_name='audit_logs')

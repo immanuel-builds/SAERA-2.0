@@ -1,2 +1,0 @@
-git clone <repository-url> /var/www/vulnerability-scanner
-cd /var/www/vulnerability-scanner

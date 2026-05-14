@@ -50,6 +50,14 @@ class ServiceScanner:
             'ports': [23],
             'patterns': [r'telnet'],
         },
+        'irc': {
+            'ports': [6667, 6668, 6697],
+            'patterns': [r'Unreal', r'irc'],
+        },
+        'smb': {
+            'ports': [139, 445],
+            'patterns': [r'Samba', r'SMB'],
+        },
     }
     
     def enumerate_services(self, port_scan_results: Dict) -> List[Dict]:
@@ -79,35 +87,46 @@ class ServiceScanner:
     def _identify_service(self, port_info: Dict) -> Dict:
         """
         Identify service details from port information
-        
-        Args:
-            port_info: Port information from scan
-            
-        Returns:
-            Service details dictionary
         """
         service_name = port_info.get('service', '').lower()
         product = port_info.get('product', '')
         version = port_info.get('version', '')
         extrainfo = port_info.get('extrainfo', '')
         port = port_info.get('port')
+        banner = port_info.get('banner', '')
         
+        # If product/version missing (socket scan), try to extract from banner
+        if (not product or not version) and banner:
+            for svc_type, svc_data in self.SERVICE_SIGNATURES.items():
+                for pattern in svc_data.get('patterns', []):
+                    match = re.search(pattern, banner, re.I)
+                    if match:
+                        service_name = svc_type
+                        # If the pattern has a group, it's the version
+                        if match.groups():
+                            version = match.group(1)
+                        # Extract product name from pattern or use default
+                        product = prod_name = pattern.split('/')[0].split(' ')[0].replace('\\', '').replace('[', '').replace(']', '').replace('+', '')
+                        break
+
         # Build service identifier
         service_id = self._classify_service_type(service_name, port)
         
         # Extract version information
         version_info = self._extract_version(product, version, extrainfo)
+        if not version_info or version_info == 'Unknown Version':
+            version_info = banner if banner else 'Unknown Version'
         
         return {
             'port': port,
             'service_type': service_id,
             'service_name': service_name or 'unknown',
-            'product': product,
+            'product': product or service_name,
             'version': version,
             'version_info': version_info,
             'extrainfo': extrainfo,
             'is_encrypted': self._is_encrypted_service(service_name, port),
-            'banner': f"{product} {version} {extrainfo}".strip(),
+            'banner': banner,
         }
     
     def _classify_service_type(self, service_name: str, port: int) -> str:

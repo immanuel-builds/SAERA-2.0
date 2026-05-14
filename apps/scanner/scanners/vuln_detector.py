@@ -91,19 +91,52 @@ class VulnerabilityDetector:
         },
     }
     
+    # Specialized signatures for high-impact vulnerabilities (e.g. Metasploitable)
+    SIGNATURE_VULNERABILITIES = [
+        {
+            'pattern': r'vsftpd 2\.3\.4',
+            'severity': 'critical',
+            'title': 'vsFTPd 2.3.4 Backdoor Detected',
+            'description': 'The detected version of vsFTPd contains a malicious backdoor that allows remote command execution.',
+            'impact': 'Attackers can gain full system access by sending a specific sequence to the FTP service.',
+            'recommendation': 'Immediately update vsFTPd to a secure version or switch to a different FTP server.',
+        },
+        {
+            'pattern': r'Unreal3\.2\.8\.1',
+            'severity': 'critical',
+            'title': 'UnrealIRCd 3.2.8.1 Backdoor Detected',
+            'description': 'The detected version of UnrealIRCd contains a backdoor that allows remote code execution.',
+            'impact': 'Total system compromise via the IRC service.',
+            'recommendation': 'Update UnrealIRCd to the latest stable version.',
+        },
+        {
+            'pattern': r'Samba 3\.0\.20',
+            'severity': 'critical',
+            'title': 'Samba 3.0.20-3.0.25rc3 Remote Code Execution',
+            'description': 'The "username map script" vulnerability allows remote command execution.',
+            'impact': 'Unauthorized root access to the system.',
+            'recommendation': 'Update Samba to a non-vulnerable version.',
+        },
+        {
+            'pattern': r'GNU bash 4\.',
+            'severity': 'high',
+            'title': 'Potential Shellshock Vulnerability',
+            'description': 'Older versions of Bash are vulnerable to the Shellshock exploit (CVE-2014-6271).',
+            'impact': 'Remote code execution via specifically crafted environment variables.',
+            'recommendation': 'Update Bash to the latest version.',
+        }
+    ]
+
     def detect_vulnerabilities(self, services: List[Dict], port_results: List[Dict]) -> List[Dict]:
         """
         Detect vulnerabilities from enumerated services
-        
-        Args:
-            services: List of identified services
-            port_results: List of port scan results
-            
-        Returns:
-            List of detected vulnerabilities
         """
         vulnerabilities = []
         
+        # Check for signature-based vulnerabilities (Metasploitable, etc)
+        signature_vulns = self._check_signatures(services)
+        vulnerabilities.extend(signature_vulns)
+
         # Check for insecure protocols
         insecure_protocol_vulns = self._check_insecure_protocols(services)
         vulnerabilities.extend(insecure_protocol_vulns)
@@ -125,6 +158,36 @@ class VulnerabilityDetector:
         vulnerabilities.extend(unnecessary_vulns)
         
         logger.info(f"Detected {len(vulnerabilities)} vulnerabilities")
+        return vulnerabilities
+
+    def _check_signatures(self, services: List[Dict]) -> List[Dict]:
+        """Check services against known vulnerability signatures"""
+        vulnerabilities = []
+        import re
+        
+        for service in services:
+            banner = service.get('banner', '')
+            product = service.get('product', '')
+            version = service.get('version_info', '')
+            
+            check_string = f"{banner} {product} {version}".strip()
+            if not check_string:
+                continue
+                
+            for sig in self.SIGNATURE_VULNERABILITIES:
+                if re.search(sig['pattern'], check_string, re.I):
+                    vulnerabilities.append({
+                        'vuln_type': 'cve',
+                        'severity': sig['severity'],
+                        'title': sig['title'],
+                        'description': sig['description'],
+                        'impact': sig['impact'],
+                        'recommendation': sig['recommendation'],
+                        'port': service.get('port'),
+                        'protocol': service.get('protocol', 'tcp'),
+                        'service': service.get('service_name'),
+                        'evidence': f"Signature match found: {check_string}",
+                    })
         return vulnerabilities
     
     def _check_insecure_protocols(self, services: List[Dict]) -> List[Dict]:

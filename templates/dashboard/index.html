@@ -3,17 +3,19 @@
 
 {% block title %}Command Center - SAERA{% endblock %}
 
+{% block body_class %}dashboard-page{% endblock %}
+
 {% block content %}
 <!-- Top Header -->
-<div class="top-header align-items-end">
+<div class="top-header align-items-end mb-5">
     <div>
-        <h1 class="display-6 mb-1 text-white">Security Command Center</h1>
+        <h1 class="mb-1">Intelligence Observatory</h1>
         <div class="d-flex align-items-center gap-3">
-            <div class="text-success small text-uppercase fw-bold tracking-wider d-flex align-items-center">
-                <span class="pulse-dot me-2"></span> System Online
+            <div class="small text-uppercase tracking-wider d-flex align-items-center" style="color: var(--ash-gray); font-family: var(--font-heading); font-weight: 500;">
+                <span class="status-indicator me-2"></span> System Online
             </div>
-            <div class="text-muted small text-uppercase fw-bold tracking-wider">
-                &bull; Monitoring Active &bull; <span id="current-time"></span>
+            <div class="text-muted small text-uppercase tracking-wider" style="font-family: var(--font-heading);">
+                &bull; Passive Monitoring &bull; <span id="current-time"></span>
             </div>
         </div>
     </div>
@@ -21,26 +23,27 @@
         <button class="btn btn-outline-cyan d-flex align-items-center gap-2" onclick="location.reload()">
             <i class="bi bi-arrow-clockwise"></i> Refresh
         </button>
+        {% if user.is_analyst %}
         <a href="{% url 'scan_create' %}" class="btn btn-primary d-flex align-items-center gap-2">
             <i class="bi bi-plus-lg"></i> New Scan
         </a>
+        {% endif %}
     </div>
 </div>
 
 <style>
-    .pulse-dot {
-        width: 8px;
-        height: 8px;
-        background-color: var(--success-color);
+    .status-indicator {
+        width: 6px;
+        height: 6px;
+        background-color: var(--ash-gray);
         border-radius: 50%;
         display: inline-block;
-        box-shadow: 0 0 0 rgba(16, 185, 129, 0.4);
-        animation: pulse 2s infinite;
+        opacity: 0.5;
+        animation: stay-silent 4s infinite;
     }
-    @keyframes pulse {
-        0% { box-shadow: 0 0 0 0 rgba(16, 185, 129, 0.4); }
-        70% { box-shadow: 0 0 0 10px rgba(16, 185, 129, 0); }
-        100% { box-shadow: 0 0 0 0 rgba(16, 185, 129, 0); }
+    @keyframes stay-silent {
+        0%, 100% { opacity: 0.3; transform: scale(1); }
+        50% { opacity: 0.6; transform: scale(1.1); }
     }
 </style>
 
@@ -264,22 +267,22 @@
                         {{ severity_counts.info|default:0 }}
                     ],
                     backgroundColor: [
-                        '#ef4444', // Critical (Red)
-                        '#f43f5e', // High (Rose)
-                        '#a855f7', // Medium (Purple)
-                        '#6366f1', // Low (Indigo)
-                        '#d946ef'  // Info (Magenta)
+                        '#7A2E2E', // Iron Red
+                        '#8C6A3B', // Aged Gold
+                        '#233142', // Indigo
+                        '#161616', // Charcoal
+                        '#8A8A84'  // Ash
                     ],
                     hoverBackgroundColor: [
-                        '#f87171',
-                        '#fb7185',
-                        '#c084fc',
-                        '#818cf8',
-                        '#e879f9'
+                        '#8a3a3a',
+                        '#9e7a4a',
+                        '#2e3f54',
+                        '#1f1f1f',
+                        '#9b9b96'
                     ],
-                    borderWidth: 8,
-                    borderColor: '#0f172a',
-                    hoverOffset: 15
+                    borderWidth: 2,
+                    borderColor: '#0D0D0C',
+                    hoverOffset: 10
                 }]
             },
             options: {

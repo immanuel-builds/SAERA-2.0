@@ -8,6 +8,7 @@ from django.http import FileResponse, Http404, HttpResponseForbidden
 from apps.scanner.models import ScanJob
 from .models import Report, ExportHistory
 from .generators import pdf_generator, csv_generator, json_generator
+from apps.accounts.decorators import analyst_or_admin
 import os
 
 
@@ -21,6 +22,7 @@ def report_list(request):
 
 
 @login_required
+@analyst_or_admin
 def report_generate(request, scan_id):
     """Generate a report from a scan"""
     scan = get_object_or_404(ScanJob, id=scan_id, initiated_by=request.user)

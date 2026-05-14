@@ -1,141 +1,189 @@
 {% extends 'base.html' %}
 {% load static %}
 
-{% block title %}Admin Console - SAERA Scanner{% endblock %}
+{% block title %}Engine Core - SAERA Backend{% endblock %}
 
 {% block content %}
-<div class="top-header align-items-end mb-5">
+<div class="top-header align-items-end mb-4">
     <div>
-        <h1 class="display-6 mb-1 text-white">Security Admin Console</h1>
+        <h1 class="display-6 mb-1 text-white fw-bold">Backend Engine <span class="text-primary">Control Center</span></h1>
         <div class="d-flex align-items-center gap-3">
-            <div class="text-danger small text-uppercase fw-bold tracking-wider d-flex align-items-center">
-                <i class="bi bi-shield-lock-fill me-2"></i> System Administration
+            <div class="text-primary small text-uppercase fw-bold tracking-wider d-flex align-items-center">
+                <i class="bi bi-cpu-fill me-2"></i> System Kernel: v2.4.0
             </div>
             <div class="text-muted small text-uppercase fw-bold tracking-wider">
-                &bull; Centralized Monitoring &bull; Authorized Personnel Only
+                &bull; Relational Data Registry &bull; Core Services Monitoring
             </div>
         </div>
     </div>
 </div>
 
-<!-- Admin Stats -->
+<!-- Engine Status Gauges -->
 <div class="row g-4 mb-5">
-    <div class="col-md-4">
-        <div class="cyber-card p-4">
-            <div class="hud-stat">
-                <div>
-                    <div class="hud-value">{{ total_users }}</div>
-                    <div class="hud-label">Total Operatives</div>
-                </div>
-                <div class="hud-icon text-primary">
-                    <i class="bi bi-people-fill"></i>
-                </div>
+    <div class="col-md-3">
+        <div class="cyber-card p-3 border-0" style="background: rgba(59, 130, 246, 0.05);">
+            <div class="d-flex justify-content-between align-items-start mb-2">
+                <div class="text-muted small text-uppercase tracking-widest fw-bold">Web Server</div>
+                <div class="status-indicator online"></div>
             </div>
+            <div class="h4 text-white mb-0">Django Core</div>
+            <div class="text-success small"><i class="bi bi-check-circle-fill me-1"></i> Operations Normal</div>
         </div>
     </div>
-    <div class="col-md-4">
-        <div class="cyber-card p-4">
-            <div class="hud-stat">
-                <div>
-                    <div class="hud-value text-success">{{ active_users }}</div>
-                    <div class="hud-label text-success">Active Sessions</div>
-                </div>
-                <div class="hud-icon text-success">
-                    <i class="bi bi-person-check-fill"></i>
-                </div>
+    <div class="col-md-3">
+        <div class="cyber-card p-3 border-0" style="background: rgba(168, 85, 247, 0.05);">
+            <div class="d-flex justify-content-between align-items-start mb-2">
+                <div class="text-muted small text-uppercase tracking-widest fw-bold">Task Broker</div>
+                <div class="status-indicator {% if stats.engine_status == 'online' %}online{% else %}warning{% endif %}"></div>
             </div>
+            <div class="h4 text-white mb-0">Redis Flux</div>
+            <div class="text-muted small">Port: 6379</div>
         </div>
     </div>
-    <div class="col-md-4">
-        <div class="cyber-card p-4">
-            <div class="hud-stat">
-                <div>
-                    <div class="hud-value text-danger">{{ admin_users }}</div>
-                    <div class="hud-label text-danger">Admins In-Post</div>
-                </div>
-                <div class="hud-icon text-danger">
-                    <i class="bi bi-shield-shaded"></i>
-                </div>
+    <div class="col-md-3">
+        <div class="cyber-card p-3 border-0" style="background: rgba(244, 63, 94, 0.05);">
+            <div class="d-flex justify-content-between align-items-start mb-2">
+                <div class="text-muted small text-uppercase tracking-widest fw-bold">Scanner Node</div>
+                <div class="status-indicator {% if stats.engine_status == 'online' %}online{% else %}danger{% endif %}"></div>
             </div>
+            <div class="h4 text-white mb-0">Celery Worker</div>
+            <div class="text-muted small">Status: {{ stats.engine_status|upper }}</div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="cyber-card p-3 border-0" style="background: rgba(234, 179, 8, 0.05);">
+            <div class="d-flex justify-content-between align-items-start mb-2">
+                <div class="text-muted small text-uppercase tracking-widest fw-bold">Database</div>
+                <div class="status-indicator online"></div>
+            </div>
+            <div class="h4 text-white mb-0">SQLite Engine</div>
+            <div class="text-muted small">Sync: Encrypted</div>
         </div>
     </div>
 </div>
 
-<div class="row g-4">
-    <!-- Audit Logs -->
-    <div class="col-lg-8">
-        <div class="cyber-card h-100">
-            <div class="card-header">
-                <h5 class="card-title"><i class="bi bi-journal-text me-2 text-primary"></i> Global Audit Stream</h5>
-                <span class="badge bg-secondary">Live Telemetry</span>
-            </div>
-            <div class="card-body p-0">
-                <div class="table-responsive">
-                    <table class="table table-hover align-middle">
-                        <thead>
-                            <tr>
-                                <th>User</th>
-                                <th>Action</th>
-                                <th>Time</th>
-                                <th>IP Address</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            {% for log in recent_logs %}
-                            <tr>
-                                <td class="text-white">
-                                    <div class="d-flex align-items-center">
-                                        <div class="rounded-circle bg-primary bg-opacity-20 text-primary d-flex align-items-center justify-content-center me-2" style="width: 24px; height: 24px; font-size: 0.7rem;">
-                                            {{ log.user.username|make_list|first|upper }}
-                                        </div>
-                                        {{ log.user.username }}
-                                    </div>
-                                </td>
-                                <td>
-                                    {% if log.action == 'user_login' %}
-                                        <span class="text-success small"><i class="bi bi-box-arrow-in-right me-1"></i> LOGIN</span>
-                                    {% elif log.action == 'user_logout' %}
-                                        <span class="text-muted small"><i class="bi bi-box-arrow-right me-1"></i> LOGOUT</span>
-                                    {% elif log.action == 'user_signup' %}
-                                        <span class="text-info small"><i class="bi bi-person-plus me-1"></i> SIGNUP</span>
-                                    {% else %}
-                                        <span class="text-primary small">{{ log.get_action_display|upper }}</span>
-                                    {% endif %}
-                                </td>
-                                <td class="text-muted small">{{ log.created_at|date:"M d, H:i" }}</td>
-                                <td class="text-muted small"><code class="text-info">{{ log.ip_address|default:"Unknown" }}</code></td>
-                            </tr>
-                            {% empty %}
-                            <tr>
-                                <td colspan="4" class="text-center py-5 text-muted">No security logs recorded</td>
-                            </tr>
-                            {% endfor %}
-                        </tbody>
-                    </table>
+<!-- Tabs for different Engine views -->
+<ul class="nav nav-pills mb-4 gap-2" id="engineTabs" role="tablist">
+    <li class="nav-item" role="presentation">
+        <button class="nav-link active rounded-pill px-4" id="data-tab" data-bs-toggle="pill" data-bs-target="#data-registry" type="button">
+            <i class="bi bi-layers-half me-2"></i> Data Registry
+        </button>
+    </li>
+    <li class="nav-item" role="presentation">
+        <button class="nav-link rounded-pill px-4" id="personnel-tab" data-bs-toggle="pill" data-bs-target="#personnel" type="button">
+            <i class="bi bi-people-fill me-2"></i> Personnel
+        </button>
+    </li>
+    <li class="nav-item" role="presentation">
+        <button class="nav-link rounded-pill px-4" id="logs-tab" data-bs-toggle="pill" data-bs-target="#engine-logs" type="button">
+            <i class="bi bi-terminal-fill me-2"></i> Audit Stream
+        </button>
+    </li>
+</ul>
+
+<div class="tab-content" id="engineTabContent">
+    <!-- Data Registry Tab -->
+    <div class="tab-pane fade show active" id="data-registry" role="tabpanel">
+        <div class="row g-4">
+            <div class="col-md-3">
+                <div class="cyber-card p-4 text-center h-100 hvr-up">
+                    <i class="bi bi-person-badge text-primary fs-1 mb-3"></i>
+                    <div class="h2 text-white">{{ stats.total_users }}</div>
+                    <div class="text-muted small text-uppercase fw-bold">User Records</div>
+                    <hr class="border-secondary opacity-10">
+                    <div class="text-primary small fw-bold">{{ stats.admin_users }} Admins</div>
                 </div>
+            </div>
+            <div class="col-md-3">
+                <div class="cyber-card p-4 text-center h-100 hvr-up">
+                    <i class="bi bi-target text-success fs-1 mb-3"></i>
+                    <div class="h2 text-white">{{ stats.total_targets }}</div>
+                    <div class="text-muted small text-uppercase fw-bold">Scan Targets</div>
+                    <hr class="border-secondary opacity-10">
+                    <div class="text-success small fw-bold">Entity Index</div>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="cyber-card p-4 text-center h-100 hvr-up">
+                    <i class="bi bi-activity text-warning fs-1 mb-3"></i>
+                    <div class="h2 text-white">{{ stats.total_scans }}</div>
+                    <div class="text-muted small text-uppercase fw-bold">Total Job Cycles</div>
+                    <hr class="border-secondary opacity-10">
+                    <div class="text-warning small fw-bold">Job Registry</div>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="cyber-card p-4 text-center h-100 hvr-up">
+                    <i class="bi bi-shield-exclamation text-danger fs-1 mb-3"></i>
+                    <div class="h2 text-white">{{ stats.total_vulns }}</div>
+                    <div class="text-muted small text-uppercase fw-bold">Vuln Definitions</div>
+                    <hr class="border-secondary opacity-10">
+                    <div class="text-danger small fw-bold">Findings Count</div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="cyber-card mt-4 p-5 text-center">
+            <h3 class="text-white mb-3">Relational Engine Management</h3>
+            <p class="text-muted mb-4 mx-auto" style="max-width: 600px;">
+                The SAERA Backend Engine maintains a consistent relational state across all entities. 
+                Use the core management portal to modify schema records directly.
+            </p>
+            <div class="d-flex justify-content-center gap-3">
+                <a href="/admin/" target="_blank" class="btn btn-primary btn-lg px-5">
+                    Launch Data Explorer <i class="bi bi-box-arrow-up-right ms-2"></i>
+                </a>
             </div>
         </div>
     </div>
 
-    <!-- Newest Operatives -->
-    <div class="col-lg-4">
-        <div class="cyber-card h-100">
-            <div class="card-header">
-                <h5 class="card-title"><i class="bi bi-person-plus-fill me-2 text-primary"></i> Newest Personnel</h5>
+    <!-- Personnel Tab -->
+    <div class="tab-pane fade" id="personnel" role="tabpanel">
+        <div class="cyber-card">
+            <div class="card-header d-flex justify-content-between align-items-center">
+                <h5 class="card-title mb-0"><i class="bi bi-people-fill me-2 text-primary"></i> Authorized Operatives</h5>
+                <span class="badge bg-primary bg-opacity-10 text-primary border border-primary">{{ stats.total_users }} Registered</span>
             </div>
             <div class="card-body">
-                <div class="user-list">
+                <div class="row g-3">
                     {% for user in new_users %}
-                    <div class="d-flex align-items-center mb-4 p-3 rounded-4" style="background: rgba(255, 255, 255, 0.03); border: 1px solid rgba(255, 255, 255, 0.05);">
-                        <div class="rounded-circle me-3 d-flex align-items-center justify-content-center text-white" 
-                             style="width: 45px; height: 45px; background: linear-gradient(135deg, var(--primary-color), var(--accent-red)); font-weight: 800;">
-                            {{ user.username|make_list|first|upper }}
+                    <div class="col-md-6 col-lg-4">
+                        <div class="d-flex align-items-center p-3 rounded-4 operative-item" style="background: rgba(255, 255, 255, 0.03); border: 1px solid rgba(255, 255, 255, 0.05);">
+                            <div class="rounded-circle me-3 d-flex align-items-center justify-content-center text-white" 
+                                 style="width: 45px; height: 45px; background: linear-gradient(135deg, var(--primary-color), var(--accent-red)); font-weight: 800;">
+                                {{ user.username|make_list|first|upper }}
+                            </div>
+                            <div class="flex-grow-1">
+                                <div class="text-white fw-bold">{{ user.username }}</div>
+                                <div class="text-muted small">{{ user.role|upper }} &bull; {{ user.date_joined|date:"M d" }}</div>
+                            </div>
+                            {% if user != request.user %}
+                            <button class="btn btn-sm btn-outline-danger border-0" data-bs-toggle="modal" data-bs-target="#decommissionModal" 
+                                    data-username="{{ user.username }}" data-userid="{{ user.id }}">
+                                <i class="bi bi-trash3"></i>
+                            </button>
+                            {% endif %}
                         </div>
-                        <div class="flex-grow-1">
-                            <div class="text-white fw-bold">{{ user.username }}</div>
-                            <div class="text-muted small">{{ user.organization|default:"Independent" }}</div>
-                        </div>
-                        <span class="badge bg-opacity-10 text-primary border-primary border small">{{ user.get_role_display }}</span>
+                    </div>
+                    {% endfor %}
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Logs Tab -->
+    <div class="tab-pane fade" id="engine-logs" role="tabpanel">
+        <div class="cyber-card">
+            <div class="card-header">
+                <h5 class="card-title mb-0"><i class="bi bi-terminal-fill me-2 text-primary"></i> System Audit Stream</h5>
+            </div>
+            <div class="card-body p-0">
+                <div class="terminal-view p-3" style="background: #020617; max-height: 500px; overflow-y: auto; font-family: 'JetBrains Mono', monospace; font-size: 0.8rem;">
+                    {% for log in recent_logs %}
+                    <div class="mb-2 d-flex">
+                        <span class="text-muted me-2">[{{ log.created_at|date:"H:i:s" }}]</span>
+                        <span class="text-primary me-2">ENGINE:</span>
+                        <span class="text-white">User <span class="text-info">{{ log.user.username }}</span> executed <span class="text-warning">{{ log.get_action_display }}</span> from {{ log.ip_address }}</span>
                     </div>
                     {% endfor %}
                 </div>
@@ -143,4 +191,77 @@
         </div>
     </div>
 </div>
+
+<!-- Decommission Modal (Same as before but consistent styling) -->
+<div class="modal fade" id="decommissionModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content cyber-card danger-border p-2">
+            <div class="modal-header border-0">
+                <h5 class="modal-title text-danger fw-bold">DECOMMISSION PROTOCOL</h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body text-center py-4">
+                <div class="mb-3 text-danger fs-1"><i class="bi bi-exclamation-octagon"></i></div>
+                <p class="text-white mb-1">Are you sure you want to decommission operative:</p>
+                <h4 id="modalUsername" class="text-danger fw-bold mb-4"></h4>
+                <p class="text-muted small">This will purge all relational data linked to this identity. This action is final.</p>
+            </div>
+            <div class="modal-footer border-0">
+                <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Abort</button>
+                <form id="deleteUserForm" method="post">
+                    {% csrf_token %}
+                    <button type="submit" class="btn btn-danger">Confirm Decommission</button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+    .status-indicator {
+        width: 10px;
+        height: 10px;
+        border-radius: 50%;
+        box-shadow: 0 0 10px currentColor;
+    }
+    .status-indicator.online { background-color: #22c55e; color: #22c55e; }
+    .status-indicator.warning { background-color: #eab308; color: #eab308; }
+    .status-indicator.danger { background-color: #ef4444; color: #ef4444; }
+    
+    .nav-pills .nav-link {
+        background: rgba(255,255,255,0.03);
+        color: var(--text-secondary);
+        border: 1px solid rgba(255,255,255,0.05);
+        transition: all 0.3s ease;
+    }
+    .nav-pills .nav-link.active {
+        background: var(--primary-color) !important;
+        color: white !important;
+        box-shadow: 0 0 20px rgba(59, 130, 246, 0.3);
+    }
+    .hvr-up { transition: transform 0.3s ease; }
+    .hvr-up:hover { transform: translateY(-5px); }
+    
+    .operative-item { transition: all 0.3s ease; }
+    .operative-item:hover {
+        background: rgba(255, 255, 255, 0.08) !important;
+        border-color: var(--primary-color) !important;
+    }
+    .danger-border { border: 1px solid rgba(244, 63, 94, 0.3) !important; }
+</style>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        const decommissionModal = document.getElementById('decommissionModal');
+        if (decommissionModal) {
+            decommissionModal.addEventListener('show.bs.modal', function(event) {
+                const button = event.relatedTarget;
+                const username = button.getAttribute('data-username');
+                const userId = button.getAttribute('data-userid');
+                decommissionModal.querySelector('#modalUsername').textContent = username;
+                decommissionModal.querySelector('#deleteUserForm').action = `/accounts/user/${userId}/delete/`;
+            });
+        }
+    });
+</script>
 {% endblock %}

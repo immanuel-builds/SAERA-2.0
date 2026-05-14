@@ -5,6 +5,7 @@ from django import forms
 from crispy_forms.helper import FormHelper
 from crispy_forms.layout import Layout, Submit, Row, Column, Div
 from .models import ScanTarget, ScanConfiguration
+from .validators import validate_scan_target
 
 
 class ScanTargetForm(forms.ModelForm):
@@ -19,6 +20,11 @@ class ScanTargetForm(forms.ModelForm):
             'target_type': forms.Select(attrs={'class': 'form-control'}),
             'description': forms.Textarea(attrs={'class': 'form-control', 'rows': 3, 'placeholder': 'Optional description'}),
         }
+    
+    def clean_target(self):
+        target = self.cleaned_data.get('target')
+        validate_scan_target(target)
+        return target
 
 
 class QuickScanForm(forms.Form):
@@ -32,6 +38,11 @@ class QuickScanForm(forms.Form):
             'placeholder': 'Enter IP address, domain, or CIDR range'
         })
     )
+
+    def clean_target(self):
+        target = self.cleaned_data.get('target')
+        validate_scan_target(target)
+        return target
     
     scan_type = forms.ChoiceField(
         label='Scan Type',

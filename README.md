@@ -94,9 +94,35 @@ cp .env.example .env
 Edit `.env` and set your configuration:
 - `SECRET_KEY`: Django secret key (generate a new one)
 - `DEBUG`: Set to `False` in production
-- Database settings (if using PostgreSQL)
+- `DB_NAME`, `DB_USER`, `DB_PASSWORD`: (Optional) PostgreSQL credentials for the production kernel
 - `REDIS_URL`: Redis connection URL
 - `NVD_API_KEY`: Optional NVD API key for CVE lookups
+
+## 🗄️ Database: PostgreSQL Migration
+
+The SAERA platform is built with a **Hybrid Database Engine**. By default, it uses **SQLite** for zero-config local development. To shift to the professional **PostgreSQL** kernel:
+
+1. **Install PostgreSQL**: Download from [postgresql.org](https://www.postgresql.org/download/windows/).
+2. **Create Database**: Create a new database named `netvuln_db`.
+3. **Update .env**:
+   ```env
+   DB_NAME=netvuln_db
+   DB_USER=your_postgres_user
+   DB_PASSWORD=your_password
+   DB_HOST=localhost
+   DB_PORT=5432
+   ```
+4. **Run Setup**: Execute `setup.bat`. The script will automatically detect the Postgres credentials and migrate the data. If the connection fails, it will safely fallback to SQLite.
+
+## 🔌 The "Backend Limb" (API Documentation)
+
+To demonstrate the independence of the backend engine from the "Midnight Aurora" GUI, SAERA provides a dedicated **API Limb**:
+
+- **Swagger UI**: `http://localhost:8000/api/schema/swagger-ui/`
+- **ReDoc UI**: `http://localhost:8000/api/schema/redoc/`
+- **OpenAPI Schema**: `http://localhost:8000/api/schema/`
+
+This technical interface allows direct interaction with the system's relational data registry via JSON, proving the backend is a separate, functional entity.
 
 ### 6. Database Setup
 

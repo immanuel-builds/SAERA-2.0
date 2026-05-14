@@ -10,6 +10,7 @@ from django.db.models import Q, Count
 from .models import ScanTarget, ScanJob, Vulnerability, ScanConfiguration, PortScanResult
 from .forms import ScanTargetForm, QuickScanForm, ScanConfigurationForm
 from .tasks import scan_target_task
+from apps.accounts.decorators import analyst_or_admin, admin_only
 import re
 import ipaddress
 
@@ -32,6 +33,7 @@ def scan_list(request):
 
 
 @login_required
+@analyst_or_admin
 def scan_create(request):
     """Create and initiate a new scan"""
     if not request.user.can_initiate_scans:
@@ -43,11 +45,6 @@ def scan_create(request):
         if form.is_valid():
             target_input = form.cleaned_data['target']
             scan_type = form.cleaned_data['scan_type']
-            
-            # Validate target
-            if not _validate_target(target_input):
-                messages.error(request, "Invalid target. Please enter a valid IP address, domain, or CIDR range.")
-                return render(request, 'scanner/scan_create.html', {'form': form})
             
             # Determine target type
             target_type = _determine_target_type(target_input)
@@ -62,8 +59,7 @@ def scan_create(request):
                 }
             )
             
-            # Create or reuse a scan configuration that exactly matches this request.
-            # Reusing only by scan type causes later checkbox changes to be ignored.
+            # Create or reuse a scan configuration
             port_ranges = {
                 'quick': '1-100',
                 'standard': '1-1000',
@@ -103,28 +99,27 @@ def scan_create(request):
             try:
                 scan_target_task.delay(scan_job.id)
             except Exception as broker_exc:
-                # Broker (Redis) not reachable — can happen if Redis stopped after startup.
-                # settings.py auto-detection handles the startup case; this catches runtime failures.
                 error_str = str(broker_exc)
-                broker_keywords = (
-                    'ConnectionError', 'ConnectionRefused', 'connect',
-                    '10061', 'refused', 'OperationalError', 'No such file',
-                    'Transport', 'channel', 'redis',
-                )
+                broker_keywords = ('ConnectionError', 'ConnectionRefused', 'connect', '10061', 'redis')
                 if any(k.lower() in error_str.lower() for k in broker_keywords):
                     scan_job.delete()
-                    messages.error(
-                        request,
-                        "Cannot reach the task broker (Redis). "
-                        "Either start Redis or set CELERY_TASK_ALWAYS_EAGER=True in your "
-                        ".env file, then restart the server. "
-                        "The app will then run scans synchronously without Redis."
-                    )
+                    messages.error(request, "Cannot reach the task broker (Redis).")
                     return render(request, 'scanner/scan_create.html', {'form': form})
                 raise
 
             messages.success(request, f"Scan initiated successfully! Scan ID: #{scan_job.id}")
             return redirect('scan_progress', scan_id=scan_job.id)
+        else:
+            # Security Event: Log validation failure
+            from apps.accounts.models import AuditLog
+            AuditLog.objects.create(
+                user=request.user,
+                action='security_event',
+                description=f"Security Alert: Validation failed for scan target input. Errors: {form.errors.as_text()}",
+                ip_address=get_client_ip(request),
+                user_agent=request.META.get('HTTP_USER_AGENT', '')
+            )
+            messages.error(request, "Security Validation Failed. Your attempt has been logged.")
     else:
         form = QuickScanForm()
     

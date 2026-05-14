@@ -124,30 +124,77 @@ def profile_view(request):
 
 @login_required
 def admin_console(request):
-    """Super Admin view for system monitoring"""
+    """Backend Engine Control Center view"""
     if not request.user.is_admin:
         raise PermissionDenied
     
-    # Get overall statistics
-    total_users = User.objects.count()
-    active_users = User.objects.filter(is_active=True).count()
-    admin_users = User.objects.filter(role='admin').count()
+    from apps.scanner.models import ScanTarget, ScanJob, Vulnerability, ScanConfiguration
+    from apps.reports.models import Report
     
-    # Get audit logs for all users
+    # Engine Health Simulation/Check
+    try:
+        from config.celery import app as celery_app
+        inspector = celery_app.control.inspect()
+        active_workers = inspector.active()
+        engine_status = 'online' if active_workers else 'degraded'
+    except:
+        engine_status = 'unknown'
+
+    # Get overall statistics
+    stats = {
+        'total_users': User.objects.count(),
+        'active_users': User.objects.filter(is_active=True).count(),
+        'admin_users': User.objects.filter(role='admin').count(),
+        'total_targets': ScanTarget.objects.count(),
+        'total_scans': ScanJob.objects.count(),
+        'total_vulns': Vulnerability.objects.count(),
+        'total_reports': Report.objects.count(),
+        'engine_status': engine_status,
+    }
+    
+    # Get recent audit logs
     recent_logs = AuditLog.objects.all().select_related('user').order_by('-created_at')[:50]
     
-    # Group logs by action type for stats
-    action_stats = AuditLog.objects.values('action').annotate(count=Count('id'))
-    
     # Get recent user registrations
-    new_users = User.objects.all().order_by('-date_joined')[:5]
+    new_users = User.objects.all().order_by('-date_joined')[:10]
     
     context = {
-        'total_users': total_users,
-        'active_users': active_users,
-        'admin_users': admin_users,
+        'stats': stats,
         'recent_logs': recent_logs,
-        'action_stats': action_stats,
         'new_users': new_users,
     }
     return render(request, 'accounts/admin_console.html', context)
+
+
+@login_required
+def delete_user(request, user_id):
+    """Decommission an operative (delete user)"""
+    if not request.user.is_admin:
+        raise PermissionDenied
+    
+    target_user = get_object_or_404(User, id=user_id)
+    
+    # Prevent self-deletion
+    if target_user == request.user:
+        messages.error(request, "Negative. You cannot decommission your own profile.")
+        return redirect('admin_console')
+    
+    # Prevent deleting other admins if current user is not superuser
+    if target_user.is_admin and not request.user.is_superuser:
+        messages.error(request, "Insufficient clearance to decommission another Admin.")
+        return redirect('admin_console')
+        
+    username = target_user.username
+    target_user.delete()
+    
+    # Create audit log
+    AuditLog.objects.create(
+        user=request.user,
+        action='user_deleted', # Need to ensure this choice exists or use a generic one
+        description=f"Operative {username} (ID: {user_id}) was decommissioned by {request.user.username}",
+        ip_address=get_client_ip(request),
+        user_agent=request.META.get('HTTP_USER_AGENT', '')
+    )
+    
+    messages.success(request, f"Operative {username} has been successfully decommissioned.")
+    return redirect('admin_console')

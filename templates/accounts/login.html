@@ -5,85 +5,90 @@
 
 {% block extra_css %}
 <style>
-    body {
-        background: url("{% static 'img/login_bg_purple.png' %}") no-repeat center center fixed;
-        background-size: cover;
-    }
     .login-container {
-        backdrop-filter: blur(8px);
-        -webkit-backdrop-filter: blur(8px);
         min-height: 100vh;
         display: flex;
         align-items: center;
         justify-content: center;
-        background: radial-gradient(circle at center, rgba(2, 6, 23, 0.6) 0%, rgba(2, 6, 23, 0.95) 100%);
+        padding: var(--ma-unit);
     }
     .login-card {
         width: 100%;
-        max-width: 450px;
-        padding: 3rem;
+        max-width: 400px;
+        padding: 4rem 3rem;
+        background: rgba(13, 13, 12, 0.6);
+        border: 1px solid var(--border-subtle);
+        border-radius: 2px;
+        box-shadow: var(--ink-shadow);
+        backdrop-filter: blur(12px);
     }
     .form-control {
-        background: rgba(255, 255, 255, 0.08);
-        border: 1px solid rgba(255, 255, 255, 0.2);
-        color: white;
-        padding: 0.8rem 1.2rem;
-        border-radius: 12px;
-        transition: all 0.3s ease;
+        background: rgba(255, 255, 255, 0.02);
+        border: 1px solid var(--border-subtle);
+        color: var(--text-primary);
+        padding: 0.9rem 1.2rem;
+        border-radius: 2px;
+        transition: all 0.5s ease;
+        font-size: 0.9rem;
     }
     .form-control:focus {
-        background: rgba(255, 255, 255, 0.08);
-        border-color: var(--primary-color);
-        box-shadow: 0 0 15px rgba(59, 130, 246, 0.2);
-        color: white;
+        background: rgba(255, 255, 255, 0.05);
+        border-color: var(--ash-gray);
+        color: var(--text-primary);
+        box-shadow: none;
     }
     .input-group-text {
-        background: rgba(255, 255, 255, 0.05);
-        border: 1px solid rgba(255, 255, 255, 0.1);
-        color: var(--text-secondary);
-        border-radius: 12px 0 0 12px;
+        background: rgba(255, 255, 255, 0.02);
+        border: 1px solid var(--border-subtle);
+        color: var(--text-muted);
+        border-radius: 2px 0 0 2px;
     }
     .form-control {
-        border-radius: 0 12px 12px 0;
+        border-radius: 0 2px 2px 0;
     }
-    .brand-logo {
-        width: 80px;
-        height: 80px;
-        background: linear-gradient(135deg, var(--primary-color), var(--accent-red));
-        border-radius: 20px;
+    .brand-sigil {
+        width: 64px;
+        height: 64px;
+        background: var(--charcoal);
+        border: 1px solid var(--border-subtle);
+        border-radius: 2px;
         display: flex;
         align-items: center;
         justify-content: center;
-        margin: 0 auto 1.5rem;
-        box-shadow: 0 10px 30px rgba(59, 130, 246, 0.4);
+        margin: 0 auto 2rem;
+        color: var(--ash-gray);
+        font-size: 1.5rem;
     }
 </style>
 {% endblock %}
 
 {% block content %}
 <div class="login-container">
-    <div class="cyber-card login-card">
+    <div class="login-card">
         <div class="text-center mb-5">
-            <div class="brand-logo">
-                <i class="bi bi-shield-lock-fill text-white fs-1"></i>
+            <div class="brand-sigil">
+                <i class="bi bi-shield-lock"></i>
             </div>
-            <h2 class="h3 mb-2 text-white">SAERA Console</h2>
-            <p class="text-muted small text-uppercase tracking-widest">Authorized Intelligence Only</p>
+            <h2 class="mb-2">SAERA Observatory</h2>
+            <p class="text-muted small text-uppercase tracking-widest">Authorized Observation Only</p>
         </div>
 
         <form method="post" class="needs-validation" novalidate>
             {% csrf_token %}
 
             <div class="mb-4">
-                <label for="id_username" class="form-label text-muted small fw-bold text-uppercase">Username</label>
+                <label for="id_username" class="form-label">Identity</label>
                 <div class="input-group">
                     <span class="input-group-text"><i class="bi bi-person"></i></span>
-                    <input type="text" name="username" class="form-control" id="id_username" placeholder="Enter identity" required>
+                    <input type="text" name="username" class="form-control" id="id_username" placeholder="Registry ID" required>
                 </div>
             </div>
 
             <div class="mb-5">
-                <label for="id_password" class="form-label text-muted small fw-bold text-uppercase">Access Key</label>
+                <div class="d-flex justify-content-between align-items-center mb-2">
+                    <label for="id_password" class="form-label mb-0">Access Key</label>
+                    <a href="{% url 'password_reset' %}" class="text-muted text-decoration-none small opacity-75 hover-opacity-100" style="font-size: 0.6rem; text-transform: uppercase; letter-spacing: 0.1em;">Recover</a>
+                </div>
                 <div class="input-group">
                     <span class="input-group-text"><i class="bi bi-key"></i></span>
                     <input type="password" name="password" class="form-control" id="id_password" placeholder="••••••••" required>
@@ -91,16 +96,16 @@
             </div>
 
             <div class="d-grid">
-                <button type="submit" class="btn btn-primary btn-lg py-3">
-                    Establish Secure Link <i class="bi bi-arrow-right ms-2"></i>
+                <button type="submit" class="btn btn-primary">
+                    Initialize Sweep <i class="bi bi-arrow-right ms-2"></i>
                 </button>
             </div>
         </form>
 
         <div class="text-center mt-5">
-            <p class="text-muted small">Need access clearance? <a href="{% url 'register' %}" class="text-primary text-decoration-none fw-bold">Create Profile</a></p>
-            <div class="text-muted" style="font-size: 0.7rem;">
-                <i class="bi bi-info-circle me-1"></i> All interactions are logged and monitored.
+            <p class="text-muted small">New analyst? <a href="{% url 'register' %}" class="text-white text-decoration-none fw-medium">Request Clearance</a></p>
+            <div class="text-muted" style="font-size: 0.55rem; text-transform: uppercase; letter-spacing: 0.2em; margin-top: 2rem;">
+                Monitoring Active • Archive Persistent
             </div>
         </div>
     </div>

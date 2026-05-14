@@ -12,7 +12,7 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link
-        href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Outfit:wght@400;500;600;700;800&display=swap"
+        href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Space+Grotesk:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap"
         rel="stylesheet">
 
     <!-- Bootstrap CSS -->
@@ -26,24 +26,53 @@
     {% block extra_css %}{% endblock %}
 
     <style>
-        /* Global Glow and Mesh */
-        body::before {
-            content: '';
+        /* Atmospheric Layering System (Story-Driven) */
+        .atmospheric-bg {
             position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: 
-                radial-gradient(circle at 20% 30%, rgba(168, 85, 247, 0.05) 0%, transparent 40%),
-                radial-gradient(circle at 80% 70%, rgba(244, 63, 94, 0.05) 0%, transparent 40%);
-            pointer-events: none;
-            z-index: -1;
+            inset: 0;
+            z-index: -2;
+            background-color: #000;
+            background-size: cover;
+            background-position: center;
+            background-repeat: no-repeat;
+            opacity: 0.5; /* Increased for higher contrast */
+            transition: all 2s ease;
+        }
+
+        /* Narrative Filter System */
+        body.auth-page .atmospheric-bg { 
+            background-image: url("{% static 'img/observatory_corridor_bg_1778688761321.png' %}"); 
+            filter: grayscale(1) contrast(1.5) brightness(0.5) blur(2px);
+        }
+        body.dashboard-page .atmospheric-bg { 
+            background-image: url("{% static 'img/tactical_ink_topography_bg_1778688805418.png' %}"); 
+            filter: sepia(0.5) hue-rotate(180deg) contrast(1.2) brightness(0.6) blur(2px); /* Indigo tint */
+        }
+        body.ops-page .atmospheric-bg { 
+            background-image: url("{% static 'img/foggy_scan_geometry_bg_1778688995082.png' %}"); 
+            filter: sepia(0.5) hue-rotate(320deg) contrast(1.3) brightness(0.5) blur(1px); /* Crimson tint */
+        }
+        body.intel-page .atmospheric-bg { 
+            background-image: url("{% static 'img/archive_parchment_bg_1778689292787.png' %}"); 
+            filter: sepia(0.3) contrast(1.1) brightness(0.6); /* Parchment tint */
+        }
+        body.report-page .atmospheric-bg { 
+            background-image: url("{% static 'img/archive_parchment_bg_1778689292787.png' %}"); 
+            filter: sepia(0.8) saturate(2) contrast(1.5) brightness(0.4); /* Gold tint */
         }
     </style>
 </head>
 
-<body>
+<body class="loading {% block body_class %}{% if not user.is_authenticated %}auth-page{% endif %}{% endblock %}">
+    <div class="atmospheric-bg"></div>
+
+    <!-- Preloader - The Ink Diffusion -->
+    <div class="preloader" id="preloader">
+        <div class="loader-ink">
+            <i class="bi bi-shield-lock loader-icon"></i>
+        </div>
+        <div class="loader-text">Synchronizing Observation Grid...</div>
+    </div>
 
     {% if user.is_authenticated %}
     <div class="wrapper">
@@ -52,10 +81,10 @@
             <div class="sidebar-brand">
                 <div class="d-flex align-items-center">
                     <div class="brand-icon me-3 d-flex align-items-center justify-content-center" 
-                         style="width: 40px; height: 40px; background: linear-gradient(135deg, var(--primary-color), var(--accent-red)); border-radius: 10px; box-shadow: 0 0 20px rgba(168, 85, 247, 0.3);">
-                        <i class="bi bi-shield-lock-fill text-white fs-4"></i>
+                         style="width: 32px; height: 32px; background: var(--accent-color); border-radius: 2px;">
+                        <i class="bi bi-shield-lock text-white fs-5"></i>
                     </div>
-                    <span class="text-white">SAERA</span>
+                    <span>SAERA</span>
                 </div>
             </div>
 
@@ -67,12 +96,14 @@
                             <i class="bi bi-grid-fill"></i> Dashboard
                         </a>
                     </li>
+                    {% if user.is_analyst %}
                     <li class="nav-item">
                         <a class="nav-link {% if request.resolver_match.url_name == 'scan_create' %}active{% endif %}"
                             href="{% url 'scan_create' %}">
                             <i class="bi bi-plus-circle-fill"></i> New Scan
                         </a>
                     </li>
+                    {% endif %}
                     <li class="nav-item">
                         <a class="nav-link {% if request.resolver_match.url_name == 'scan_list' %}active{% endif %}"
                             href="{% url 'scan_list' %}">
@@ -91,12 +122,25 @@
                             <i class="bi bi-file-earmark-text-fill"></i> Reports
                         </a>
                     </li>
-                    <li class="nav-divider my-3" style="border-top: 1px solid var(--glass-border); opacity: 0.5;"></li>
+                    <li class="nav-item">
+                        <a class="nav-link {% if request.resolver_match.app_name == 'knowledge' %}active{% endif %}"
+                            href="{% url 'knowledge:list' %}">
+                            <i class="bi bi-book-half"></i> Knowledge Base
+                        </a>
+                    </li>
+                    <li class="nav-divider my-4" style="border-top: 1px solid var(--border-subtle); opacity: 0.3;"></li>
                     {% if user.is_admin %}
                     <li class="nav-item">
                         <a class="nav-link {% if request.resolver_match.url_name == 'admin_console' %}active{% endif %}"
-                            href="{% url 'admin_console' %}" style="color: var(--accent-red); border-color: rgba(244, 63, 94, 0.1);">
-                            <i class="bi bi-shield-shaded"></i> Admin Console
+                            href="{% url 'admin_console' %}">
+                            <i class="bi bi-cpu"></i> Engine Core
+                        </a>
+                    </li>
+                    {% endif %}
+                    {% if user.is_superuser %}
+                    <li class="nav-item">
+                        <a class="nav-link" href="/admin/" target="_blank" style="color: var(--accent-gold);">
+                            <i class="bi bi-database-fill-gear"></i> Database Engine
                         </a>
                     </li>
                     {% endif %}
@@ -115,16 +159,16 @@
             </div>
 
             <div class="sidebar-footer">
-                <div class="user-profile p-3" style="background: rgba(255, 255, 255, 0.03); border-radius: 16px; border: 1px solid rgba(255, 255, 255, 0.05);">
-                    <div class="rounded-circle d-flex align-items-center justify-content-center text-white me-3"
-                        style="width: 40px; height: 40px; background: linear-gradient(135deg, var(--primary-color), var(--accent-red)); font-weight: 700; box-shadow: 0 4px 10px rgba(0,0,0,0.3);">
+                <div class="user-profile p-3" style="background: rgba(255, 255, 255, 0.02); border-top: 1px solid var(--border-subtle);">
+                    <div class="d-flex align-items-center justify-content-center text-white me-3"
+                        style="width: 32px; height: 32px; background: var(--charcoal); border: 1px solid var(--border-subtle); font-family: var(--font-heading); font-size: 0.8rem;">
                         {{ user.username|make_list|first|upper }}
                     </div>
                     <div class="flex-grow-1 overflow-hidden">
-                        <div class="fw-bold text-white small text-truncate">{{ user.username }}</div>
-                        <div class="text-muted" style="font-size: 0.7rem; text-transform: uppercase; letter-spacing: 0.05em;">{{ user.get_role_display }}</div>
+                        <div class="fw-bold text-white small text-truncate" style="letter-spacing: 0.05em;">{{ user.username }}</div>
+                        <div class="text-muted" style="font-size: 0.6rem; text-transform: uppercase; letter-spacing: 0.1em;">{{ user.get_role_display }}</div>
                     </div>
-                    <a href="{% url 'logout' %}" class="text-muted hover-danger ms-2" title="Logout" style="transition: color 0.2s ease;">
+                    <a href="{% url 'logout' %}" class="text-muted hover-danger ms-2" title="Logout">
                         <i class="bi bi-power fs-5"></i>
                     </a>
                 </div>
@@ -183,6 +227,15 @@
     <!-- Custom JS -->
     <script src="{% static 'js/main.js' %}"></script>
     <script>
+        // Preloader Fade Out
+        window.addEventListener('load', () => {
+            const preloader = document.getElementById('preloader');
+            setTimeout(() => {
+                preloader.classList.add('fade-out');
+                document.body.classList.remove('loading');
+            }, 800); // Small delay for premium feel
+        });
+
         // Sidebar Toggle for Mobile
         const sidebarToggle = document.getElementById('sidebarToggle');
         const sidebar = document.getElementById('sidebar');

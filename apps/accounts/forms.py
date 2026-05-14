@@ -20,3 +20,16 @@ class UserRegistrationForm(UserCreationForm):
             'password1': forms.PasswordInput(attrs={'placeholder': 'Enter a strong access key'}),
             'password2': forms.PasswordInput(attrs={'placeholder': 'Verify your access key'}),
         }
+
+    def clean_email(self):
+        email = self.cleaned_data.get('email')
+        if User.objects.filter(email=email).exists():
+            raise forms.ValidationError("This email is already registered in the system.")
+        return email
+
+    def clean_username(self):
+        username = self.cleaned_data.get('username')
+        reserved = ['admin', 'root', 'superuser', 'system', 'saera', 'kernel']
+        if username.lower() in reserved:
+            raise forms.ValidationError("This operative ID is reserved by the system kernel.")
+        return username

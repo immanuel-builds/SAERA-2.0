@@ -1,0 +1,82 @@
+{% extends 'base.html' %}
+
+{% block title %}{{ reference.title }} - Knowledge Base{% endblock %}
+
+{% block content %}
+<div class="container py-5">
+    <div class="row justify-content-center">
+        <div class="col-lg-10">
+            <!-- Navigation -->
+            <nav aria-label="breadcrumb" class="mb-4">
+                <ol class="breadcrumb">
+                    <li class="breadcrumb-item"><a href="{% url 'dashboard' %}">Dashboard</a></li>
+                    <li class="breadcrumb-item"><a href="{% url 'knowledge:list' %}">Knowledge Base</a></li>
+                    <li class="breadcrumb-item active text-white" aria-current="page">{{ reference.title }}</li>
+                </ol>
+            </nav>
+
+            <!-- Header Card -->
+            <div class="card bg-dark text-white border-secondary mb-4 shadow-lg overflow-hidden">
+                <div class="card-header bg-gradient py-4 px-4 border-secondary d-flex justify-content-between align-items-center">
+                    <div>
+                        <span class="badge {% if reference.severity == 'critical' %}bg-danger{% elif reference.severity == 'high' %}bg-warning text-dark{% elif reference.severity == 'medium' %}bg-info text-dark{% else %}bg-secondary{% endif %} mb-2">
+                            {{ reference.get_severity_display }}
+                        </span>
+                        <h1 class="h2 mb-0 fw-bold">{{ reference.title }}</h1>
+                    </div>
+                    <div class="text-end">
+                        <span class="d-block text-muted small">Category</span>
+                        <span class="fw-bold">{{ reference.category }}</span>
+                    </div>
+                </div>
+                <div class="card-body p-4">
+                    <div class="row">
+                        <div class="col-md-12 mb-4">
+                            <h4 class="text-primary h5 fw-bold mb-3"><i class="fas fa-info-circle me-2"></i>Description</h4>
+                            <div class="text-light-gray fs-6 lh-lg">
+                                {{ reference.description|linebreaks }}
+                            </div>
+                        </div>
+                        
+                        <div class="col-md-12 mb-4">
+                            <h4 class="text-success h5 fw-bold mb-3"><i class="fas fa-tools me-2"></i>Remediation & Mitigation</h4>
+                            <div class="bg-black bg-opacity-50 p-4 rounded border border-secondary text-light-gray fs-6 lh-lg">
+                                {{ reference.remediation|linebreaks }}
+                            </div>
+                        </div>
+
+                        {% if reference.references %}
+                        <div class="col-md-12">
+                            <h4 class="text-info h5 fw-bold mb-3"><i class="fas fa-external-link-alt me-2"></i>External References</h4>
+                            <div class="text-muted small">
+                                {{ reference.references|linebreaks }}
+                            </div>
+                        </div>
+                        {% endif %}
+                    </div>
+                </div>
+                <div class="card-footer bg-transparent border-secondary p-4">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <span class="text-muted small">Last updated: {{ reference.created_at|date:"F d, Y" }}</span>
+                        <button class="btn btn-outline-secondary btn-sm" onclick="window.print()">
+                            <i class="fas fa-print me-2"></i>Print Reference
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+    .text-light-gray {
+        color: #e0e0e0;
+    }
+    .bg-gradient {
+        background: linear-gradient(135deg, #1a1a1a 0%, #2c2c2c 100%);
+    }
+    .breadcrumb-item + .breadcrumb-item::before {
+        color: #6c757d;
+    }
+</style>
+{% endblock %}
