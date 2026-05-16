@@ -163,21 +163,29 @@ powershell -Command "(Get-Content .env) -replace 'CELERY_TASK_ALWAYS_EAGER=.*','
 :env_done
 
 REM --- DATABASE INITIALIZATION ---
-echo Checking database configuration...
-%VENV_PY% -c "from django.conf import settings; print(settings.DATABASES['default']['ENGINE'])" | findstr /i "postgresql" >nul 2>&1
+echo Checking MySQL configuration...
+set DJANGO_SETTINGS_MODULE=config.settings
+%VENV_PY% -c "import django; django.setup(); from django.conf import settings; print(settings.DATABASES['default']['ENGINE'])" | findstr /i "mysql" >nul 2>&1
 if errorlevel 1 (
-    echo [INFO] Running on SQLite fallback ^(local file database^).
-) else (
-    echo [INFO] Running on PostgreSQL production kernel.
-    echo [INFO] Verifying PostgreSQL connectivity...
-    %VENV_PY% manage.py check >nul 2>&1
-    if errorlevel 1 (
-        echo [ERROR] PostgreSQL connection failed. Check your .env credentials.
-        echo [INFO] Defaulting to SQLite for now...
-    ) else (
-        echo [OK] PostgreSQL connectivity verified.
-    )
+    echo [ERROR] MySQL is not configured as the primary engine. 
+    echo         Please check settings.py or .env.
+    pause
+    exit /b 1
 )
+
+echo [INFO] Running on MySQL Intelligence Engine.
+echo [INFO] Verifying MySQL connectivity...
+%VENV_PY% manage.py check >nul 2>&1
+if errorlevel 1 (
+    echo [ERROR] MySQL connection failed. Check your .env credentials.
+    echo [INFO] Ensure the database 'saera_db' exists in MySQL.
+    pause
+    exit /b 1
+) else (
+    echo [OK] MySQL connectivity verified.
+)
+
+:db_done
 
 REM Make migrations (CRITICAL FIX)
 echo [6/8] Creating database migrations...

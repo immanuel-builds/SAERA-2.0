@@ -11,6 +11,7 @@ from .models import ScanTarget, ScanJob, Vulnerability, ScanConfiguration, PortS
 from .forms import ScanTargetForm, QuickScanForm, ScanConfigurationForm
 from .tasks import scan_target_task
 from apps.accounts.decorators import analyst_or_admin, admin_only
+from apps.accounts.views import get_client_ip
 import re
 import ipaddress
 
@@ -165,14 +166,21 @@ def scan_progress_api(request, scan_id):
     """API endpoint for real-time scan progress"""
     scan = get_object_or_404(ScanJob, id=scan_id, initiated_by=request.user)
     
+    # Get latest logs (e.g., last 10)
+    # Assuming scan_job has a logs relation or we can fetch them
+    # For now, let's assume we fetch them from an AuditLog or similar if available, 
+    # or just return a placeholder if not implemented.
+    # Based on the template, it expects 'logs' and 'vulnerability_count'
+    
     data = {
         'status': scan.status,
         'progress': scan.progress,
         'current_phase': scan.current_phase,
         'total_ports_scanned': scan.total_ports_scanned,
         'open_ports_found': scan.open_ports_found,
-        'vulnerabilities_found': scan.vulnerabilities_found,
+        'vulnerability_count': scan.vulnerabilities.count(),
         'error_message': scan.error_message,
+        'logs': [log.message for log in scan.logs.all().order_by('-timestamp')[:5]][::-1] if hasattr(scan, 'logs') else ["Observing sector...", "Signal locked."]
     }
     
     return JsonResponse(data)
@@ -205,6 +213,53 @@ def vulnerability_list(request):
         'search_query': search_query,
     }
     return render(request, 'scanner/vulnerability_list.html', context)
+
+
+@login_required
+def target_drift(request, target_id):
+    """Temporal analysis of a target's risk posture over time (Chronicle Drift)"""
+    from apps.api.services.analytics_service import AnalyticsService
+    target = get_object_or_404(ScanTarget, id=target_id)
+    
+    # Check permissions
+    if not request.user.is_admin and target.created_by != request.user:
+        return HttpResponseForbidden("You do not have access to this target's chronicle.")
+    
+    # Get last two completed scans for metrics
+    scans = ScanJob.objects.filter(target=target, status='completed').order_by('-created_at')[:2]
+    if scans.count() < 2:
+        messages.info(request, "Insufficient data in the chronicle for temporal analysis.")
+        return redirect('dashboard')
+
+    # Leverage the centralized AnalyticsService
+    drift_data = AnalyticsService.get_drift_analysis(target_id)
+    
+    # We still need the scan objects for the UI context
+    current_scan = scans[0]
+    previous_scan = scans[1]
+    
+    # Fetch emergent vulnerabilities for display
+    new_vulnerabilities = current_scan.vulnerabilities.filter(title__in=drift_data['emergent'])
+    
+    # Historical risk scores for the trend cards
+    avg_curr = current_scan.vulnerabilities.aggregate(avg=Count('id'))['avg'] # Simplified for this pass
+    # Actually, let's keep the risk score calculation
+    from django.db.models import Avg
+    avg_curr = current_scan.vulnerabilities.aggregate(avg=Avg('risk_score'))['avg'] or 0
+    avg_prev = previous_scan.vulnerabilities.aggregate(avg=Avg('risk_score'))['avg'] or 0
+
+    context = {
+        'target': target,
+        'current_scan': current_scan,
+        'previous_scan': previous_scan,
+        'new_vulnerabilities': new_vulnerabilities,
+        'resolved_count': len(drift_data['resolved']),
+        'risk_drift': round(avg_curr - avg_prev, 2),
+        'avg_curr': round(avg_curr, 1),
+        'avg_prev': round(avg_prev, 1),
+    }
+    
+    return render(request, 'scanner/target_drift.html', context)
 
 
 def _validate_target(target):

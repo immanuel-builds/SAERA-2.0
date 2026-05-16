@@ -1,0 +1,138 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Signal Topography - SAERA{% endblock %}
+
+{% block extra_css %}
+<style>
+    #network-map {
+        width: 100%;
+        height: 700px;
+        background-color: transparent;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="animate-in fade-in duration-1000">
+    <div class="flex justify-between items-end mb-12">
+        <div>
+            <span class="text-[10px] font-bold text-ash uppercase tracking-[0.4em] block mb-2">Network Topology</span>
+            <h1 class="text-5xl text-ink font-serif tracking-tighter">Signal Topography</h1>
+            <p class="text-sm text-ink/60 font-serif italic mt-2">Visualizing the invisible relationships between digital sectors.</p>
+        </div>
+        <div class="flex gap-8">
+            <div class="flex items-center gap-3">
+                <span class="w-2 h-2 rounded-full bg-bamboo shadow-[0_0_8px_rgba(78,107,87,0.4)]"></span>
+                <span class="text-[9px] font-bold text-ash uppercase tracking-widest">Stable Presence</span>
+            </div>
+            <div class="flex items-center gap-3">
+                <span class="w-2 h-2 rounded-full bg-ash shadow-[0_0_8px_rgba(107,107,107,0.4)]"></span>
+                <span class="text-[9px] font-bold text-ash uppercase tracking-widest">Observing...</span>
+            </div>
+            <div class="flex items-center gap-3">
+                <span class="w-2 h-2 rounded-full bg-seal shadow-[0_0_8px_rgba(159,59,50,0.4)] animate-pulse"></span>
+                <span class="text-[9px] font-bold text-seal uppercase tracking-widest">Critical Anomaly</span>
+            </div>
+        </div>
+    </div>
+
+    <div class="parchment-card p-0 overflow-hidden relative border border-ink/5 group">
+        <!-- Background Sumi-e Landscape Asset -->
+        <div class="absolute inset-0 opacity-10 mix-blend-multiply pointer-events-none transition-transform duration-[20s] group-hover:scale-110" 
+             style="background-image: url('{% static 'img/jap 10.png' %}'); background-size: cover; background-position: center;"></div>
+        
+        <div id="network-map" class="relative z-10"></div>
+        
+        <!-- Controls Overlay -->
+        <div class="absolute bottom-10 left-10 z-20 flex gap-4">
+            <button onclick="network.stabilize()" class="w-10 h-10 flex items-center justify-center border border-ink/5 bg-background/80 hover:bg-ink/5 transition-all">
+                <span class="material-symbols-outlined text-ash text-sm">recenter</span>
+            </button>
+            <button class="px-6 flex items-center gap-3 border border-ink/5 bg-background/80 text-[9px] font-bold text-ash uppercase tracking-widest hover:bg-ink/5 transition-all">
+                <span class="material-symbols-outlined text-xs">auto_graph</span>
+                Force-Directed Flow
+            </button>
+        </div>
+    </div>
+</div>
+
+<!-- Vis.js Library -->
+<script src="https://unpkg.com/vis-network/standalone/umd/vis-network.min.js"></script>
+<script>
+    let network;
+    document.addEventListener('DOMContentLoaded', function() {
+        const nodes = new vis.DataSet({{ nodes_json|safe }});
+        const edges = new vis.DataSet({{ edges_json|safe }});
+
+        const container = document.getElementById('network-map');
+        const data = { nodes: nodes, edges: edges };
+        
+        const options = {
+            nodes: {
+                font: {
+                    face: 'Zen Old Mincho',
+                    color: '#1A1A1A',
+                    size: 14,
+                    bold: { color: '#1A1A1A', size: 14 }
+                },
+                borderWidth: 1,
+                borderWidthSelected: 2,
+                shadow: {
+                    enabled: true,
+                    color: 'rgba(0,0,0,0.1)',
+                    size: 5,
+                    x: 2,
+                    y: 2
+                }
+            },
+            edges: {
+                width: 1,
+                color: { 
+                    color: '#1A1A1A', 
+                    highlight: '#9F3B32',
+                    hover: '#1A1A1A',
+                    opacity: 0.1 
+                },
+                smooth: {
+                    type: 'curvedCW',
+                    forceDirection: 'none',
+                    roundness: 0.3
+                }
+            },
+            interaction: {
+                hover: true,
+                tooltipDelay: 200,
+                zoomView: true
+            },
+            physics: {
+                forceAtlas2Based: {
+                    gravitationalConstant: -100,
+                    centralGravity: 0.005,
+                    springLength: 150,
+                    springConstant: 0.18,
+                    avoidOverlap: 1.5
+                },
+                maxVelocity: 50,
+                solver: 'forceAtlas2Based',
+                timestep: 0.35,
+                stabilization: { 
+                    iterations: 150,
+                    updateInterval: 25 
+                }
+            }
+        };
+
+        network = new vis.Network(container, data, options);
+
+        // Click interaction
+        network.on("click", function (params) {
+            if (params.nodes.length > 0) {
+                const nodeId = params.nodes[0];
+                const node = nodes.get(nodeId);
+                console.log("Selected Node:", node.label);
+            }
+        });
+    });
+</script>
+{% endblock %}

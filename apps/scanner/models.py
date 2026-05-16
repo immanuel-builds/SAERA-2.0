@@ -149,9 +149,10 @@ class Vulnerability(models.Model):
     cve_id = models.CharField(max_length=50, blank=True, help_text="CVE ID if applicable")
     cve_url = models.URLField(blank=True)
     
-    # Additional data
-    raw_output = models.TextField(blank=True, help_text="Raw scanner output")
-    evidence = models.TextField(blank=True)
+    # New Risk Intelligence Fields
+    risk_score = models.FloatField(default=0, help_text="Calculated Risk Score (0-10)")
+    risk_level = models.CharField(max_length=20, default='Low', help_text="Calculated Risk Level")
+    exploitability = models.IntegerField(default=0, help_text="Exploitability factor")
     
     created_at = models.DateTimeField(auto_now_add=True)
     

@@ -1,112 +1,68 @@
 {% extends 'base.html' %}
 {% load static %}
 
-{% block title %}Login - SAERA Scanner{% endblock %}
+{% block title %}Initial Observation - SAERA{% endblock %}
 
-{% block extra_css %}
-<style>
-    .login-container {
-        min-height: 100vh;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        padding: var(--ma-unit);
-    }
-    .login-card {
-        width: 100%;
-        max-width: 400px;
-        padding: 4rem 3rem;
-        background: rgba(13, 13, 12, 0.6);
-        border: 1px solid var(--border-subtle);
-        border-radius: 2px;
-        box-shadow: var(--ink-shadow);
-        backdrop-filter: blur(12px);
-    }
-    .form-control {
-        background: rgba(255, 255, 255, 0.02);
-        border: 1px solid var(--border-subtle);
-        color: var(--text-primary);
-        padding: 0.9rem 1.2rem;
-        border-radius: 2px;
-        transition: all 0.5s ease;
-        font-size: 0.9rem;
-    }
-    .form-control:focus {
-        background: rgba(255, 255, 255, 0.05);
-        border-color: var(--ash-gray);
-        color: var(--text-primary);
-        box-shadow: none;
-    }
-    .input-group-text {
-        background: rgba(255, 255, 255, 0.02);
-        border: 1px solid var(--border-subtle);
-        color: var(--text-muted);
-        border-radius: 2px 0 0 2px;
-    }
-    .form-control {
-        border-radius: 0 2px 2px 0;
-    }
-    .brand-sigil {
-        width: 64px;
-        height: 64px;
-        background: var(--charcoal);
-        border: 1px solid var(--border-subtle);
-        border-radius: 2px;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        margin: 0 auto 2rem;
-        color: var(--ash-gray);
-        font-size: 1.5rem;
-    }
-</style>
-{% endblock %}
+{% block body_class %}auth-page{% endblock %}
+
+{% block background_image %}{% static 'img/jap 26.png' %}{% endblock %}
 
 {% block content %}
-<div class="login-container">
-    <div class="login-card">
-        <div class="text-center mb-5">
-            <div class="brand-sigil">
-                <i class="bi bi-shield-lock"></i>
+<div class="min-h-[90vh] flex items-center justify-center py-24">
+    <div class="w-full max-w-md space-y-16 animate-in fade-in zoom-in duration-1000">
+        <!-- Logo & Title -->
+        <div class="text-center space-y-6">
+            <div class="text-6xl text-ink font-serif tracking-tighter">SAERA</div>
+            <div class="flex flex-col items-center">
+                <span class="text-[10px] font-bold text-ash uppercase tracking-[0.4em]">Silent Observatory</span>
+                <div class="w-16 h-[0.5px] bg-ink/10 mt-6"></div>
             </div>
-            <h2 class="mb-2">SAERA Observatory</h2>
-            <p class="text-muted small text-uppercase tracking-widest">Authorized Observation Only</p>
         </div>
 
-        <form method="post" class="needs-validation" novalidate>
-            {% csrf_token %}
-
-            <div class="mb-4">
-                <label for="id_username" class="form-label">Identity</label>
-                <div class="input-group">
-                    <span class="input-group-text"><i class="bi bi-person"></i></span>
-                    <input type="text" name="username" class="form-control" id="id_username" placeholder="Registry ID" required>
-                </div>
+        <!-- Auth Panel -->
+        <div class="parchment-card p-12 space-y-12 relative overflow-hidden group">
+            <div class="absolute top-0 right-0 p-8 opacity-10 pointer-events-none group-hover:opacity-20 transition-opacity">
+                <span class="material-symbols-outlined text-8xl font-thin text-ash" style="font-variation-settings: 'wght' 100;">ink_highlighter</span>
             </div>
 
-            <div class="mb-5">
-                <div class="d-flex justify-content-between align-items-center mb-2">
-                    <label for="id_password" class="form-label mb-0">Access Key</label>
-                    <a href="{% url 'password_reset' %}" class="text-muted text-decoration-none small opacity-75 hover-opacity-100" style="font-size: 0.6rem; text-transform: uppercase; letter-spacing: 0.1em;">Recover</a>
+            <form method="post" class="space-y-10">
+                {% csrf_token %}
+                
+                <div class="space-y-4">
+                    <label class="text-[10px] font-bold text-ash uppercase tracking-widest px-2">Analyst Identity</label>
+                    <div class="relative">
+                        <span class="material-symbols-outlined absolute left-4 top-1/2 -translate-y-1/2 text-ash/40 text-sm">person</span>
+                        <input type="text" name="username" placeholder="Registry ID" required class="w-full bg-background border border-ink/5 rounded-sm py-4 pl-12 pr-6 text-sm font-serif italic focus:ring-1 focus:ring-ink/10 focus:border-ink/20 outline-none transition-all">
+                    </div>
                 </div>
-                <div class="input-group">
-                    <span class="input-group-text"><i class="bi bi-key"></i></span>
-                    <input type="password" name="password" class="form-control" id="id_password" placeholder="••••••••" required>
-                </div>
-            </div>
 
-            <div class="d-grid">
-                <button type="submit" class="btn btn-primary">
-                    Initialize Sweep <i class="bi bi-arrow-right ms-2"></i>
+                <div class="space-y-4">
+                    <div class="flex justify-between items-center px-2">
+                        <label class="text-[10px] font-bold text-ash uppercase tracking-widest">Access Key</label>
+                        <a href="{% url 'password_reset' %}" class="text-[9px] text-ash/40 hover:text-ink transition-colors uppercase tracking-widest">Recover</a>
+                    </div>
+                    <div class="relative">
+                        <span class="material-symbols-outlined absolute left-4 top-1/2 -translate-y-1/2 text-ash/40 text-sm">key</span>
+                        <input type="password" name="password" placeholder="••••••••" required class="w-full bg-background border border-ink/5 rounded-sm py-4 pl-12 pr-6 text-sm font-serif italic focus:ring-1 focus:ring-ink/10 focus:border-ink/20 outline-none transition-all">
+                    </div>
+                </div>
+
+                <button type="submit" class="saera-button w-full mt-6 group">
+                    <span class="flex items-center justify-center gap-4">
+                        <span class="material-symbols-outlined text-sm">sensor_occupied</span>
+                        <span class="uppercase tracking-[0.2em] font-bold text-[11px]">Begin Observation</span>
+                    </span>
                 </button>
-            </div>
-        </form>
+            </form>
 
-        <div class="text-center mt-5">
-            <p class="text-muted small">New analyst? <a href="{% url 'register' %}" class="text-white text-decoration-none fw-medium">Request Clearance</a></p>
-            <div class="text-muted" style="font-size: 0.55rem; text-transform: uppercase; letter-spacing: 0.2em; margin-top: 2rem;">
-                Monitoring Active • Archive Persistent
+            <div class="text-center pt-6 border-t border-ink/5">
+                <p class="text-xs text-ash font-serif italic">New analyst? <a href="{% url 'register' %}" class="text-ink hover:text-seal transition-colors font-bold underline decoration-ink/10 underline-offset-4">Request Clearance</a></p>
             </div>
+        </div>
+
+        <!-- Footer Note -->
+        <div class="text-center">
+            <p class="text-[9px] text-ash uppercase tracking-[0.5em] opacity-40">The Observatory is Watching</p>
         </div>
     </div>
 </div>

@@ -1,0 +1,116 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Chronicle Drift - {{ target.name }}{% endblock %}
+
+{% block content %}
+<div class="animate-in fade-in slide-in-from-bottom-8 duration-1000 space-y-12">
+    <!-- Hero: Temporal Analysis -->
+    <div class="parchment-card p-0 overflow-hidden relative h-[380px] border border-ink/5 group">
+        <!-- Torii Gate Asset: Representing the gateway through time -->
+        <div class="absolute inset-0 opacity-40 mix-blend-multiply transition-transform duration-[15s] group-hover:scale-110" 
+             style="background-image: url('{% static 'img/jap 14.png' %}'); background-size: cover; background-position: center;"></div>
+        
+        <div class="relative z-10 p-12 h-full flex flex-col justify-between">
+            <div class="flex justify-between items-start">
+                <div>
+                    <span class="text-[10px] font-bold text-ink uppercase tracking-[0.4em] block mb-2">Sector Analysis</span>
+                    <h1 class="text-6xl text-ink font-serif tracking-tighter">Chronicle Drift</h1>
+                    <p class="text-sm text-ink/60 font-serif italic mt-2">{{ target.target }} — Tracking the flow of digital entropy.</p>
+                </div>
+                <div class="text-right">
+                    <span class="text-[10px] font-bold text-ash uppercase tracking-[0.3em] block mb-2">Chronicle ID</span>
+                    <span class="text-2xl font-mono text-ink/20">#{{ target.id|stringformat:"04d" }}</span>
+                </div>
+            </div>
+
+            <div class="grid grid-cols-4 gap-12 border-t border-ink/10 pt-8">
+                <div>
+                    <span class="text-[9px] font-bold text-ash uppercase tracking-widest block">Posture Delta</span>
+                    <span class="text-4xl font-serif {% if risk_drift > 0 %}text-seal{% elif risk_drift < 0 %}text-bamboo{% else %}text-ink{% endif %}">
+                        {% if risk_drift > 0 %}+{% endif %}{{ risk_drift }}
+                    </span>
+                </div>
+                <div>
+                    <span class="text-[9px] font-bold text-ash uppercase tracking-widest block">Archival Baseline</span>
+                    <span class="text-4xl text-ink font-serif">{{ avg_prev }}</span>
+                </div>
+                <div>
+                    <span class="text-[9px] font-bold text-ash uppercase tracking-widest block">Active Presence</span>
+                    <span class="text-4xl text-ink font-serif">{{ avg_curr }}</span>
+                </div>
+                <div class="flex items-end justify-end">
+                    <div class="size-16 border border-ink/5 rounded-full flex items-center justify-center relative group-hover:border-seal/20 transition-all">
+                        <span class="material-symbols-outlined text-ash/20 group-hover:text-seal/40 animate-spin-slow">hourglass_empty</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Comparison Grid -->
+    <div class="grid grid-cols-12 gap-12">
+        <!-- New Anomalies: Emergent Risk -->
+        <div class="col-span-7 parchment-card p-10 flex flex-col min-h-[450px]">
+            <div class="mb-12 flex justify-between items-end">
+                <div>
+                    <span class="text-[10px] font-bold text-seal uppercase tracking-[0.2em] block mb-2">Emergent Anomalies</span>
+                    <h3 class="text-3xl text-ink font-serif italic">The Unfolding Risk</h3>
+                </div>
+                <span class="text-[9px] font-bold text-ash/40 uppercase tracking-widest">New detections in sweep #{{ current_scan.id }}</span>
+            </div>
+            
+            <div class="space-y-8 flex-grow">
+                {% for vuln in new_vulnerabilities %}
+                <div class="pb-6 border-b border-ink/5 last:border-0 group cursor-default">
+                    <div class="flex justify-between items-start mb-2">
+                        <span class="text-lg font-serif text-ink group-hover:text-seal transition-colors duration-500">{{ vuln.title }}</span>
+                        <div class="flex gap-4 items-center">
+                            <span class="text-[9px] font-mono text-ash/40">{{ vuln.risk_score }} RISK</span>
+                            <span class="severity-seal text-[8px]">{{ vuln.severity|upper }}</span>
+                        </div>
+                    </div>
+                    <p class="text-xs text-ink/60 font-serif italic line-clamp-1 opacity-0 group-hover:opacity-100 transition-opacity duration-700">
+                        {{ vuln.description }}
+                    </p>
+                </div>
+                {% empty %}
+                <div class="flex flex-col items-center justify-center h-full opacity-[0.03] grayscale py-20">
+                    <span class="material-symbols-outlined text-[120px]">filter_vintage</span>
+                    <p class="text-sm font-serif italic mt-8 text-ink">The stream remains pure. No new entropy detected.</p>
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+
+        <!-- Resolved & Context -->
+        <div class="col-span-5 flex flex-col gap-12">
+            <!-- Restored Order -->
+            <div class="parchment-card p-10 flex flex-col items-center text-center justify-center flex-grow">
+                <div class="mb-8">
+                    <span class="text-[10px] font-bold text-bamboo uppercase tracking-[0.2em] block mb-2">Restored Order</span>
+                    <h3 class="text-2xl text-ink font-serif italic">Resolved Issues</h3>
+                </div>
+                <div class="size-32 border-2 border-bamboo/10 rounded-full flex items-center justify-center mb-8 relative">
+                    <div class="absolute inset-0 bg-bamboo/5 rounded-full animate-ping opacity-20"></div>
+                    <span class="text-6xl text-bamboo font-serif">{{ resolved_count }}</span>
+                </div>
+                <p class="text-xs text-ink/40 font-serif italic max-w-[200px]">Vulnerabilities from the previous cycle that are no longer observable.</p>
+            </div>
+
+            <!-- Temporal Note -->
+            <div class="parchment-card p-8 bg-ink text-parchment relative overflow-hidden">
+                <div class="relative z-10">
+                    <span class="text-[9px] font-bold text-parchment/40 uppercase tracking-[0.3em] block mb-4">Observation Note</span>
+                    <p class="text-xs font-serif leading-relaxed italic">
+                        "Security is not a state, but a flow. What was locked yesterday may drift into exposure tomorrow. Vigilance is the only constant."
+                    </p>
+                </div>
+                <div class="absolute -bottom-4 -right-4 opacity-10">
+                    <span class="material-symbols-outlined text-6xl">history_edu</span>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

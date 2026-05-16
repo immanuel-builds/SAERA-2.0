@@ -1,149 +1,157 @@
 {% extends 'base.html' %}
 {% load static %}
 
-{% block title %}Intelligence Gathering - SAERA{% endblock %}
+{% block title %}Tactical Observation - SAERA{% endblock %}
 
 {% block body_class %}ops-page{% endblock %}
 
 {% block content %}
-<div class="row justify-content-center py-5">
-    <div class="col-md-9">
-        <div class="cyber-card">
-            <!-- Tactical Header -->
-            <div class="p-5 text-center border-bottom border-subtle">
-                <div class="d-inline-flex align-items-center justify-content-center mb-4" 
-                     style="width: 64px; height: 64px; background: var(--charcoal); border: 1px solid var(--border-subtle); border-radius: 2px;">
-                    <i class="bi bi-broadcast text-white fs-2"></i>
+<main class="flex-1 flex flex-col gap-16 py-12 px-10 animate-in fade-in duration-1000 max-w-6xl">
+    <!-- Top Row: The Enso & Anomaly Ingest -->
+    <div class="grid grid-cols-1 lg:grid-cols-12 gap-16 items-center">
+        <!-- The Enso Circle: Progress Visualization -->
+        <div class="lg:col-span-7 flex flex-col items-center justify-center relative p-12">
+            <div class="relative w-[400px] h-[400px] flex items-center justify-center">
+                <!-- Brushstroke Enso Background -->
+                <div class="absolute inset-0 opacity-10 mix-blend-multiply pointer-events-none" style="background-image: url('{% static 'img/zen_enso.png' %}'); background-size: contain; background-repeat: no-repeat; background-position: center;"></div>
+                
+                <svg class="w-full h-full -rotate-90 transform" viewBox="0 0 100 100">
+                    <!-- Progress Ring (Subtle) -->
+                    <circle id="progress-ring" class="text-ink opacity-40 transition-all duration-1000 ease-in-out" cx="50" cy="50" fill="none" r="45" 
+                            stroke="currentColor" stroke-dasharray="282.7" stroke-dashoffset="282.7" stroke-width="0.5"></circle>
+                </svg>
+                
+                <div class="absolute flex flex-col items-center justify-center text-center">
+                    <span id="progress-percent" class="text-7xl text-ink font-serif font-medium tracking-tighter">0%</span>
+                    <span id="scan-status" class="text-[10px] font-bold text-ash uppercase tracking-[0.4em] mt-6">Observing...</span>
                 </div>
-                <h1 class="mb-2">Observation in Progress</h1>
-                <p class="text-muted small text-uppercase tracking-widest">Active Pulse: #{{ scan.id }}</p>
             </div>
-            
-            <div class="p-5">
-                <div class="mb-5 text-center">
-                    <h4 class="mb-1">Target Analysis: <span class="text-white">{{ scan.target.target }}</span></h4>
-                    <span class="badge px-3 py-2" style="background: rgba(255,255,255,0.02); border: 1px solid var(--border-subtle);">
-                         {{ scan.target.name }}
-                    </span>
+            <div class="mt-12 flex flex-col items-center gap-4">
+                <h3 class="text-2xl text-ink font-serif italic">The Recursive Trace</h3>
+                <p class="text-sm text-ash font-serif italic text-center max-w-sm leading-relaxed">Watching the digital ripples for <span class="text-ink font-bold">{{ scan_job.target.target }}</span>.</p>
+            </div>
+        </div>
+        
+        <!-- Anomaly Ingest Archive -->
+        <div class="lg:col-span-5 flex flex-col gap-12">
+            <div class="parchment-card p-10 relative overflow-hidden">
+                <div class="flex justify-between items-start mb-8">
+                    <div>
+                        <span class="text-[10px] font-bold text-ash uppercase tracking-widest block mb-4">Anomaly Ingest</span>
+                        <h4 class="text-2xl text-ink font-serif italic">The Evidence Counter</h4>
+                    </div>
+                    <span class="material-symbols-outlined text-seal text-3xl">brush</span>
                 </div>
                 
-                <!-- Main Progress Visualization -->
-                <div class="mb-5">
-                    <div class="d-flex justify-content-between align-items-end mb-3">
-                        <div class="text-start">
-                            <label class="text-muted small text-uppercase tracking-wider mb-1 d-block">Current Sector</label>
-                            <h5 class="mb-0 text-white" id="currentPhase">{{ scan.current_phase }}</h5>
-                        </div>
-                        <div class="text-end">
-                            <span class="display-6 fw-bold text-white" id="progressText">{{ scan.progress }}%</span>
-                        </div>
-                    </div>
-                    
-                    <div class="progress" style="height: 12px; background: rgba(255,255,255,0.05); border-radius: 0; padding: 2px;">
-                        <div id="progressBar" class="progress-bar progress-bar-striped progress-bar-animated"
-                            role="progressbar" 
-                            style="width: {{ scan.progress }}%; background: var(--accent-color); transition: width 1s ease;">
-                        </div>
+                <div class="mt-12 flex items-baseline gap-6">
+                    <span id="vulnerability-count" class="text-8xl text-seal font-serif tracking-tighter">{{ scan_job.vulnerabilities.count }}</span>
+                    <div class="flex flex-col">
+                        <span class="text-[10px] font-bold text-ash uppercase tracking-widest">Anomalies</span>
+                        <span class="text-xs text-ash/40 font-serif italic">Found in this sweep</span>
                     </div>
                 </div>
 
-                <!-- Stats Grid -->
-                <div class="row g-4 mb-5">
-                    <div class="col-md-4">
-                        <div class="cyber-card p-4 text-center">
-                            <div class="text-muted small text-uppercase tracking-widest mb-2">Vectors Scanned</div>
-                            <div class="h2 mb-0 text-white fw-bold" id="portsScanned">{{ scan.total_ports_scanned }}</div>
+                <div id="anomaly-list" class="mt-12 space-y-6">
+                    {% for vuln in scan_job.vulnerabilities.all|slice:":3" %}
+                    <div class="flex items-center justify-between py-4 border-b border-ink/5 animate-in slide-in-from-right duration-700">
+                        <div class="flex items-center gap-4">
+                            <span class="severity-seal text-[8px]">{{ vuln.severity|upper }}</span>
+                            <span class="text-sm font-serif text-ink italic truncate max-w-[180px]">{{ vuln.title }}</span>
                         </div>
+                        <span class="text-[8px] font-mono text-ash/40">{{ vuln.created_at|date:"H:i:s" }}</span>
                     </div>
-                    <div class="col-md-4">
-                        <div class="cyber-card p-4 text-center">
-                            <div class="text-muted small text-uppercase tracking-widest mb-2">Active Entry</div>
-                            <div class="h2 mb-0 text-white fw-bold" id="openPorts">{{ scan.open_ports_found }}</div>
-                        </div>
-                    </div>
-                    <div class="col-md-4">
-                        <div class="cyber-card p-4 text-center border-danger" style="background: rgba(230, 57, 70, 0.05);">
-                            <div class="text-danger small text-uppercase tracking-widest mb-2">Anomalies</div>
-                            <div class="h2 mb-0 text-danger fw-bold" id="vulnsFound">{{ scan.vulnerabilities_found }}</div>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Tactical Feed -->
-                <div class="p-4 rounded-0 mb-5" style="background: #000; border: 1px solid var(--border-subtle);">
-                    <div class="d-flex align-items-center justify-content-between mb-3">
-                        <div class="d-flex align-items-center gap-2">
-                            <span class="spinner-grow spinner-grow-sm" style="color: var(--accent-color);" role="status"></span>
-                            <span class="small fw-bold text-uppercase tracking-widest" style="color: var(--accent-color);">Tactical Command Feed</span>
-                        </div>
-                        <span class="badge bg-danger small">LOGGING ACTIVE</span>
-                    </div>
-                    <div class="text-light small font-monospace" id="statusConsole" style="height: 150px; overflow-y: auto; line-height: 1.8; color: var(--ash-gray) !important;">
-                        <span class="text-muted">[{{ now|date:"H:i:s" }}]</span> Initializing observation grid...<br>
-                        <span class="text-muted">[{{ now|date:"H:i:s" }}]</span> Vector established: <span class="text-white">{{ scan.target.target }}</span><br>
-                        <span class="text-muted">[{{ now|date:"H:i:s" }}]</span> Mode: <span class="text-danger">{{ scan.current_phase }}</span>
-                    </div>
-                </div>
-
-                <!-- Footer Actions -->
-                <div class="d-flex gap-3">
-                    <a href="{% url 'scan_detail' scan.id %}" id="viewResultsBtn" class="btn btn-primary d-none flex-grow-1">
-                        View Intelligence Report <i class="bi bi-arrow-right ms-2"></i>
-                    </a>
-                    <a href="{% url 'dashboard' %}" class="btn btn-outline-cyan flex-grow-1">
-                        Cease Pulse
-                    </a>
+                    {% endfor %}
                 </div>
             </div>
         </div>
     </div>
-</div>
-{% endblock %}
 
-{% block extra_js %}
+    <!-- The Investigator's Journal: Terminal Output -->
+    <div class="flex flex-col gap-6 mt-8">
+        <div class="flex justify-between items-center px-2">
+            <h3 class="text-2xl text-ink font-serif">Investigator's Journal</h3>
+            <div class="flex items-center gap-6">
+                <span class="text-[10px] font-bold text-ash uppercase tracking-widest">Sector Session: {{ scan_job.id|truncatechars:8 }}</span>
+                <span class="w-1.5 h-1.5 rounded-full bg-bamboo animate-pulse"></span>
+            </div>
+        </div>
+        <div class="terminal-window h-[400px] overflow-y-auto custom-scrollbar">
+            <div id="log-container" class="space-y-4 font-mono text-[13px] text-ink/80">
+                {% for log in logs %}
+                <div class="flex gap-4 opacity-40">
+                    <span class="text-ash/40">[{{ log.timestamp|date:"H:i:s" }}]</span>
+                    <span>{{ log.message }}</span>
+                </div>
+                {% endfor %}
+                <div class="flex gap-4 active-line text-seal animate-pulse">
+                    <span class="text-seal/40">[{{ "now"|date:"H:i:s" }}]</span>
+                    <span>&gt; THE OBSERVATORY IS WATCHING THE DARK WATER...</span>
+                </div>
+            </div>
+        </div>
+    </div>
+</main>
+
 <script>
-    const scanId = {{ scan.id }};
-    const progressApiUrl = "{% url 'scan_progress_api' scan.id %}";
-    let lastPhase = "{{ scan.current_phase }}";
-
     function updateProgress() {
-        fetch(progressApiUrl)
-            .then(response => response.json())
-            .then(data => {
-                const progressBar = document.getElementById('progressBar');
-                progressBar.style.width = data.progress + '%';
-                document.getElementById('progressText').textContent = data.progress + '%';
-                document.getElementById('currentPhase').textContent = data.current_phase;
+        $.ajax({
+            url: "{% url 'scan_progress_api' scan_job.id %}",
+            success: function(data) {
+                const progress = data.progress;
+                const status = data.status;
+                const ring = document.getElementById('progress-ring');
+                const percent = document.getElementById('progress-percent');
+                const statusText = document.getElementById('scan-status');
+                
+                // Update Progress Ring (Circumference is 282.7 for r=45)
+                const offset = 282.7 - (progress / 100 * 282.7);
+                ring.style.strokeDashoffset = offset;
+                percent.innerText = progress + '%';
+                statusText.innerText = status.toUpperCase() + '...';
 
-                document.getElementById('portsScanned').textContent = data.total_ports_scanned;
-                document.getElementById('openPorts').textContent = data.open_ports_found;
-                document.getElementById('vulnsFound').textContent = data.vulnerabilities_found;
-
-                if (data.current_phase !== lastPhase) {
-                    const consoleText = document.getElementById('statusConsole');
-                    const time = new Date().toLocaleTimeString([], {hour: '2-digit', minute:'2-digit', second:'2-digit'});
-                    const newLine = document.createElement('div');
-                    newLine.innerHTML = `<span class="text-muted">[${time}]</span> Phase Shift: <span class="text-warning">${data.current_phase}</span>`;
-                    consoleText.appendChild(newLine);
-                    consoleText.scrollTop = consoleText.scrollHeight;
-                    lastPhase = data.current_phase;
+                // Update Stats
+                const countElem = $('#vulnerability-count');
+                const currentCount = parseInt(countElem.text());
+                if (parseInt(data.vulnerability_count) > currentCount) {
+                    countElem.addClass('animate-bounce text-seal');
+                    setTimeout(() => countElem.removeClass('animate-bounce'), 1000);
+                }
+                countElem.text(data.vulnerability_count);
+                
+                // Update Logs
+                if (data.logs && data.logs.length > 0) {
+                    const logContainer = document.getElementById('log-container');
+                    const activeLine = logContainer.querySelector('.active-line');
+                    
+                    data.logs.forEach(log => {
+                        const div = document.createElement('div');
+                        div.className = 'flex gap-4 animate-in slide-in-from-left duration-500 text-ash/80';
+                        div.innerHTML = `<span class="text-ash/40">[${new Date().toLocaleTimeString()}]</span><span>${log}</span>`;
+                        logContainer.insertBefore(div, activeLine);
+                    });
+                    
+                    logContainer.scrollTop = logContainer.scrollHeight;
                 }
 
-                if (data.status === 'completed') {
-                    progressBar.classList.remove('progress-bar-animated');
-                    progressBar.style.background = '#10b981';
-                    document.getElementById('viewResultsBtn').classList.remove('d-none');
-                    clearInterval(progressInterval);
-                } else if (data.status === 'failed') {
-                    progressBar.classList.remove('progress-bar-animated');
-                    progressBar.style.background = '#ef4444';
-                    clearInterval(progressInterval);
+                if (status === 'completed' || status === 'failed') {
+                    statusText.innerText = status.toUpperCase();
+                    if (status === 'completed') {
+                        percent.innerText = '100%';
+                        ring.style.strokeDashoffset = 0;
+                        setTimeout(() => {
+                            window.location.href = "{% url 'scan_detail' scan_job.id %}";
+                        }, 2500);
+                    }
+                } else {
+                    setTimeout(updateProgress, 3000);
                 }
-            })
-            .catch(error => console.error('Error:', error));
+            }
+        });
     }
 
-    const progressInterval = setInterval(updateProgress, 2000);
-    updateProgress();
+    $(document).ready(function() {
+        updateProgress();
+    });
 </script>
+{% endblock %}
 {% endblock %}

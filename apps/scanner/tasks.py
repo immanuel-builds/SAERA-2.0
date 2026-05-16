@@ -77,14 +77,27 @@ def scan_target_task(self, scan_job_id):
             services = []
         
         # Phase 3: Vulnerability Detection
+        vulnerabilities = []
         if config and config.enable_vuln_detection:
             scan_job.current_phase = 'Vulnerability Detection'
             scan_job.progress = 60
             scan_job.save()
             
+            # 3.1: Rule-based Misconfiguration Audit
+            from .rules import ALL_RULES
+            for service in services:
+                for rule in ALL_RULES:
+                    is_violated, finding = rule.check(service)
+                    if is_violated:
+                        finding['port'] = service.get('port')
+                        finding['service'] = service.get('service')
+                        vulnerabilities.append(finding)
+            
+            # 3.2: Service-based Vulnerability Detection
             vuln_detector = VulnerabilityDetector()
             open_ports = port_scanner.get_open_ports(port_results)
-            vulnerabilities = vuln_detector.detect_vulnerabilities(services, open_ports)
+            detected_vulns = vuln_detector.detect_vulnerabilities(services, open_ports)
+            vulnerabilities.extend(detected_vulns)
             
             scan_job.progress = 70
             scan_job.save()
@@ -99,15 +112,20 @@ def scan_target_task(self, scan_job_id):
                 cve_vulns = cve_lookup.lookup_cves_for_services(services)
                 vulnerabilities.extend(cve_vulns)
             
-            # Save vulnerabilities
+            # Phase 5: Risk Analysis Engine
+            scan_job.current_phase = 'Risk Intelligence Analysis'
+            scan_job.progress = 90
+            scan_job.save()
+            
+            # Save vulnerabilities with risk context
             _save_vulnerabilities(scan_job, vulnerabilities)
             
             # Update scan job statistics
             scan_job.vulnerabilities_found = len(vulnerabilities)
-            scan_job.critical_vulns = len([v for v in vulnerabilities if v['severity'] == 'critical'])
-            scan_job.high_vulns = len([v for v in vulnerabilities if v['severity'] == 'high'])
-            scan_job.medium_vulns = len([v for v in vulnerabilities if v['severity'] == 'medium'])
-            scan_job.low_vulns = len([v for v in vulnerabilities if v['severity'] == 'low'])
+            scan_job.critical_vulns = len([v for v in vulnerabilities if v.get('severity') == 'critical'])
+            scan_job.high_vulns = len([v for v in vulnerabilities if v.get('severity') == 'high'])
+            scan_job.medium_vulns = len([v for v in vulnerabilities if v.get('severity') == 'medium'])
+            scan_job.low_vulns = len([v for v in vulnerabilities if v.get('severity') == 'low'])
         
         # Complete the scan
         scan_job.status = 'completed'
@@ -163,6 +181,8 @@ def _save_port_results(scan_job, port_results):
 
 def _save_vulnerabilities(scan_job, vulnerabilities):
     """Save detected vulnerabilities to database"""
+    from .risk_engine import calculate_risk, get_exploitability_factor
+    
     for vuln in vulnerabilities:
         # Calculate CVSS if not provided
         cvss_score = vuln.get('cvss_score')
@@ -170,11 +190,24 @@ def _save_vulnerabilities(scan_job, vulnerabilities):
             detector = VulnerabilityDetector()
             cvss_score = detector.calculate_cvss_score(vuln)
         
+        # Calculate Risk Intelligence
+        risk_score, risk_level = calculate_risk(
+            cvss=cvss_score,
+            service=vuln.get('service'),
+            is_public=True, # Heuristic: Assume public for academic depth
+            has_default_creds=vuln.get('vuln_type') == 'auth',
+            misconfigs=vuln.get('misconfigs', [])
+        )
+        exploitability = get_exploitability_factor(cvss_score, vuln.get('cve_id'))
+
         Vulnerability.objects.create(
             scan_job=scan_job,
             vuln_type=vuln.get('vuln_type', 'other'),
             severity=vuln.get('severity', 'medium'),
             cvss_score=cvss_score,
+            risk_score=risk_score,
+            risk_level=risk_level,
+            exploitability=exploitability,
             title=vuln.get('title', 'Unknown Vulnerability'),
             description=vuln.get('description', ''),
             impact=vuln.get('impact', ''),
@@ -185,7 +218,6 @@ def _save_vulnerabilities(scan_job, vulnerabilities):
             service_version=vuln.get('service_version', ''),
             cve_id=vuln.get('cve_id', ''),
             cve_url=vuln.get('cve_url', ''),
-            evidence=vuln.get('evidence', ''),
         )
 
 

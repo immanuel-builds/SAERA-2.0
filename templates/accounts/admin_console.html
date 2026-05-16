@@ -1,168 +1,161 @@
 {% extends 'base.html' %}
 {% load static %}
 
-{% block title %}Engine Core - SAERA Backend{% endblock %}
+{% block title %}Engine Core - Silent Observatory Archive{% endblock %}
 
 {% block content %}
-<div class="top-header align-items-end mb-4">
-    <div>
-        <h1 class="display-6 mb-1 text-white fw-bold">Backend Engine <span class="text-primary">Control Center</span></h1>
-        <div class="d-flex align-items-center gap-3">
-            <div class="text-primary small text-uppercase fw-bold tracking-wider d-flex align-items-center">
-                <i class="bi bi-cpu-fill me-2"></i> System Kernel: v2.4.0
-            </div>
-            <div class="text-muted small text-uppercase fw-bold tracking-wider">
-                &bull; Relational Data Registry &bull; Core Services Monitoring
-            </div>
-        </div>
+<div class="space-y-24 animate-in fade-in duration-1000">
+    <!-- Hero: The Archival Engine -->
+    <div class="flex flex-col gap-4">
+        <h1 class="text-6xl text-ink font-serif font-medium tracking-tight">Engine <span class="text-ash italic">Core</span></h1>
+        <p class="text-lg text-ash max-w-2xl font-serif italic">The silent heartbeat of the observatory. Monitor the relational flux, manage operatives, and maintain the integrity of the chronicle.</p>
     </div>
-</div>
 
-<!-- Engine Status Gauges -->
-<div class="row g-4 mb-5">
-    <div class="col-md-3">
-        <div class="cyber-card p-3 border-0" style="background: rgba(59, 130, 246, 0.05);">
-            <div class="d-flex justify-content-between align-items-start mb-2">
-                <div class="text-muted small text-uppercase tracking-widest fw-bold">Web Server</div>
-                <div class="status-indicator online"></div>
+    <!-- Engine Health Seals -->
+    <div class="grid grid-cols-1 md:grid-cols-4 gap-8">
+        <div class="parchment-card p-8 flex flex-col gap-6">
+            <span class="text-[10px] font-bold text-ash uppercase tracking-widest">Web Server</span>
+            <div class="flex items-center justify-between">
+                <span class="text-xl text-ink font-serif">Django Flux</span>
+                <span class="w-2 h-2 rounded-full bg-bamboo animate-pulse"></span>
             </div>
-            <div class="h4 text-white mb-0">Django Core</div>
-            <div class="text-success small"><i class="bi bi-check-circle-fill me-1"></i> Operations Normal</div>
+            <span class="text-[9px] font-mono text-ash/60 uppercase">System Nominal</span>
+        </div>
+        <div class="parchment-card p-8 flex flex-col gap-6">
+            <span class="text-[10px] font-bold text-ash uppercase tracking-widest">Task Broker</span>
+            <div class="flex items-center justify-between">
+                <span class="text-xl text-ink font-serif">Redis Signal</span>
+                <span class="w-2 h-2 rounded-full {% if stats.engine_status == 'online' %}bg-bamboo{% else %}bg-seal{% endif %}"></span>
+            </div>
+            <span class="text-[9px] font-mono text-ash/60 uppercase">Port: 6379</span>
+        </div>
+        <div class="parchment-card p-8 flex flex-col gap-6">
+            <span class="text-[10px] font-bold text-ash uppercase tracking-widest">Scanner Node</span>
+            <div class="flex items-center justify-between">
+                <span class="text-xl text-ink font-serif">Celery Pulse</span>
+                <span class="w-2 h-2 rounded-full {% if stats.engine_status == 'online' %}bg-bamboo{% else %}bg-seal{% endif %}"></span>
+            </div>
+            <span class="text-[9px] font-mono text-ash/60 uppercase">Status: {{ stats.engine_status|upper }}</span>
+        </div>
+        <div class="parchment-card p-8 flex flex-col gap-6">
+            <span class="text-[10px] font-bold text-ash uppercase tracking-widest">Data Engine</span>
+            <div class="flex items-center justify-between">
+                <span class="text-xl text-ink font-serif">SQLite Logic</span>
+                <span class="w-2 h-2 rounded-full bg-bamboo"></span>
+            </div>
+            <span class="text-[9px] font-mono text-ash/60 uppercase">Relational Sync</span>
         </div>
     </div>
-    <div class="col-md-3">
-        <div class="cyber-card p-3 border-0" style="background: rgba(168, 85, 247, 0.05);">
-            <div class="d-flex justify-content-between align-items-start mb-2">
-                <div class="text-muted small text-uppercase tracking-widest fw-bold">Task Broker</div>
-                <div class="status-indicator {% if stats.engine_status == 'online' %}online{% else %}warning{% endif %}"></div>
-            </div>
-            <div class="h4 text-white mb-0">Redis Flux</div>
-            <div class="text-muted small">Port: 6379</div>
-        </div>
-    </div>
-    <div class="col-md-3">
-        <div class="cyber-card p-3 border-0" style="background: rgba(244, 63, 94, 0.05);">
-            <div class="d-flex justify-content-between align-items-start mb-2">
-                <div class="text-muted small text-uppercase tracking-widest fw-bold">Scanner Node</div>
-                <div class="status-indicator {% if stats.engine_status == 'online' %}online{% else %}danger{% endif %}"></div>
-            </div>
-            <div class="h4 text-white mb-0">Celery Worker</div>
-            <div class="text-muted small">Status: {{ stats.engine_status|upper }}</div>
-        </div>
-    </div>
-    <div class="col-md-3">
-        <div class="cyber-card p-3 border-0" style="background: rgba(234, 179, 8, 0.05);">
-            <div class="d-flex justify-content-between align-items-start mb-2">
-                <div class="text-muted small text-uppercase tracking-widest fw-bold">Database</div>
-                <div class="status-indicator online"></div>
-            </div>
-            <div class="h4 text-white mb-0">SQLite Engine</div>
-            <div class="text-muted small">Sync: Encrypted</div>
-        </div>
-    </div>
-</div>
 
-<!-- Tabs for different Engine views -->
-<ul class="nav nav-pills mb-4 gap-2" id="engineTabs" role="tablist">
-    <li class="nav-item" role="presentation">
-        <button class="nav-link active rounded-pill px-4" id="data-tab" data-bs-toggle="pill" data-bs-target="#data-registry" type="button">
-            <i class="bi bi-layers-half me-2"></i> Data Registry
-        </button>
-    </li>
-    <li class="nav-item" role="presentation">
-        <button class="nav-link rounded-pill px-4" id="personnel-tab" data-bs-toggle="pill" data-bs-target="#personnel" type="button">
-            <i class="bi bi-people-fill me-2"></i> Personnel
-        </button>
-    </li>
-    <li class="nav-item" role="presentation">
-        <button class="nav-link rounded-pill px-4" id="logs-tab" data-bs-toggle="pill" data-bs-target="#engine-logs" type="button">
-            <i class="bi bi-terminal-fill me-2"></i> Audit Stream
-        </button>
-    </li>
-</ul>
-
-<div class="tab-content" id="engineTabContent">
-    <!-- Data Registry Tab -->
-    <div class="tab-pane fade show active" id="data-registry" role="tabpanel">
-        <div class="row g-4">
-            <div class="col-md-3">
-                <div class="cyber-card p-4 text-center h-100 hvr-up">
-                    <i class="bi bi-person-badge text-primary fs-1 mb-3"></i>
-                    <div class="h2 text-white">{{ stats.total_users }}</div>
-                    <div class="text-muted small text-uppercase fw-bold">User Records</div>
-                    <hr class="border-secondary opacity-10">
-                    <div class="text-primary small fw-bold">{{ stats.admin_users }} Admins</div>
-                </div>
-            </div>
-            <div class="col-md-3">
-                <div class="cyber-card p-4 text-center h-100 hvr-up">
-                    <i class="bi bi-target text-success fs-1 mb-3"></i>
-                    <div class="h2 text-white">{{ stats.total_targets }}</div>
-                    <div class="text-muted small text-uppercase fw-bold">Scan Targets</div>
-                    <hr class="border-secondary opacity-10">
-                    <div class="text-success small fw-bold">Entity Index</div>
-                </div>
-            </div>
-            <div class="col-md-3">
-                <div class="cyber-card p-4 text-center h-100 hvr-up">
-                    <i class="bi bi-activity text-warning fs-1 mb-3"></i>
-                    <div class="h2 text-white">{{ stats.total_scans }}</div>
-                    <div class="text-muted small text-uppercase fw-bold">Total Job Cycles</div>
-                    <hr class="border-secondary opacity-10">
-                    <div class="text-warning small fw-bold">Job Registry</div>
-                </div>
-            </div>
-            <div class="col-md-3">
-                <div class="cyber-card p-4 text-center h-100 hvr-up">
-                    <i class="bi bi-shield-exclamation text-danger fs-1 mb-3"></i>
-                    <div class="h2 text-white">{{ stats.total_vulns }}</div>
-                    <div class="text-muted small text-uppercase fw-bold">Vuln Definitions</div>
-                    <hr class="border-secondary opacity-10">
-                    <div class="text-danger small fw-bold">Findings Count</div>
-                </div>
-            </div>
+    <!-- The Living Archive Map -->
+    <div class="parchment-card p-12 min-h-[500px] overflow-hidden flex flex-col justify-between">
+        <div class="relative z-10 space-y-2">
+            <h3 class="text-3xl text-ink font-serif">The Living Map</h3>
+            <p class="text-[10px] text-ash uppercase tracking-[0.3em]">Active Intelligence Nodes • Relational Flow</p>
         </div>
         
-        <div class="cyber-card mt-4 p-5 text-center">
-            <h3 class="text-white mb-3">Relational Engine Management</h3>
-            <p class="text-muted mb-4 mx-auto" style="max-width: 600px;">
-                The SAERA Backend Engine maintains a consistent relational state across all entities. 
-                Use the core management portal to modify schema records directly.
-            </p>
-            <div class="d-flex justify-content-center gap-3">
-                <a href="/admin/" target="_blank" class="btn btn-primary btn-lg px-5">
-                    Launch Data Explorer <i class="bi bi-box-arrow-up-right ms-2"></i>
-                </a>
+        <!-- Abstract Ink Map Visualization -->
+        <div class="absolute inset-0 flex items-center justify-center pointer-events-none">
+            <svg class="w-full h-full opacity-10" viewBox="0 0 1000 500">
+                <defs>
+                    <filter id="inkStain">
+                        <feTurbulence type="fractalNoise" baseFrequency="0.05" numOctaves="2" result="noise" />
+                        <feDisplacementMap in="SourceGraphic" in2="noise" scale="10" />
+                    </filter>
+                </defs>
+                <g filter="url(#inkStain)">
+                    <circle cx="500" cy="250" r="40" fill="currentColor" class="text-ink" />
+                    <circle cx="300" cy="150" r="20" fill="currentColor" class="text-ash" />
+                    <circle cx="700" cy="150" r="15" fill="currentColor" class="text-ash" />
+                    <circle cx="400" cy="350" r="25" fill="currentColor" class="text-ash" />
+                    <circle cx="650" cy="380" r="30" fill="currentColor" class="text-ash" />
+                </g>
+                <path d="M500,250 Q400,200 300,150" fill="none" stroke="currentColor" stroke-width="0.5" stroke-dasharray="2 4" class="text-ink" />
+                <path d="M500,250 Q600,200 700,150" fill="none" stroke="currentColor" stroke-width="0.5" stroke-dasharray="2 4" class="text-ink" />
+                <path d="M500,250 Q450,300 400,350" fill="none" stroke="currentColor" stroke-width="0.5" stroke-dasharray="2 4" class="text-ink" />
+                <path d="M500,250 Q575,315 650,380" fill="none" stroke="currentColor" stroke-width="0.5" stroke-dasharray="2 4" class="text-ink" />
+            </svg>
+            <div class="absolute inset-0 bg-gradient-to-t from-background to-transparent opacity-40"></div>
+        </div>
+
+        <div class="flex gap-12 self-end relative z-10">
+            <div class="text-right">
+                <div class="text-[9px] font-bold text-ash uppercase tracking-widest">Operatives</div>
+                <div class="text-4xl text-ink font-serif">{{ stats.total_users }}</div>
+            </div>
+            <div class="text-right border-l border-ink/5 pl-12">
+                <div class="text-[9px] font-bold text-ash uppercase tracking-widest">Observations</div>
+                <div class="text-4xl text-ink font-serif">{{ stats.total_scans }}</div>
+            </div>
+            <div class="text-right border-l border-ink/5 pl-12">
+                <div class="text-[9px] font-bold text-ash uppercase tracking-widest">Anomalies</div>
+                <div class="text-4xl text-seal font-serif">{{ stats.total_vulns }}</div>
             </div>
         </div>
     </div>
 
-    <!-- Personnel Tab -->
-    <div class="tab-pane fade" id="personnel" role="tabpanel">
-        <div class="cyber-card">
-            <div class="card-header d-flex justify-content-between align-items-center">
-                <h5 class="card-title mb-0"><i class="bi bi-people-fill me-2 text-primary"></i> Authorized Operatives</h5>
-                <span class="badge bg-primary bg-opacity-10 text-primary border border-primary">{{ stats.total_users }} Registered</span>
+    <!-- Data Registry & Personnel Archive -->
+    <div class="grid grid-cols-1 lg:grid-cols-12 gap-16">
+        <!-- Personnel Archive -->
+        <div class="lg:col-span-7 parchment-card p-0 flex flex-col">
+            <div class="p-10 border-b border-ink/5 flex justify-between items-center">
+                <h3 class="text-2xl text-ink font-serif">Personnel Archive</h3>
+                <span class="text-[10px] font-mono text-ash uppercase tracking-widest">{{ stats.total_users }} Registered</span>
             </div>
-            <div class="card-body">
-                <div class="row g-3">
-                    {% for user in new_users %}
-                    <div class="col-md-6 col-lg-4">
-                        <div class="d-flex align-items-center p-3 rounded-4 operative-item" style="background: rgba(255, 255, 255, 0.03); border: 1px solid rgba(255, 255, 255, 0.05);">
-                            <div class="rounded-circle me-3 d-flex align-items-center justify-content-center text-white" 
-                                 style="width: 45px; height: 45px; background: linear-gradient(135deg, var(--primary-color), var(--accent-red)); font-weight: 800;">
-                                {{ user.username|make_list|first|upper }}
-                            </div>
-                            <div class="flex-grow-1">
-                                <div class="text-white fw-bold">{{ user.username }}</div>
-                                <div class="text-muted small">{{ user.role|upper }} &bull; {{ user.date_joined|date:"M d" }}</div>
-                            </div>
-                            {% if user != request.user %}
-                            <button class="btn btn-sm btn-outline-danger border-0" data-bs-toggle="modal" data-bs-target="#decommissionModal" 
-                                    data-username="{{ user.username }}" data-userid="{{ user.id }}">
-                                <i class="bi bi-trash3"></i>
-                            </button>
-                            {% endif %}
+            <div class="overflow-x-auto">
+                <table class="w-full text-left font-sans">
+                    <thead class="bg-ash/5">
+                        <tr>
+                            <th class="px-10 py-4 text-[10px] font-bold text-ash uppercase tracking-wider">Operative</th>
+                            <th class="px-10 py-4 text-[10px] font-bold text-ash uppercase tracking-wider">Clearance</th>
+                            <th class="px-10 py-4 text-[10px] font-bold text-ash uppercase tracking-wider">Action</th>
+                        </tr>
+                    </thead>
+                    <tbody class="divide-y divide-ink/5">
+                        {% for user in new_users %}
+                        <tr class="hover:bg-ash/5 transition-all">
+                            <td class="px-10 py-6">
+                                <div class="flex items-center gap-4">
+                                    <div class="size-8 flex items-center justify-center font-serif text-ash border border-ink/10">
+                                        {{ user.username|make_list|first|upper }}
+                                    </div>
+                                    <span class="text-sm font-medium text-ink">{{ user.username }}</span>
+                                </div>
+                            </td>
+                            <td class="px-10 py-6">
+                                <span class="severity-seal text-[9px]">
+                                    {{ user.role|upper }}
+                                </span>
+                            </td>
+                            <td class="px-10 py-6">
+                                {% if user != request.user %}
+                                <button class="text-ash/40 hover:text-seal transition-colors" 
+                                        onclick="confirmDecommission('{{ user.username }}', '{{ user.id }}')">
+                                    <span class="material-symbols-outlined text-lg">close</span>
+                                </button>
+                                {% endif %}
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- Audit Stream: The Field Journal -->
+        <div class="lg:col-span-5 flex flex-col gap-8">
+            <div class="flex justify-between items-center px-2">
+                <h3 class="text-2xl text-ink font-serif">The Field Journal</h3>
+                <span class="text-[10px] font-mono text-ash uppercase tracking-widest">Real-time Stream</span>
+            </div>
+            <div class="terminal-window h-[500px] overflow-y-auto custom-scrollbar">
+                <div class="space-y-8">
+                    {% for log in recent_logs %}
+                    <div class="flex gap-6 group">
+                        <span class="text-[10px] font-mono text-ash/40 mt-1 whitespace-nowrap">{{ log.created_at|date:"H:i:s" }}</span>
+                        <div class="flex flex-col gap-2">
+                            <span class="text-sm font-bold text-ink group-hover:text-seal transition-colors tracking-tight">{{ log.get_action_display }}</span>
+                            <p class="text-xs text-ash/80 leading-relaxed font-serif italic">{{ log.description }}</p>
                         </div>
                     </div>
                     {% endfor %}
@@ -170,98 +163,42 @@
             </div>
         </div>
     </div>
+</div>
 
-    <!-- Logs Tab -->
-    <div class="tab-pane fade" id="engine-logs" role="tabpanel">
-        <div class="cyber-card">
-            <div class="card-header">
-                <h5 class="card-title mb-0"><i class="bi bi-terminal-fill me-2 text-primary"></i> System Audit Stream</h5>
-            </div>
-            <div class="card-body p-0">
-                <div class="terminal-view p-3" style="background: #020617; max-height: 500px; overflow-y: auto; font-family: 'JetBrains Mono', monospace; font-size: 0.8rem;">
-                    {% for log in recent_logs %}
-                    <div class="mb-2 d-flex">
-                        <span class="text-muted me-2">[{{ log.created_at|date:"H:i:s" }}]</span>
-                        <span class="text-primary me-2">ENGINE:</span>
-                        <span class="text-white">User <span class="text-info">{{ log.user.username }}</span> executed <span class="text-warning">{{ log.get_action_display }}</span> from {{ log.ip_address }}</span>
-                    </div>
-                    {% endfor %}
-                </div>
-            </div>
+<!-- Decommission Protocol Modal -->
+<div id="decommission-modal" class="fixed inset-0 z-[200] hidden items-center justify-center p-6 backdrop-blur-sm bg-background/90">
+    <div class="parchment-card max-w-md w-full p-12 space-y-10 animate-in zoom-in duration-300 border-seal/30">
+        <div class="text-center space-y-6">
+            <span class="material-symbols-outlined text-seal text-6xl" style="font-variation-settings: 'wght' 200;">ink_eraser</span>
+            <h3 class="text-3xl text-ink font-serif">Decommission Operative</h3>
+            <p class="text-sm text-ash font-serif italic">Are you certain you wish to erase operative <span id="target-operative" class="text-seal font-bold"></span> from the chronicle? This action is absolute.</p>
+        </div>
+        <div class="flex gap-4">
+            <button onclick="closeModal()" class="flex-1 px-8 py-4 border border-ink/10 text-ash text-[10px] font-bold uppercase tracking-widest hover:bg-ash/5 transition-all">Abort</button>
+            <form id="decommission-form" method="post" class="flex-1">
+                {% csrf_token %}
+                <button type="submit" class="w-full px-8 py-4 bg-seal text-white text-[10px] font-bold uppercase tracking-widest hover:scale-105 transition-all">Confirm Erase</button>
+            </form>
         </div>
     </div>
 </div>
-
-<!-- Decommission Modal (Same as before but consistent styling) -->
-<div class="modal fade" id="decommissionModal" tabindex="-1" aria-hidden="true">
-    <div class="modal-dialog modal-dialog-centered">
-        <div class="modal-content cyber-card danger-border p-2">
-            <div class="modal-header border-0">
-                <h5 class="modal-title text-danger fw-bold">DECOMMISSION PROTOCOL</h5>
-                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
-            </div>
-            <div class="modal-body text-center py-4">
-                <div class="mb-3 text-danger fs-1"><i class="bi bi-exclamation-octagon"></i></div>
-                <p class="text-white mb-1">Are you sure you want to decommission operative:</p>
-                <h4 id="modalUsername" class="text-danger fw-bold mb-4"></h4>
-                <p class="text-muted small">This will purge all relational data linked to this identity. This action is final.</p>
-            </div>
-            <div class="modal-footer border-0">
-                <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Abort</button>
-                <form id="deleteUserForm" method="post">
-                    {% csrf_token %}
-                    <button type="submit" class="btn btn-danger">Confirm Decommission</button>
-                </form>
-            </div>
-        </div>
-    </div>
-</div>
-
-<style>
-    .status-indicator {
-        width: 10px;
-        height: 10px;
-        border-radius: 50%;
-        box-shadow: 0 0 10px currentColor;
-    }
-    .status-indicator.online { background-color: #22c55e; color: #22c55e; }
-    .status-indicator.warning { background-color: #eab308; color: #eab308; }
-    .status-indicator.danger { background-color: #ef4444; color: #ef4444; }
-    
-    .nav-pills .nav-link {
-        background: rgba(255,255,255,0.03);
-        color: var(--text-secondary);
-        border: 1px solid rgba(255,255,255,0.05);
-        transition: all 0.3s ease;
-    }
-    .nav-pills .nav-link.active {
-        background: var(--primary-color) !important;
-        color: white !important;
-        box-shadow: 0 0 20px rgba(59, 130, 246, 0.3);
-    }
-    .hvr-up { transition: transform 0.3s ease; }
-    .hvr-up:hover { transform: translateY(-5px); }
-    
-    .operative-item { transition: all 0.3s ease; }
-    .operative-item:hover {
-        background: rgba(255, 255, 255, 0.08) !important;
-        border-color: var(--primary-color) !important;
-    }
-    .danger-border { border: 1px solid rgba(244, 63, 94, 0.3) !important; }
-</style>
 
 <script>
-    document.addEventListener('DOMContentLoaded', function() {
-        const decommissionModal = document.getElementById('decommissionModal');
-        if (decommissionModal) {
-            decommissionModal.addEventListener('show.bs.modal', function(event) {
-                const button = event.relatedTarget;
-                const username = button.getAttribute('data-username');
-                const userId = button.getAttribute('data-userid');
-                decommissionModal.querySelector('#modalUsername').textContent = username;
-                decommissionModal.querySelector('#deleteUserForm').action = `/accounts/user/${userId}/delete/`;
-            });
-        }
-    });
+    function confirmDecommission(username, userId) {
+        const modal = document.getElementById('decommission-modal');
+        const target = document.getElementById('target-operative');
+        const form = document.getElementById('decommission-form');
+        
+        target.innerText = username;
+        form.action = `/accounts/user/${userId}/delete/`;
+        modal.classList.remove('hidden');
+        modal.classList.add('flex');
+    }
+
+    function closeModal() {
+        const modal = document.getElementById('decommission-modal');
+        modal.classList.add('hidden');
+        modal.classList.remove('flex');
+    }
 </script>
 {% endblock %}

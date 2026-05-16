@@ -3,249 +3,174 @@
 <html lang="en">
 
 <head>
-    <meta charset="UTF-8">
+    <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta name="description" content="Network Vulnerabilities Testing Website - Security Assessment Platform">
-    <title>{% block title %}SAERA - Security Assessment & Risk Analysis{% endblock %}</title>
-
-    <!-- Google Fonts -->
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link
-        href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Space+Grotesk:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap"
-        rel="stylesheet">
-
-    <!-- Bootstrap CSS -->
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
-    <!-- Bootstrap Icons -->
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css">
-    <!-- Vis.js for Network Map -->
-    <script type="text/javascript" src="https://unpkg.com/vis-network/standalone/umd/vis-network.min.js"></script>
-    <!-- Custom CSS -->
+    <title>{% block title %}SAERA - Command Center{% endblock %}</title>
+    
+    <!-- Design System Assets -->
+    <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;0,600;0,700;1,300;1,400;1,500;1,600;1,700&family=Inter:wght@100..900&family=JetBrains+Mono:ital,wght@0,100..800;1,100..800&family=Noto+Serif+JP:wght@200..900&family=Zen+Old+Mincho:wght@400;500;600;700;900&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="{% static 'css/style.css' %}">
-    {% block extra_css %}{% endblock %}
-
+    
+    <script id="tailwind-config">
+        tailwind.config = {
+          darkMode: "class",
+          theme: {
+            extend: {
+              "colors": {
+                "background": "#EAE2D6",
+                "ink": "#1A1A1A",
+                "mist": "#CFC6B8",
+                "ash": "#6B6B6B",
+                "seal": "#9F3B32",
+                "bamboo": "#4E6B57",
+                "on-background": "#1A1A1A",
+                "surface": "rgba(234, 226, 214, 0.8)",
+                "on-surface": "#1A1A1A",
+                "primary": "#1A1A1A",
+                "on-primary": "#EAE2D6",
+                "error": "#9F3B32"
+              },
+              "borderRadius": {
+                "DEFAULT": "0.5rem",
+                "lg": "1rem",
+                "xl": "1.5rem",
+                "full": "9999px"
+              },
+              "fontFamily": {
+                "serif": ["Zen Old Mincho", "Noto Serif JP", "serif"],
+                "sans": ["Inter", "sans-serif"],
+                "mono": ["JetBrains Mono", "monospace"]
+              }
+            }
+          }
+        }
+      </script>
+    
     <style>
-        /* Atmospheric Layering System (Story-Driven) */
-        .atmospheric-bg {
-            position: fixed;
-            inset: 0;
-            z-index: -2;
-            background-color: #000;
-            background-size: cover;
-            background-position: center;
-            background-repeat: no-repeat;
-            opacity: 0.5; /* Increased for higher contrast */
-            transition: all 2s ease;
+        .material-symbols-outlined {
+            font-variation-settings: "FILL" 0, "wght" 300, "GRAD" 0, "opsz" 24;
         }
-
-        /* Narrative Filter System */
-        body.auth-page .atmospheric-bg { 
-            background-image: url("{% static 'img/observatory_corridor_bg_1778688761321.png' %}"); 
-            filter: grayscale(1) contrast(1.5) brightness(0.5) blur(2px);
-        }
-        body.dashboard-page .atmospheric-bg { 
-            background-image: url("{% static 'img/tactical_ink_topography_bg_1778688805418.png' %}"); 
-            filter: sepia(0.5) hue-rotate(180deg) contrast(1.2) brightness(0.6) blur(2px); /* Indigo tint */
-        }
-        body.ops-page .atmospheric-bg { 
-            background-image: url("{% static 'img/foggy_scan_geometry_bg_1778688995082.png' %}"); 
-            filter: sepia(0.5) hue-rotate(320deg) contrast(1.3) brightness(0.5) blur(1px); /* Crimson tint */
-        }
-        body.intel-page .atmospheric-bg { 
-            background-image: url("{% static 'img/archive_parchment_bg_1778689292787.png' %}"); 
-            filter: sepia(0.3) contrast(1.1) brightness(0.6); /* Parchment tint */
-        }
-        body.report-page .atmospheric-bg { 
-            background-image: url("{% static 'img/archive_parchment_bg_1778689292787.png' %}"); 
-            filter: sepia(0.8) saturate(2) contrast(1.5) brightness(0.4); /* Gold tint */
-        }
+        {% block extra_css %}{% endblock %}
     </style>
 </head>
 
-<body class="loading {% block body_class %}{% if not user.is_authenticated %}auth-page{% endif %}{% endblock %}">
-    <div class="atmospheric-bg"></div>
-
-    <!-- Preloader - The Ink Diffusion -->
-    <div class="preloader" id="preloader">
-        <div class="loader-ink">
-            <i class="bi bi-shield-lock loader-icon"></i>
+<body class="bg-background text-on-background font-sans min-h-screen selection:bg-seal selection:text-white {% block body_class %}{% endblock %}">
+    <!-- Atmospheric Background System -->
+    <div class="fixed inset-0 z-[-1] overflow-hidden pointer-events-none">
+        <div class="paper-texture"></div>
+        <div class="mist-overlay"></div>
+        <div class="drift-fog absolute inset-0"></div>
+        <!-- Ghostly Background Image -->
+        <div class="absolute inset-0 opacity-[0.05] mix-blend-multiply pointer-events-none" 
+             style="background-image: url('{% block background_image %}{% static 'img/tactical_ink_topography_bg_1778688805418.png' %}{% endblock %}'); background-size: cover; background-position: center;">
         </div>
-        <div class="loader-text">Synchronizing Observation Grid...</div>
     </div>
 
-    {% if user.is_authenticated %}
-    <div class="wrapper">
-        <!-- Sidebar -->
-        <nav class="sidebar" id="sidebar">
-            <div class="sidebar-brand">
-                <div class="d-flex align-items-center">
-                    <div class="brand-icon me-3 d-flex align-items-center justify-content-center" 
-                         style="width: 32px; height: 32px; background: var(--accent-color); border-radius: 2px;">
-                        <i class="bi bi-shield-lock text-white fs-5"></i>
+    <div class="relative z-10 min-h-screen">
+        {% if user.is_authenticated %}
+        <!-- Unified Command Deck (Sidebar) -->
+        <aside class="saera-sidebar overflow-hidden">
+            <!-- Sidebar Zen Accent -->
+            <div class="absolute -bottom-10 -left-10 w-48 h-48 opacity-[0.03] pointer-events-none grayscale" style="background-image: url('{% static 'img/jap 1.png' %}'); background-size: contain; background-repeat: no-repeat;"></div>
+            
+            <!-- Brand -->
+            <div class="flex flex-col gap-2 mb-12">
+                <span class="font-serif text-4xl font-medium tracking-tight text-ink">SAERA</span>
+                <span class="font-serif text-[10px] uppercase tracking-[0.2em] text-ash/60">Silent Observatory</span>
+            </div>
+
+            <!-- Integrated Search -->
+            <div class="relative mb-8">
+                <span class="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-ash/40 text-sm">search</span>
+                <input type="text" placeholder="QUERY SIGNAL..." class="w-full bg-ash/5 border-none rounded-sm py-2 pl-10 pr-4 text-[10px] tracking-widest uppercase focus:ring-1 focus:ring-seal/20 outline-none transition-all">
+            </div>
+
+            <!-- Navigation Deck -->
+            <nav class="flex flex-col gap-2">
+                <a class="saera-nav-link {% if request.resolver_match.url_name == 'dashboard' %}active{% endif %}" href="{% url 'dashboard' %}">
+                    <span class="material-symbols-outlined">visibility</span>
+                    Observatory
+                </a>
+                <a class="saera-nav-link {% if 'vulnerability' in request.path %}active{% endif %}" href="{% url 'vulnerability_list' %}">
+                    <span class="material-symbols-outlined">psychology</span>
+                    Intel
+                </a>
+                <a class="saera-nav-link {% if request.resolver_match.url_name == 'network_map' %}active{% endif %}" href="{% url 'network_map' %}">
+                    <span class="material-symbols-outlined">hub</span>
+                    Signal Topography
+                </a>
+                <a class="saera-nav-link {% if 'knowledge' in request.path %}active{% endif %}" href="{% url 'knowledge:list' %}">
+                    <span class="material-symbols-outlined">history_edu</span>
+                    The Chronicle
+                </a>
+                {% if user.is_admin %}
+                <a class="saera-nav-link {% if 'admin-console' in request.path %}active{% endif %}" href="{% url 'admin_console' %}">
+                    <span class="material-symbols-outlined">terminal</span>
+                    Engine Core
+                </a>
+                {% endif %}
+            </nav>
+
+            <!-- Bottom Telemetry & User -->
+            <div class="mt-auto pt-12 border-t border-ink/5 flex flex-col gap-8">
+                <div class="flex items-center justify-between px-2">
+                    <div class="flex flex-col">
+                        <span class="text-[8px] font-bold text-ash uppercase tracking-tighter">Observatory Status</span>
+                        <span class="text-[10px] font-serif text-bamboo italic">Watching...</span>
                     </div>
-                    <span>SAERA</span>
+                    <span class="w-1.5 h-1.5 rounded-full bg-bamboo/40 animate-pulse"></span>
                 </div>
-            </div>
-
-            <div class="sidebar-menu">
-                <ul class="list-unstyled">
-                    <li class="nav-item">
-                        <a class="nav-link {% if request.resolver_match.url_name == 'dashboard' %}active{% endif %}"
-                            href="{% url 'dashboard' %}">
-                            <i class="bi bi-grid-fill"></i> Dashboard
-                        </a>
-                    </li>
-                    {% if user.is_analyst %}
-                    <li class="nav-item">
-                        <a class="nav-link {% if request.resolver_match.url_name == 'scan_create' %}active{% endif %}"
-                            href="{% url 'scan_create' %}">
-                            <i class="bi bi-plus-circle-fill"></i> New Scan
-                        </a>
-                    </li>
-                    {% endif %}
-                    <li class="nav-item">
-                        <a class="nav-link {% if request.resolver_match.url_name == 'scan_list' %}active{% endif %}"
-                            href="{% url 'scan_list' %}">
-                            <i class="bi bi-list-ul"></i> All Scans
-                        </a>
-                    </li>
-                    <li class="nav-item">
-                        <a class="nav-link {% if request.resolver_match.url_name == 'vulnerability_list' %}active{% endif %}"
-                            href="{% url 'vulnerability_list' %}">
-                            <i class="bi bi-bug-fill"></i> Vulnerabilities
-                        </a>
-                    </li>
-                    <li class="nav-item">
-                        <a class="nav-link {% if request.resolver_match.url_name == 'report_list' %}active{% endif %}"
-                            href="{% url 'report_list' %}">
-                            <i class="bi bi-file-earmark-text-fill"></i> Reports
-                        </a>
-                    </li>
-                    <li class="nav-item">
-                        <a class="nav-link {% if request.resolver_match.app_name == 'knowledge' %}active{% endif %}"
-                            href="{% url 'knowledge:list' %}">
-                            <i class="bi bi-book-half"></i> Knowledge Base
-                        </a>
-                    </li>
-                    <li class="nav-divider my-4" style="border-top: 1px solid var(--border-subtle); opacity: 0.3;"></li>
-                    {% if user.is_admin %}
-                    <li class="nav-item">
-                        <a class="nav-link {% if request.resolver_match.url_name == 'admin_console' %}active{% endif %}"
-                            href="{% url 'admin_console' %}">
-                            <i class="bi bi-cpu"></i> Engine Core
-                        </a>
-                    </li>
-                    {% endif %}
-                    {% if user.is_superuser %}
-                    <li class="nav-item">
-                        <a class="nav-link" href="/admin/" target="_blank" style="color: var(--accent-gold);">
-                            <i class="bi bi-database-fill-gear"></i> Database Engine
-                        </a>
-                    </li>
-                    {% endif %}
-                    <li class="nav-item">
-                        <a class="nav-link {% if request.resolver_match.url_name == 'profile' %}active{% endif %}"
-                            href="{% url 'profile' %}">
-                            <i class="bi bi-person-circle"></i> User Profile
-                        </a>
-                    </li>
-                    <li class="nav-item">
-                        <a class="nav-link hover-danger-text" href="{% url 'logout' %}">
-                            <i class="bi bi-box-arrow-right"></i> Sign Out
-                        </a>
-                    </li>
-                </ul>
-            </div>
-
-            <div class="sidebar-footer">
-                <div class="user-profile p-3" style="background: rgba(255, 255, 255, 0.02); border-top: 1px solid var(--border-subtle);">
-                    <div class="d-flex align-items-center justify-content-center text-white me-3"
-                        style="width: 32px; height: 32px; background: var(--charcoal); border: 1px solid var(--border-subtle); font-family: var(--font-heading); font-size: 0.8rem;">
-                        {{ user.username|make_list|first|upper }}
+                
+                <div class="flex items-center gap-4 bg-ash/5 p-4 rounded-sm border border-ink/5 relative overflow-hidden group">
+                    <!-- Wabi Accent -->
+                    <div class="absolute -right-2 -bottom-2 w-16 h-16 opacity-[0.03] group-hover:opacity-[0.1] transition-opacity pointer-events-none grayscale" style="background-image: url('{% static 'img/jap 8.png' %}'); background-size: contain; background-repeat: no-repeat;"></div>
+                    
+                    <div class="w-8 h-8 rounded-full bg-mist overflow-hidden border border-ink/10 grayscale contrast-125 relative z-10">
+                        <img src="https://lh3.googleusercontent.com/aida-public/AB6AXuAqXV7nHWM6oCI8j6qE8V1FBaIKZ74w5cG_MZZbfOVKsNJNQpl8jAG7Yn4-7G_ymL4kB0RHiv8wOKGUC8-e-zjSSzk1NQp6zdu-EWrpvOj0CzxUtbIIV-beNGxRTreE7Py_3Woy1kOm5AYQ5jYwkB_iukWWyPi7r9puBbzyuOYx4bOrP3pWKf5_nMl0hoElblLwX5AJohRgJ0k8pNji2EU9dhj3E4si-x1QjD-H6LpW4mCnMTDqD2cYwlAkr0hmmJGm9L9k3vFpJ3c" alt="Operator" class="w-full h-full object-cover">
                     </div>
-                    <div class="flex-grow-1 overflow-hidden">
-                        <div class="fw-bold text-white small text-truncate" style="letter-spacing: 0.05em;">{{ user.username }}</div>
-                        <div class="text-muted" style="font-size: 0.6rem; text-transform: uppercase; letter-spacing: 0.1em;">{{ user.get_role_display }}</div>
+                    <div class="flex flex-col relative z-10">
+                        <span class="text-[11px] font-bold text-ink">{{ user.username }}</span>
+                        <span class="text-[8px] text-ash uppercase">Analyst</span>
                     </div>
-                    <a href="{% url 'logout' %}" class="text-muted hover-danger ms-2" title="Logout">
-                        <i class="bi bi-power fs-5"></i>
+                    <a href="{% url 'logout' %}" class="ml-auto text-ash/40 hover:text-seal transition-colors relative z-10">
+                        <span class="material-symbols-outlined text-sm">logout</span>
                     </a>
                 </div>
             </div>
-        </nav>
+        </aside>
+        {% endif %}
 
-        <!-- Main Content for Authenticated Users -->
-        <div class="main-content">
-            <!-- Mobile Toggle -->
-            <div class="d-lg-none mb-3">
-                <button class="mobile-toggle" id="sidebarToggle">
-                    <i class="bi bi-list"></i>
-                </button>
-            </div>
-
-            <!-- Messages -->
+        <!-- Main Content Canvas -->
+        <main class="{% if user.is_authenticated %}saera-main{% else %}min-h-screen flex items-center justify-center p-6 w-full{% endif %}">
             {% if messages %}
-            <div class="row mb-4">
-                <div class="col-12">
-                    {% for message in messages %}
-                    <div class="alert alert-{{ message.tags }} alert-dismissible fade show bg-opacity-10 border-{{ message.tags }}"
-                        role="alert">
-                        <i class="bi bi-info-circle-fill me-2"></i> {{ message }}
-                        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+            <div class="mb-12 space-y-4 max-w-4xl">
+                {% for message in messages %}
+                <div class="parchment-card py-4 px-6 flex items-center justify-between border-l-4 {% if message.tags == 'error' %}border-l-seal text-seal{% else %}border-l-ink text-ink{% endif %}">
+                    <div class="flex items-center gap-4">
+                        <span class="material-symbols-outlined">{% if message.tags == 'error' %}warning{% else %}info{% endif %}</span>
+                        <span class="font-serif italic">{{ message }}</span>
                     </div>
-                    {% endfor %}
                 </div>
+                {% endfor %}
             </div>
             {% endif %}
-            {% else %}
-            <!-- Login Page Layout for Non-Authenticated Users -->
-            <main class="container-fluid p-0" style="min-height: 100vh;">
-                {% endif %}
 
-                <!-- Content Block (appears once, works for both authenticated and non-authenticated) -->
-                {% block content %}{% endblock %}
+            {% block content %}{% endblock %}
+        </main>
 
-                {% if user.is_authenticated %}
-                <!-- Footer for Authenticated Users -->
-                <footer class="footer text-center mt-5">
-                    <small class="text-muted">
-                        <i class="bi bi-shield-check text-success me-1"></i>
-                        <strong>Ethical Use Only:</strong> Authorized testing only.
-                    </small>
-                </footer>
-        </div>
+        {% if user.is_authenticated %}
+        <!-- FAB for Command -->
+        <a href="{% url 'scan_create' %}" class="saera-fab ink-glow">
+            <span class="material-symbols-outlined text-3xl">brush</span>
+        </a>
+        {% endif %}
     </div>
-    {% else %}
-    </main>
-    {% endif %}
 
-    <!-- Bootstrap JS -->
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
-    <!-- Chart.js -->
-    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
-    <!-- Custom JS -->
-    <script src="{% static 'js/main.js' %}"></script>
-    <script>
-        // Preloader Fade Out
-        window.addEventListener('load', () => {
-            const preloader = document.getElementById('preloader');
-            setTimeout(() => {
-                preloader.classList.add('fade-out');
-                document.body.classList.remove('loading');
-            }, 800); // Small delay for premium feel
-        });
-
-        // Sidebar Toggle for Mobile
-        const sidebarToggle = document.getElementById('sidebarToggle');
-        const sidebar = document.getElementById('sidebar');
-        if (sidebarToggle) {
-            sidebarToggle.addEventListener('click', () => {
-                sidebar.classList.toggle('active');
-            });
-        }
-    </script>
+    <!-- Scripts -->
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     {% block extra_js %}{% endblock %}
 </body>
-
 </html>

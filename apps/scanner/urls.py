@@ -11,4 +11,5 @@ urlpatterns = [
     path('<int:scan_id>/progress/', views.scan_progress, name='scan_progress'),
     path('api/progress/<int:scan_id>/', views.scan_progress_api, name='scan_progress_api'),
     path('vulnerabilities/', views.vulnerability_list, name='vulnerability_list'),
+    path('target/<int:target_id>/drift/', views.target_drift, name='target_drift'),
 ]

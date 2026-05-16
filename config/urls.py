@@ -14,6 +14,7 @@ urlpatterns = [
     path('scanner/', include('apps.scanner.urls')),
     path('reports/', include('apps.reports.urls')),
     path('knowledge/', include('apps.knowledge.urls')),
+    path('api/v1/', include('apps.api.urls')),
     
     # API Documentation (The Backend Limb)
     path('api/schema/', SpectacularAPIView.as_view(), name='schema'),

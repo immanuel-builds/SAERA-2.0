@@ -4,6 +4,7 @@ django-environ==0.11.2
 
 # Database
 psycopg2-binary==2.9.12
+mysqlclient==2.2.0
 Pillow==10.3.0
 
 # Security Scanning

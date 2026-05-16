@@ -1,93 +1,134 @@
 {% extends 'base.html' %}
 {% load static %}
 
-{% block title %}Initiate Pulse - SAERA{% endblock %}
+{% block title %}Tactical Coordinates - SAERA{% endblock %}
 
 {% block body_class %}ops-page{% endblock %}
 
 {% block content %}
-<div class="row justify-content-center">
-    <div class="col-lg-8">
-        <div class="cyber-card">
-            <div class="card-header border-bottom border-subtle">
-                <h4 class="mb-0"><i class="bi bi-radar me-2"></i> Observation Pulse</h4>
+<div class="max-w-4xl mx-auto space-y-16 animate-in fade-in zoom-in duration-1000">
+    <!-- Hero Section: The Invitation to Observe -->
+    <div class="text-center space-y-6">
+        <span class="text-[10px] font-bold text-ash uppercase tracking-[0.5em]">Sector Initialization</span>
+        <h1 class="text-5xl text-ink font-serif tracking-tighter">Tactical Coordinates</h1>
+        <p class="text-lg text-ink/60 font-serif italic max-w-2xl mx-auto leading-relaxed">
+            Initialize a high-precision digital pulse. Define your target parameters with the clarity of a brushstroke on fresh parchment.
+        </p>
+        <div class="w-16 h-[0.5px] bg-ink/10 mx-auto"></div>
+    </div>
+
+    <!-- Input Deck: The Scholarly Form -->
+    <div class="parchment-card p-12 space-y-12 relative overflow-hidden group">
+        <!-- Background Enso Ghost -->
+        <div class="absolute -top-12 -right-12 w-64 h-64 opacity-[0.03] group-hover:opacity-[0.08] transition-opacity pointer-events-none" style="background-image: url('{% static 'img/zen_enso.png' %}'); background-size: contain; background-repeat: no-repeat;"></div>
+
+        <form method="post" class="space-y-12 relative z-10">
+            {% csrf_token %}
+            
+            <!-- Target IP / Domain -->
+            <div class="space-y-6">
+                <div class="flex justify-between items-end border-b border-ink/5 pb-4">
+                    <label for="id_target" class="text-[10px] font-bold text-ash uppercase tracking-widest">Target Designation</label>
+                    <span class="text-[9px] font-serif italic text-ash/40">Ready for Inscription</span>
+                </div>
+                <div class="relative group">
+                    <input type="text" name="target" id="id_target" required
+                           class="w-full bg-transparent py-6 font-serif text-3xl text-ink placeholder:text-ash/20 focus:outline-none transition-all duration-700" 
+                           placeholder="e.g. 192.168.1.1 or internal.void">
+                    <div class="absolute bottom-0 left-0 h-[0.5px] w-0 bg-ink group-focus-within:w-full transition-all duration-1000"></div>
+                </div>
+                {% if form.target.errors %}
+                <p class="text-seal text-[9px] font-bold uppercase tracking-widest">{{ form.target.errors.0 }}</p>
+                {% endif %}
             </div>
-            <div class="card-body p-4">
-                <div class="alert mb-4 border-subtle" style="background: rgba(255,255,255,0.02);">
-                    <div class="d-flex">
-                        <i class="bi bi-exclamation-triangle-fill fs-4 me-3 text-warning"></i>
-                        <div>
-                            <strong class="text-white">Directive 01: Authorization</strong><br>
-                            <small class="text-muted">Observation must only be conducted on authorized vectors. All pulses are cryptographically signed and logged.</small>
-                        </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-12">
+                <!-- Intensity Dial: The Three States of Observation -->
+                <div class="space-y-6">
+                    <label class="text-[10px] font-bold text-ash uppercase tracking-widest block">Observation Intensity</label>
+                    <div class="flex p-1 border border-ink/5 bg-background/50">
+                        <label class="flex-1 text-center py-4 cursor-pointer transition-all has-[:checked]:bg-ink has-[:checked]:text-parchment text-ash text-[10px] font-bold uppercase tracking-widest">
+                            <input type="radio" name="scan_type" value="quick" class="hidden">
+                            Glimpse
+                        </label>
+                        <label class="flex-1 text-center py-4 cursor-pointer transition-all has-[:checked]:bg-ink has-[:checked]:text-parchment text-ash text-[10px] font-bold uppercase tracking-widest">
+                            <input type="radio" name="scan_type" value="full" checked class="hidden">
+                            Standard
+                        </label>
+                        <label class="flex-1 text-center py-4 cursor-pointer transition-all has-[:checked]:bg-ink has-[:checked]:text-parchment text-ash text-[10px] font-bold uppercase tracking-widest">
+                            <input type="radio" name="scan_type" value="deep" class="hidden">
+                            Meditate
+                        </label>
                     </div>
                 </div>
 
-                <form method="post" class="needs-validation" novalidate>
-                    {% csrf_token %}
-
-                    <div class="mb-4">
-                        <label for="id_target" class="form-label">Vector Coordinates (IP / Domain)</label>
-                        <div class="input-group">
-                            <span class="input-group-text">
-                                <i class="bi bi-geo-alt"></i>
-                            </span>
-                            {{ form.target }}
-                        </div>
-                    </div>
-
-                    <div class="row g-4 mb-4">
-                        <div class="col-md-6">
-                            <label for="id_scan_type" class="form-label">Pulse Intensity</label>
-                            {{ form.scan_type }}
-                        </div>
-                        <div class="col-md-6 d-flex flex-column justify-content-end">
-                            <div class="form-check form-switch mb-2">
-                                {{ form.enable_service_detection }}
-                                <label class="form-check-label text-secondary" for="id_enable_service_detection">
-                                    Service Extraction
-                                </label>
+                <!-- Toggles Deck: Refined Protocols -->
+                <div class="space-y-6">
+                    <label class="text-[10px] font-bold text-ash uppercase tracking-widest block">Scholarly Modules</label>
+                    <div class="space-y-4">
+                        <label class="flex items-center justify-between p-5 border border-ink/5 hover:border-ink/20 transition-all cursor-pointer group">
+                            <div class="flex flex-col">
+                                <span class="text-sm font-serif text-ink italic">Fingerprint Services</span>
+                                <span class="text-[9px] font-mono text-ash/40 uppercase">Identify the subtle signatures</span>
                             </div>
-                            <div class="form-check form-switch">
-                                {{ form.enable_vuln_detection }}
-                                <label class="form-check-label text-secondary" for="id_enable_vuln_detection">
-                                    Threat Correlation
-                                </label>
+                            <input type="checkbox" name="enable_service_detection" checked class="accent-ink w-4 h-4">
+                        </label>
+                        <label class="flex items-center justify-between p-5 border border-ink/5 hover:border-ink/20 transition-all cursor-pointer group">
+                            <div class="flex flex-col">
+                                <span class="text-sm font-serif text-ink italic">Correlate Threats</span>
+                                <span class="text-[9px] font-mono text-ash/40 uppercase">Cross-reference with archives</span>
                             </div>
-                        </div>
+                            <input type="checkbox" name="enable_script_scan" class="accent-ink w-4 h-4">
+                        </label>
                     </div>
+                </div>
+            </div>
 
-                    <div class="d-flex gap-3 pt-3">
-                        <button type="submit" class="btn btn-primary flex-grow-1">
-                            <i class="bi bi-lightning-charge me-2"></i> Execute Sweep
-                        </button>
-                        <a href="{% url 'scan_list' %}" class="btn btn-outline-cyan">
-                            Cease
-                        </a>
-                    </div>
-                </form>
+            <!-- Execute Action: The Final Seal -->
+            <div class="pt-12 flex flex-col items-center gap-8">
+                <button type="submit" class="saera-button px-16 py-8 group">
+                    <span class="flex items-center gap-6">
+                        <span class="material-symbols-outlined text-2xl group-hover:rotate-180 transition-transform duration-1000">filter_vintage</span>
+                        <span class="text-xs font-bold uppercase tracking-[0.3em]">Begin the Sweep</span>
+                    </span>
+                </button>
+                <div class="flex items-center gap-3">
+                    <span class="w-1 h-1 rounded-full bg-bamboo/40"></span>
+                    <p class="text-[9px] text-ash/60 font-serif italic uppercase tracking-widest">
+                        Your observation will be recorded in the persistent chronicle.
+                    </p>
+                </div>
+            </div>
+        </form>
+    </div>
+
+    <!-- System Status Seals -->
+    <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
+        <div class="parchment-card p-8 flex items-center gap-6 group">
+            <div class="size-12 border border-ink/5 flex items-center justify-center group-hover:border-ink/20 transition-colors">
+                <span class="material-symbols-outlined text-ash/40">waves</span>
+            </div>
+            <div>
+                <div class="text-[9px] font-bold text-ash uppercase tracking-widest">Node Resonance</div>
+                <div class="text-xl text-ink font-serif italic">99.98% Stable</div>
             </div>
         </div>
-
-        <!-- Pulse Profiles -->
-        <div class="row g-4 mt-2">
-            <div class="col-md-4">
-                <div class="cyber-card p-3 h-100">
-                    <div class="fw-bold mb-2 small text-uppercase tracking-wider" style="color: var(--accent-color);">Quick</div>
-                    <p class="text-muted small mb-0">High velocity sweep of primary ports. Minimal visibility footprint.</p>
-                </div>
+        <div class="parchment-card p-8 flex items-center gap-6 group">
+            <div class="size-12 border border-ink/5 flex items-center justify-center group-hover:border-ink/20 transition-colors">
+                <span class="material-symbols-outlined text-ash/40">hourglass_empty</span>
             </div>
-            <div class="col-md-4">
-                <div class="cyber-card p-3 h-100">
-                    <div class="fw-bold mb-2 small text-uppercase tracking-wider" style="color: var(--accent-color);">Standard</div>
-                    <p class="text-muted small mb-0">Balanced extraction. Deep service fingerprinting across major vectors.</p>
-                </div>
+            <div>
+                <div class="text-[9px] font-bold text-ash uppercase tracking-widest">Pulse Latency</div>
+                <div class="text-xl text-ink font-serif italic">12ms Inhale</div>
             </div>
-            <div class="col-md-4">
-                <div class="cyber-card p-3 h-100">
-                    <div class="fw-bold mb-2 small text-uppercase tracking-wider" style="color: var(--accent-color);">Deep</div>
-                    <p class="text-muted small mb-0">Exhaustive audit. Full coordinate sweep. Maximum intelligence yield.</p>
-                </div>
+        </div>
+        <div class="parchment-card p-8 flex items-center gap-6 group">
+            <div class="size-12 border border-ink/5 flex items-center justify-center group-hover:border-ink/20 transition-colors">
+                <span class="material-symbols-outlined text-ash/40">fingerprint</span>
+            </div>
+            <div>
+                <div class="text-[9px] font-bold text-ash uppercase tracking-widest">Active Analytes</div>
+                <div class="text-xl text-ink font-serif italic">02 Observing</div>
             </div>
         </div>
     </div>

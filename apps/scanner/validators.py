@@ -75,19 +75,19 @@ def validate_scan_target(target):
     if not (is_ip or is_network or is_domain):
         raise ValidationError("Invalid target format. Enter a valid IP, Domain, or CIDR range.")
 
-    # 6. Blacklist check (Loopback, Private Broadcast, Multicast)
-    blacklist = ['127.0.0.1', 'localhost', '0.0.0.0', '255.255.255.255']
+    # 6. Blacklist check (Private Broadcast, Multicast)
+    blacklist = ['0.0.0.0', '255.255.255.255']
     if target.lower() in blacklist:
         raise ValidationError(f"Access Denied: Target {target} is a restricted internal address.")
         
     if is_ip:
         ip = ipaddress.ip_address(target)
-        if ip.is_loopback or ip.is_multicast or ip.is_unspecified:
+        if ip.is_multicast or ip.is_unspecified:
             raise ValidationError("Access Denied: Target is a restricted internal or loopback address.")
             
     if is_network:
         net = ipaddress.ip_network(target, strict=False)
-        if net.is_loopback or net.is_multicast:
+        if net.is_multicast:
             raise ValidationError("Access Denied: Network range includes restricted addresses.")
 
     return True
