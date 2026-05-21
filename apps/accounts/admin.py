@@ -11,7 +11,7 @@ class UserAdmin(BaseUserAdmin):
     
     fieldsets = BaseUserAdmin.fieldsets + (
         ('Additional Info', {
-            'fields': ('role', 'organization', 'department', 'can_initiate_scans', 'can_export_reports')
+            'fields': ('role', 'organization', 'department', 'can_initiate_scans')
         }),
     )
 

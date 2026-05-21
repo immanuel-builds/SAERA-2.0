@@ -1,0 +1,111 @@
+/* landing.css - Hybrid Atmospheric Layers for SAERA */
+
+html {
+    scroll-behavior: smooth;
+    background-color: #F4F0EB; /* Parchment */
+}
+
+/* Atmospheric Scrollbar */
+::-webkit-scrollbar {
+    width: 6px;
+}
+::-webkit-scrollbar-track {
+    background: #1A1C23; 
+}
+::-webkit-scrollbar-thumb {
+    background: rgba(140, 122, 107, 0.5); /* Tea Brown */
+    border-radius: 4px;
+}
+::-webkit-scrollbar-thumb:hover {
+    background: rgba(140, 122, 107, 0.8); 
+}
+
+/* LIGHT THEME (Parchment) Overlays */
+.light-noise-overlay {
+    background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)' opacity='1'/%3E%3C/svg%3E");
+    opacity: 0.1;
+    mix-blend-mode: multiply;
+}
+
+@keyframes lightDustDrift {
+    0% { transform: translateY(0) translateX(0); opacity: 0.3; }
+    33% { opacity: 0.6; }
+    66% { opacity: 0.4; }
+    100% { transform: translateY(-150px) translateX(50px); opacity: 0.3; }
+}
+.light-dust-overlay {
+    background-image: 
+        radial-gradient(rgba(44, 44, 44, 0.1) 1px, transparent 1px), 
+        radial-gradient(rgba(44, 44, 44, 0.05) 1px, transparent 1px);
+    background-size: 120px 120px, 200px 200px;
+    background-position: 0 0, 40px 60px;
+    animation: lightDustDrift 90s linear infinite;
+}
+
+/* DARK THEME (Midnight) Overlays */
+.dark-noise-overlay {
+    background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)' opacity='1'/%3E%3C/svg%3E");
+    opacity: 0.04;
+    mix-blend-mode: color-dodge;
+}
+
+@keyframes darkDustDrift {
+    0% { transform: translateY(0) translateX(0); opacity: 0.1; }
+    33% { opacity: 0.4; }
+    66% { opacity: 0.2; }
+    100% { transform: translateY(-150px) translateX(50px); opacity: 0.1; }
+}
+.dark-dust-overlay {
+    background-image: 
+        radial-gradient(rgba(244, 240, 235, 0.15) 1px, transparent 1px), 
+        radial-gradient(rgba(244, 240, 235, 0.1) 1px, transparent 1px);
+    background-size: 120px 120px, 200px 200px;
+    background-position: 0 0, 40px 60px;
+    animation: darkDustDrift 90s linear infinite;
+}
+
+.ambient-lantern {
+    background: radial-gradient(circle at 50% 20%, rgba(140, 122, 107, 0.12) 0%, rgba(26, 28, 35, 0) 60%);
+}
+
+/* Scroll Revelation (Mask Reveal upward) */
+.mask-reveal {
+    opacity: 0;
+    transform: translateY(30px);
+    transition: opacity 2s cubic-bezier(0.16, 1, 0.3, 1), transform 2s cubic-bezier(0.16, 1, 0.3, 1);
+}
+.mask-reveal.in-view {
+    opacity: 1;
+    transform: translateY(0);
+}
+
+/* 3D Perspective for Archival Cards */
+.perspective-1000 {
+    perspective: 1000px;
+}
+.tilt-card {
+    transition: transform 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94), box-shadow 0.4s ease, border-color 0.4s ease, background-color 0.4s ease;
+    transform-style: preserve-3d;
+}
+.tilt-card:hover {
+    border-color: rgba(44, 44, 44, 0.15);
+    background-color: rgba(255, 255, 255, 0.8);
+    box-shadow: 0 20px 40px rgba(0,0,0,0.08), 0 0 30px rgba(140, 122, 107, 0.1);
+}
+
+/* Reduced Motion Support */
+@media (prefers-reduced-motion: reduce) {
+    .light-dust-overlay, .dark-dust-overlay, .entranceOverlay, .ambient-lantern {
+        animation: none;
+        transition: none;
+    }
+    .mask-reveal {
+        transition: opacity 0.5s ease;
+        transform: none;
+        opacity: 1;
+    }
+    .tilt-card {
+        transition: none;
+        transform: none !important;
+    }
+}

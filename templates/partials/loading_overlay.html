@@ -1,0 +1,18 @@
+{% comment %}Loading overlay used across the app for long‑running actions {% endcomment %}
+<div id="loading-overlay" class="fixed inset-0 z-[2000] flex flex-col items-center justify-center bg-background/90 backdrop-blur-sm hidden">
+    <div class="flex flex-col items-center gap-6 max-w-lg w-full px-8">
+        <!-- Simple rotating symbol -->
+        <div class="w-16 h-16 border-4 border-ink/30 rounded-full flex items-center justify-center animate-spin">
+            <svg class="w-8 h-8 text-ink" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <circle cx="12" cy="12" r="10"/>
+                <path d="M12 2 a10 10 0 0 1 10 10"/>
+            </svg>
+        </div>
+        <!-- Quote – will be filled by JS -->
+        <p id="loading-quote" class="text-center text-ink italic text-lg max-w-full"></p>
+        <!-- Progress bar – cosmetic only, animates until page change -->
+        <div class="w-full h-px bg-ink/10 relative overflow-hidden rounded-full">
+            <div id="loading-bar" class="absolute left-0 top-0 h-full bg-ink/60" style="width:0%"></div>
+        </div>
+    </div>
+</div>

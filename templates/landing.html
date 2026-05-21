@@ -1,0 +1,237 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SAERA – Observatory Gate</title>
+    <meta name="description" content="SAERA – Midnight Observatory for Network Telemetry.">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Caveat:wght@500;600;700&family=Cormorant+Garamond:ital,wght@0,400;0,500;0,600;1,400;1,500&family=Inter:wght@300;400;500;600&family=JetBrains+Mono:wght@300;400;500&family=Zen+Old+Mincho:wght@500;700;900&display=swap" rel="stylesheet">
+    
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        parchment: '#F4F0EB',
+                        ink: '#2C2C2C',
+                        'seal-red': '#8B2626',
+                        bamboo: '#5C6B52',
+                        ash: '#7A7A7A',
+                        'tea-brown': '#8C7A6B',
+                        midnight: '#1A1C23',
+                    },
+                    fontFamily: {
+                        zen: ['"Zen Old Mincho"', 'serif'],
+                        cormorant: ['"Cormorant Garamond"', 'serif'],
+                        inter: ['"Inter"', 'sans-serif'],
+                        mono: ['"JetBrains Mono"', 'monospace'],
+                        archivist: ['"Caveat"', 'cursive'],
+                    }
+                }
+            }
+        }
+    </script>
+    
+    <link rel="stylesheet" href="{% static 'css/landing.css' %}">
+</head>
+<body class="bg-parchment text-ink font-inter antialiased overflow-x-hidden selection:bg-seal-red selection:text-white">
+
+    <!-- Z:100 Ceremonial Entrance -->
+    <div id="entranceOverlay" class="fixed inset-0 z-[100] bg-parchment flex items-center justify-center transition-opacity duration-[4000ms] pointer-events-none">
+        <div id="entranceSeal" class="opacity-0 w-32 h-32 border border-seal-red/30 rounded-full flex items-center justify-center transition-opacity duration-[2000ms] relative">
+            <div class="w-24 h-24 border border-seal-red/20 rounded-full absolute animate-[spin_60s_linear_infinite]"></div>
+            <div class="w-16 h-16 border border-seal-red/20 rounded-full absolute animate-[spin_40s_linear_infinite_reverse]"></div>
+            <div class="w-1.5 h-1.5 bg-seal-red/80 rounded-full shadow-[0_0_10px_rgba(139,38,38,0.4)]"></div>
+        </div>
+    </div>
+
+    <!-- Navbar -->
+    <nav id="mainNav" class="fixed top-0 w-full p-8 flex justify-between items-center z-50 transition-all duration-1000 border-b border-transparent mix-blend-difference text-parchment">
+        <div class="flex items-center gap-6 group">
+            <div class="w-2 h-2 rounded-full bg-bamboo animate-pulse"></div>
+            <div class="font-zen text-2xl font-bold tracking-[0.2em] opacity-90 group-hover:opacity-100 transition-opacity duration-1000">SAERA</div>
+        </div>
+        <div>
+            <a href="{% url 'login' %}" class="font-mono text-xs font-medium uppercase tracking-[0.3em] opacity-70 hover:opacity-100 transition-opacity duration-1000">Enter</a>
+        </div>
+    </nav>
+
+    <!-- SECTION 1: HERO (Warm Parchment) -->
+    <header class="relative min-h-[110vh] flex flex-col items-center justify-center px-6 text-center overflow-hidden bg-parchment">
+        <!-- Z:0 Distant Field (Astronomy Network) -->
+        <canvas id="deepNetworkCanvas" class="absolute inset-0 pointer-events-auto z-0 w-full h-full opacity-50"></canvas>
+        
+        <!-- Light Dust Overlay -->
+        <div class="absolute inset-0 pointer-events-none z-10 light-dust-overlay opacity-50"></div>
+        
+        <!-- Light Noise Overlay -->
+        <div class="absolute inset-0 pointer-events-none z-10 light-noise-overlay"></div>
+
+        <!-- Centerpiece Astrolabe Rings -->
+        <div class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[800px] h-[800px] pointer-events-none opacity-20 z-10">
+            <div class="absolute inset-0 border border-ink/20 rounded-full animate-[spin_120s_linear_infinite]"></div>
+            <div class="absolute inset-8 border border-ink/10 rounded-full animate-[spin_180s_linear_infinite_reverse]"></div>
+            <div class="absolute inset-16 border-t border-b border-tea-brown/30 rounded-full animate-[spin_90s_linear_infinite]"></div>
+        </div>
+
+        <div class="relative z-20 flex flex-col items-center">
+            <p class="font-mono font-medium uppercase tracking-[0.4em] text-ash text-xs mb-12 mask-reveal">Signal Astrolabe Online</p>
+            <h1 class="font-zen font-bold text-6xl md:text-8xl lg:text-9xl leading-[1.1] mb-16 max-w-6xl text-ink mask-reveal delay-200">
+                Security Through Understanding.
+            </h1>
+            <div class="w-px h-24 bg-gradient-to-b from-transparent via-ink/20 to-transparent mb-16 mask-reveal delay-400"></div>
+            <div class="flex gap-10 mask-reveal delay-500">
+                <a href="{% url 'login' %}" class="font-inter text-sm tracking-widest uppercase font-semibold px-12 py-4 border border-ink/20 text-ink hover:bg-ink/5 transition-all duration-1000 backdrop-blur-sm">
+                    Enter the Archive
+                </a>
+            </div>
+        </div>
+    </header>
+
+
+    <!-- SECTION 2: THE PHILOSOPHY (Deep Midnight) -->
+    <section id="philosophy" class="relative py-64 px-6 bg-midnight text-parchment overflow-hidden">
+        <!-- Dark Atmospheric Haze -->
+        <div class="absolute inset-0 pointer-events-none z-0 dark-dust-overlay opacity-30"></div>
+        <div class="absolute inset-0 pointer-events-none z-0 dark-noise-overlay"></div>
+        <div class="absolute inset-0 pointer-events-none z-0 ambient-lantern"></div>
+
+        <div class="max-w-6xl mx-auto grid grid-cols-1 md:grid-cols-2 gap-32 items-center relative z-10">
+            <div class="relative">
+                <h2 class="font-cormorant font-semibold text-5xl md:text-6xl italic text-parchment/90 mb-12 mask-reveal">The Observer's Mind</h2>
+                <p class="font-inter font-medium text-2xl leading-[1.8] text-parchment/60 mb-6 mask-reveal delay-200">
+                    Cybersecurity is not chaos. It is observation, discipline, patience, and understanding. 
+                    We do not chase the noise; we observe the patterns slowly, over time.
+                </p>
+            </div>
+            <div class="relative pt-24 md:pt-0">
+                <!-- The Archivist's Trace -->
+                <div class="absolute -right-16 -top-20 font-archivist font-bold text-5xl text-tea-brown/90 rotate-[-3deg] mask-reveal delay-300">
+                    Patience reveals the root.
+                </div>
+                <div class="border-l border-parchment/20 pl-12 py-6 font-cormorant font-medium text-3xl text-parchment/40 italic bg-white/5 backdrop-blur-sm mask-reveal delay-400">
+                    "A recurring vulnerability is like a weed. Pull the leaf, and it returns. Find the root, and it fades."
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- SECTION 3: THE OBSERVATORY PILLARS (Warm Parchment) -->
+    <section class="relative py-64 px-6 bg-parchment text-ink overflow-hidden">
+        <div class="absolute inset-0 pointer-events-none z-0 light-noise-overlay"></div>
+        
+        <div class="max-w-7xl mx-auto relative z-10">
+            <h2 class="font-cormorant font-semibold text-5xl text-center mb-40 text-ink/90 mask-reveal">Disciplines of Observation</h2>
+            
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-16 perspective-1000">
+                <article class="tilt-card flex flex-col items-center text-center p-12 bg-white/40 border border-ink/5 shadow-sm rounded-sm backdrop-blur-sm mask-reveal">
+                    <div class="w-2 h-2 rounded-full bg-ink/20 mb-12"></div>
+                    <h3 class="font-zen font-bold text-3xl mb-6 text-ink">Risk Tides</h3>
+                    <p class="font-inter font-medium text-ash text-lg leading-[1.8]">
+                        Observe how exposure swells and recedes across your infrastructure over weeks and months.
+                    </p>
+                </article>
+                <article class="tilt-card flex flex-col items-center text-center p-12 bg-white/40 border border-ink/5 shadow-sm rounded-sm backdrop-blur-sm mask-reveal delay-200">
+                    <div class="w-2 h-2 rounded-full bg-ink/20 mb-12"></div>
+                    <h3 class="font-zen font-bold text-3xl mb-6 text-ink">Lifecycle Ledger</h3>
+                    <p class="font-inter font-medium text-ash text-lg leading-[1.8]">
+                        Trace a vulnerability from its first appearance to its final remediation. Know what truly fades.
+                    </p>
+                </article>
+                <article class="tilt-card flex flex-col items-center text-center p-12 bg-white/40 border border-ink/5 shadow-sm rounded-sm backdrop-blur-sm mask-reveal delay-400">
+                    <div class="w-2 h-2 rounded-full bg-ink/20 mb-12"></div>
+                    <h3 class="font-zen font-bold text-3xl mb-6 text-ink">Doctrinal Archive</h3>
+                    <p class="font-inter font-medium text-ash text-lg leading-[1.8]">
+                        Remediation knowledge base, decoupled from live findings. Written with academic patience.
+                    </p>
+                </article>
+            </div>
+        </div>
+    </section>
+
+    <!-- SECTION 4: TEMPORAL REPLAY (Warm Parchment) -->
+    <!-- Tall container to allow scrubbing -->
+    <section class="h-[400vh] relative bg-parchment" id="temporalReplaySection">
+        <!-- Sticky inner container that holds the screen while scrolling -->
+        <div class="sticky top-0 h-screen w-full flex items-center justify-center overflow-hidden bg-parchment/80 backdrop-blur-xl">
+            
+            <div class="absolute inset-0 pointer-events-none z-0 light-noise-overlay opacity-50"></div>
+            
+            <canvas id="temporalCanvas" class="absolute inset-0 w-full h-full opacity-70"></canvas>
+            
+            <div class="relative z-10 text-center pointer-events-none">
+                <h2 class="font-cormorant font-semibold text-5xl md:text-7xl mb-8 text-ink/90">Memory of the Network</h2>
+                <p class="font-mono text-sm tracking-[0.3em] text-seal-red/80 uppercase">Scroll to scrub historical sweeps</p>
+                
+                <div class="mt-16 text-6xl font-zen text-ink/10" id="temporalYear">T-0</div>
+            </div>
+
+            <!-- Floating Archivist Trace -->
+            <div class="absolute bottom-32 right-32 font-archivist font-bold text-4xl text-ink/30 rotate-[-5deg]">
+                Time reveals the true shape.
+            </div>
+        </div>
+    </section>
+
+    <!-- SECTION 5: THE HUMAN ELEMENT (Deep Midnight) -->
+    <section class="relative py-64 px-6 bg-midnight text-parchment overflow-hidden">
+        <div class="absolute inset-0 pointer-events-none z-0 dark-dust-overlay opacity-20"></div>
+        <div class="absolute inset-0 pointer-events-none z-0 dark-noise-overlay"></div>
+
+        <div class="max-w-5xl mx-auto text-center relative z-10">
+            <h2 class="font-zen font-bold text-5xl md:text-7xl leading-tight mb-16 text-parchment mask-reveal">
+                The wise observer does not seek conflict.<br>
+                <span class="text-parchment/40">They seek clarity.</span>
+            </h2>
+            <p class="font-inter font-medium text-2xl text-parchment/40 max-w-3xl mx-auto leading-[1.8] mask-reveal delay-200">
+                Security work is ultimately about responsibility, patience, and discipline. It is about protecting systems and understanding consequences without giving in to the noise.
+            </p>
+        </div>
+    </section>
+
+    <!-- SECTION 6 & 7: TECHNICAL FOUNDATIONS & FOOTER (Deep Midnight) -->
+    <footer class="relative min-h-screen bg-midnight text-parchment flex flex-col items-center justify-center text-center px-6 overflow-hidden pt-32">
+        <div class="absolute inset-0 pointer-events-none z-0 dark-noise-overlay opacity-50"></div>
+        <div class="absolute inset-0 pointer-events-none z-0 ambient-lantern" style="top: auto; bottom: 0; background: radial-gradient(circle at 50% 100%, rgba(140, 122, 107, 0.15) 0%, rgba(26, 28, 35, 0) 60%);"></div>
+
+        <div class="relative z-10 w-full max-w-4xl mx-auto">
+            <h2 class="font-cormorant font-medium text-3xl italic text-ash/50 mb-20 mask-reveal">Instruments of the Observatory</h2>
+            <ul class="flex flex-wrap justify-center gap-16 font-mono font-medium text-sm tracking-[0.2em] text-parchment/20 mb-48">
+                <li class="mask-reveal delay-[100ms]">DJANGO</li>
+                <li class="mask-reveal delay-[200ms]">MYSQL</li>
+                <li class="mask-reveal delay-[300ms]">NMAP</li>
+                <li class="mask-reveal delay-[400ms]">CHART.JS</li>
+                <li class="mask-reveal delay-[500ms]">VIS.JS</li>
+                <li class="mask-reveal delay-[600ms]">DRF</li>
+            </ul>
+
+            <div class="w-px h-32 bg-gradient-to-b from-transparent via-parchment/20 to-transparent mb-24 mask-reveal mx-auto"></div>
+            
+            <p class="font-cormorant font-medium text-4xl md:text-5xl italic text-parchment/70 mb-20 leading-[1.5] mask-reveal delay-200">
+                Every network leaves traces. The question is whether anyone is patient enough to understand them.
+            </p>
+            
+            <a href="{% url 'login' %}" class="inline-block font-zen font-bold text-2xl px-16 py-6 border border-parchment/20 bg-white/5 text-parchment hover:bg-white/10 hover:border-parchment/40 transition-all duration-1000 backdrop-blur-md mask-reveal delay-400">
+                Enter SAERA
+            </a>
+            
+            <div class="mt-32 h-32 relative">
+                <!-- The Archivist's Final Note -->
+                <div class="absolute inset-x-0 bottom-16 font-archivist font-bold text-3xl text-ash/30 rotate-[2deg] mask-reveal delay-600">
+                    Observation continues...
+                </div>
+            </div>
+
+            <div class="absolute bottom-8 left-0 text-center w-full font-mono font-medium text-xs text-ash/20 tracking-widest uppercase">
+                © 2026 SAERA Observatory.
+            </div>
+        </div>
+    </footer>
+
+    <script src="{% static 'js/landing.js' %}"></script>
+</body>
+</html>

@@ -1,0 +1,397 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Developer Backdoor — SAERA{% endblock %}
+
+{% block content %}
+<div class="space-y-16 animate-fade-in">
+
+    <!-- Header -->
+    <div class="flex flex-col gap-3 border-b border-ink/5 pb-10">
+        <div class="flex items-center gap-4">
+            <span class="material-symbols-outlined text-seal text-2xl" style="font-variation-settings:'wght' 200;">terminal</span>
+            <span class="precise-data text-[9px] text-seal uppercase tracking-widest px-2 py-0.5 border border-seal/30 bg-seal/5">Restricted Access</span>
+        </div>
+        <h1 class="text-5xl text-ink font-serif font-medium tracking-tight">Developer <span class="text-seal italic">Backdoor</span></h1>
+        <p class="font-serif italic text-ash text-lg">Direct system inspection and control interface. All actions are audit-logged.</p>
+        <div class="flex gap-4 pt-2">
+            <a href="{% url 'admin_console' %}" class="precise-data text-[9px] hover:text-ink transition-colors opacity-50 flex items-center gap-1">
+                <span class="material-symbols-outlined text-sm">arrow_back</span> Admin Console
+            </a>
+            <a href="/admin/" target="_blank" class="precise-data text-[9px] hover:text-seal transition-colors opacity-50 flex items-center gap-1">
+                <span class="material-symbols-outlined text-sm">open_in_new</span> Django Admin Panel
+            </a>
+            <a href="/api/schema/swagger-ui/" target="_blank" class="precise-data text-[9px] hover:text-seal transition-colors opacity-50 flex items-center gap-1">
+                <span class="material-symbols-outlined text-sm">open_in_new</span> Swagger API Docs
+            </a>
+        </div>
+    </div>
+
+    <!-- System Info Row -->
+    <div class="grid grid-cols-2 md:grid-cols-4 gap-6">
+        <div class="parchment-card p-6 flex flex-col gap-3">
+            <span class="precise-data text-[9px] text-ash uppercase tracking-widest">Python</span>
+            <span class="font-mono text-sm text-ink">{{ python_version }}</span>
+            <span class="precise-data text-[8px] text-ash/40 uppercase">Runtime</span>
+        </div>
+        <div class="parchment-card p-6 flex flex-col gap-3">
+            <span class="precise-data text-[9px] text-ash uppercase tracking-widest">Django</span>
+            <span class="font-mono text-sm text-ink">{{ django_version }}</span>
+            <span class="precise-data text-[8px] text-ash/40 uppercase">Framework</span>
+        </div>
+        <div class="parchment-card p-6 flex flex-col gap-3">
+            <span class="precise-data text-[9px] text-ash uppercase tracking-widest">Database</span>
+            <span class="font-mono text-sm text-ink">{{ db_stats.name }}</span>
+            <span class="precise-data text-[8px] text-ash/40 uppercase">MySQL {{ db_stats.version|slice:":6" }}</span>
+        </div>
+        <div class="parchment-card p-6 flex flex-col gap-3">
+            <span class="precise-data text-[9px] text-ash uppercase tracking-widest">Operator</span>
+            <span class="font-mono text-sm text-ink">{{ request.user.username }}</span>
+            <span class="precise-data text-[8px] {% if request.user.is_superuser %}text-seal{% else %}text-bamboo{% endif %} uppercase">{{ request.user.role|upper }}</span>
+        </div>
+    </div>
+
+    <!-- DB Table Counts -->
+    <div class="parchment-card p-0 overflow-hidden">
+        <div class="px-10 py-6 border-b border-ink/5 flex justify-between items-center">
+            <h3 class="font-serif text-xl text-ink">Database Registry</h3>
+            <span class="precise-data text-[9px] text-ash uppercase tracking-widest">Live Row Counts</span>
+        </div>
+        <div class="overflow-x-auto">
+            <table class="w-full text-left">
+                <thead class="bg-ash/5">
+                    <tr>
+                        <th class="px-10 py-4 text-[9px] font-bold text-ash uppercase tracking-wider">Table</th>
+                        <th class="px-10 py-4 text-[9px] font-bold text-ash uppercase tracking-wider">Records</th>
+                        <th class="px-10 py-4 text-[9px] font-bold text-ash uppercase tracking-wider">Model</th>
+                    </tr>
+                </thead>
+                <tbody class="divide-y divide-ink/5 font-mono text-xs">
+                    <tr class="hover:bg-ash/5 transition-all">
+                        <td class="px-10 py-4 font-medium text-ink">accounts_user</td>
+                        <td class="px-10 py-4 text-seal font-bold">{{ db_stats.users }}</td>
+                        <td class="px-10 py-4 text-ash/60">accounts.User</td>
+                    </tr>
+                    <tr class="hover:bg-ash/5 transition-all">
+                        <td class="px-10 py-4 font-medium text-ink">accounts_auditlog</td>
+                        <td class="px-10 py-4">{{ db_stats.audit_logs }}</td>
+                        <td class="px-10 py-4 text-ash/60">accounts.AuditLog</td>
+                    </tr>
+                    <tr class="hover:bg-ash/5 transition-all">
+                        <td class="px-10 py-4 font-medium text-ink">scanner_scantarget</td>
+                        <td class="px-10 py-4">{{ db_stats.scan_targets }}</td>
+                        <td class="px-10 py-4 text-ash/60">scanner.ScanTarget</td>
+                    </tr>
+                    <tr class="hover:bg-ash/5 transition-all">
+                        <td class="px-10 py-4 font-medium text-ink">scanner_scanconfiguration</td>
+                        <td class="px-10 py-4">{{ db_stats.scan_configs }}</td>
+                        <td class="px-10 py-4 text-ash/60">scanner.ScanConfiguration</td>
+                    </tr>
+                    <tr class="hover:bg-ash/5 transition-all">
+                        <td class="px-10 py-4 font-medium text-ink">scanner_scanjob</td>
+                        <td class="px-10 py-4 text-seal font-bold">{{ db_stats.scan_jobs }}</td>
+                        <td class="px-10 py-4 text-ash/60">scanner.ScanJob</td>
+                    </tr>
+                    <tr class="hover:bg-ash/5 transition-all">
+                        <td class="px-10 py-4 font-medium text-ink">scanner_vulnerability</td>
+                        <td class="px-10 py-4 text-seal font-bold">{{ db_stats.vulnerabilities }}</td>
+                        <td class="px-10 py-4 text-ash/60">scanner.Vulnerability</td>
+                    </tr>
+                    <tr class="hover:bg-ash/5 transition-all">
+                        <td class="px-10 py-4 font-medium text-ink">scanner_portscanresult</td>
+                        <td class="px-10 py-4">{{ db_stats.port_results }}</td>
+                        <td class="px-10 py-4 text-ash/60">scanner.PortScanResult</td>
+                    </tr>
+                    <tr class="hover:bg-ash/5 transition-all">
+                        <td class="px-10 py-4 font-medium text-ink">scanner_scanlog</td>
+                        <td class="px-10 py-4">{{ db_stats.scan_logs }}</td>
+                        <td class="px-10 py-4 text-ash/60">scanner.ScanLog</td>
+                    </tr>
+                    <tr class="hover:bg-ash/5 transition-all">
+                        <td class="px-10 py-4 font-medium text-ink">scanner_observatoryhealthlog</td>
+                        <td class="px-10 py-4">{{ db_stats.health_logs }}</td>
+                        <td class="px-10 py-4 text-ash/60">scanner.ObservatoryHealthLog</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <!-- Two-Column: Failed Scans + Pending Scans -->
+    <div class="grid grid-cols-1 lg:grid-cols-2 gap-12">
+
+        <!-- Failed Scans -->
+        <div class="parchment-card p-0 overflow-hidden">
+            <div class="px-8 py-5 border-b border-ink/5 flex justify-between items-center">
+                <div class="flex items-center gap-3">
+                    <span class="w-2 h-2 rounded-full bg-seal"></span>
+                    <h3 class="font-serif text-base text-ink">Failed Scans</h3>
+                </div>
+                <span class="precise-data text-[9px] text-seal">{{ failed_scans|length }} records</span>
+            </div>
+            <div class="overflow-x-auto">
+                <table class="w-full text-left">
+                    <thead class="bg-seal/5">
+                        <tr>
+                            <th class="px-6 py-3 text-[9px] font-bold text-ash uppercase tracking-wider">ID</th>
+                            <th class="px-6 py-3 text-[9px] font-bold text-ash uppercase tracking-wider">Target</th>
+                            <th class="px-6 py-3 text-[9px] font-bold text-ash uppercase tracking-wider">User</th>
+                            <th class="px-6 py-3 text-[9px] font-bold text-ash uppercase tracking-wider">Force</th>
+                        </tr>
+                    </thead>
+                    <tbody class="divide-y divide-ink/5 text-xs font-mono">
+                        {% for scan in failed_scans %}
+                        <tr class="hover:bg-ash/5 transition-all">
+                            <td class="px-6 py-3 text-seal font-bold">#{{ scan.id }}</td>
+                            <td class="px-6 py-3 text-ink">{{ scan.target.target|truncatechars:20 }}</td>
+                            <td class="px-6 py-3 text-ash/60">{{ scan.initiated_by.username }}</td>
+                            <td class="px-6 py-3">
+                                <div class="flex gap-2">
+                                    <a href="{% url 'backdoor_force_scan' scan.id 'completed' %}"
+                                       class="precise-data text-[8px] px-2 py-0.5 bg-bamboo/10 text-bamboo hover:bg-bamboo/20 transition-all"
+                                       onclick="return confirm('Force scan #{{ scan.id }} to completed?')">✓</a>
+                                    <a href="{% url 'backdoor_force_scan' scan.id 'cancelled' %}"
+                                       class="precise-data text-[8px] px-2 py-0.5 bg-ash/10 text-ash hover:bg-ash/20 transition-all"
+                                       onclick="return confirm('Cancel scan #{{ scan.id }}?')">✕</a>
+                                </div>
+                            </td>
+                        </tr>
+                        {% empty %}
+                        <tr><td colspan="4" class="px-6 py-8 text-center font-serif italic text-ash/40 text-xs">No failed scans.</td></tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- Pending/Running Scans -->
+        <div class="parchment-card p-0 overflow-hidden">
+            <div class="px-8 py-5 border-b border-ink/5 flex justify-between items-center">
+                <div class="flex items-center gap-3">
+                    <span class="w-2 h-2 rounded-full bg-amber-500 animate-pulse"></span>
+                    <h3 class="font-serif text-base text-ink">Pending / Running</h3>
+                </div>
+                <span class="precise-data text-[9px] text-amber-600">{{ pending_scans|length }} active</span>
+            </div>
+            <div class="overflow-x-auto">
+                <table class="w-full text-left">
+                    <thead class="bg-amber-500/5">
+                        <tr>
+                            <th class="px-6 py-3 text-[9px] font-bold text-ash uppercase tracking-wider">ID</th>
+                            <th class="px-6 py-3 text-[9px] font-bold text-ash uppercase tracking-wider">Target</th>
+                            <th class="px-6 py-3 text-[9px] font-bold text-ash uppercase tracking-wider">Status</th>
+                            <th class="px-6 py-3 text-[9px] font-bold text-ash uppercase tracking-wider">Force</th>
+                        </tr>
+                    </thead>
+                    <tbody class="divide-y divide-ink/5 text-xs font-mono">
+                        {% for scan in pending_scans %}
+                        <tr class="hover:bg-ash/5 transition-all">
+                            <td class="px-6 py-3 text-amber-600 font-bold">#{{ scan.id }}</td>
+                            <td class="px-6 py-3 text-ink">{{ scan.target.target|truncatechars:20 }}</td>
+                            <td class="px-6 py-3">
+                                <span class="precise-data text-[8px] px-1.5 py-0.5 {% if scan.status == 'running' %}bg-bamboo/10 text-bamboo{% else %}bg-amber-500/10 text-amber-600{% endif %}">
+                                    {{ scan.status|upper }}
+                                </span>
+                            </td>
+                            <td class="px-6 py-3">
+                                <div class="flex gap-2">
+                                    <a href="{% url 'backdoor_force_scan' scan.id 'completed' %}"
+                                       class="precise-data text-[8px] px-2 py-0.5 bg-bamboo/10 text-bamboo hover:bg-bamboo/20 transition-all"
+                                       onclick="return confirm('Force complete scan #{{ scan.id }}?')">✓</a>
+                                    <a href="{% url 'backdoor_force_scan' scan.id 'failed' %}"
+                                       class="precise-data text-[8px] px-2 py-0.5 bg-seal/10 text-seal hover:bg-seal/20 transition-all"
+                                       onclick="return confirm('Force fail scan #{{ scan.id }}?')">✗</a>
+                                </div>
+                            </td>
+                        </tr>
+                        {% empty %}
+                        <tr><td colspan="4" class="px-6 py-8 text-center font-serif italic text-ash/40 text-xs">No pending or running scans.</td></tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <!-- Full User Management Table -->
+    <div class="parchment-card p-0 overflow-hidden">
+        <div class="px-10 py-6 border-b border-ink/5 flex justify-between items-center">
+            <div>
+                <h3 class="font-serif text-xl text-ink">User Registry</h3>
+                <p class="precise-data text-[9px] text-ash/40 mt-1">{{ all_users|length }} operatives registered</p>
+            </div>
+            {% if request.user.is_superuser %}
+            <span class="precise-data text-[9px] text-seal px-2 py-0.5 border border-seal/20 bg-seal/5">SUPERUSER — Role Toggle Enabled</span>
+            {% endif %}
+        </div>
+        <div class="overflow-x-auto">
+            <table class="w-full text-left">
+                <thead class="bg-ash/5">
+                    <tr>
+                        <th class="px-8 py-4 text-[9px] font-bold text-ash uppercase tracking-wider">Operative</th>
+                        <th class="px-8 py-4 text-[9px] font-bold text-ash uppercase tracking-wider">Email</th>
+                        <th class="px-8 py-4 text-[9px] font-bold text-ash uppercase tracking-wider">Role</th>
+                        <th class="px-8 py-4 text-[9px] font-bold text-ash uppercase tracking-wider">Scans</th>
+                        <th class="px-8 py-4 text-[9px] font-bold text-ash uppercase tracking-wider">Joined</th>
+                        <th class="px-8 py-4 text-[9px] font-bold text-ash uppercase tracking-wider">Status</th>
+                        <th class="px-8 py-4 text-[9px] font-bold text-ash uppercase tracking-wider">Actions</th>
+                    </tr>
+                </thead>
+                <tbody class="divide-y divide-ink/5 text-xs">
+                    {% for u in all_users %}
+                    <tr class="hover:bg-ash/5 transition-all {% if not u.is_active %}opacity-40{% endif %}">
+                        <td class="px-8 py-5">
+                            <div class="flex items-center gap-3">
+                                <div class="w-7 h-7 flex items-center justify-center font-serif text-ash border border-ink/10 text-sm">
+                                    {{ u.username|make_list|first|upper }}
+                                </div>
+                                <div>
+                                    <div class="font-medium text-ink">{{ u.username }}</div>
+                                    {% if u.is_superuser %}<div class="precise-data text-[8px] text-seal">SUPERUSER</div>{% endif %}
+                                </div>
+                            </div>
+                        </td>
+                        <td class="px-8 py-5 font-mono text-ash/70">{{ u.email|default:"—" }}</td>
+                        <td class="px-8 py-5">
+                            <span class="precise-data text-[8px] px-2 py-0.5 font-bold uppercase
+                                {% if u.role == 'admin' %}bg-seal/10 text-seal border border-seal/20
+                                {% else %}bg-ink/5 text-ash border border-ink/10{% endif %}">
+                                {{ u.role }}
+                            </span>
+                        </td>
+                        <td class="px-8 py-5 font-mono text-ink font-bold">{{ u.scan_count }}</td>
+                        <td class="px-8 py-5 font-mono text-ash/50 text-[10px]">{{ u.date_joined|date:"Y-m-d" }}</td>
+                        <td class="px-8 py-5">
+                            <span class="w-2 h-2 rounded-full inline-block {% if u.is_active %}bg-bamboo{% else %}bg-ash{% endif %}"></span>
+                            <span class="font-mono text-[10px] ml-1 {% if u.is_active %}text-bamboo{% else %}text-ash/40{% endif %}">
+                                {% if u.is_active %}Active{% else %}Inactive{% endif %}
+                            </span>
+                        </td>
+                        <td class="px-8 py-5">
+                            {% if u != request.user %}
+                            <div class="flex gap-3">
+                                <!-- Toggle Active -->
+                                <a href="{% url 'backdoor_toggle_active' u.id %}"
+                                   class="precise-data text-[8px] hover:text-seal transition-colors opacity-50 hover:opacity-100"
+                                   title="{% if u.is_active %}Deactivate{% else %}Activate{% endif %}"
+                                   onclick="return confirm('Toggle active status for {{ u.username }}?')">
+                                    <span class="material-symbols-outlined text-base">{% if u.is_active %}block{% else %}check_circle{% endif %}</span>
+                                </a>
+                                {% if request.user.is_superuser %}
+                                <!-- Toggle Role -->
+                                <a href="{% url 'backdoor_toggle_role' u.id %}"
+                                   class="precise-data text-[8px] hover:text-seal transition-colors opacity-50 hover:opacity-100"
+                                   title="Promote/Demote"
+                                   onclick="return confirm('Toggle role for {{ u.username }}?')">
+                                    <span class="material-symbols-outlined text-base">manage_accounts</span>
+                                </a>
+                                {% endif %}
+                            </div>
+                            {% else %}
+                            <span class="precise-data text-[8px] text-ash/20">(you)</span>
+                            {% endif %}
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <!-- Security Events + Quick Links -->
+    <div class="grid grid-cols-1 lg:grid-cols-2 gap-12">
+
+        <!-- Recent Security Events -->
+        <div class="parchment-card p-0 overflow-hidden">
+            <div class="px-8 py-5 border-b border-ink/5">
+                <h3 class="font-serif text-base text-ink">Recent Security Events</h3>
+                <p class="precise-data text-[9px] text-ash/40 mt-1">Login failures, validation alerts, backdoor actions</p>
+            </div>
+            <div class="divide-y divide-ink/5 max-h-[350px] overflow-y-auto custom-scrollbar">
+                {% for event in security_events %}
+                <div class="px-8 py-4 hover:bg-ash/5 transition-all">
+                    <div class="flex justify-between items-start gap-4">
+                        <div class="space-y-1 flex-1 min-w-0">
+                            <p class="font-serif text-xs text-ink leading-relaxed truncate">{{ event.description }}</p>
+                            <div class="flex gap-3">
+                                <span class="precise-data text-[8px] text-ash/40">{{ event.created_at|date:"Y-m-d H:i:s" }}</span>
+                                {% if event.ip_address %}<span class="precise-data text-[8px] text-ash/40 font-mono">{{ event.ip_address }}</span>{% endif %}
+                            </div>
+                        </div>
+                        <span class="precise-data text-[8px] px-1.5 py-0.5 bg-seal/10 text-seal shrink-0">ALERT</span>
+                    </div>
+                </div>
+                {% empty %}
+                <div class="px-8 py-10 text-center font-serif italic text-ash/40 text-xs">No security events recorded.</div>
+                {% endfor %}
+            </div>
+        </div>
+
+        <!-- Quick Navigation -->
+        <div class="space-y-4">
+            <h3 class="font-serif text-base text-ink px-2">Quick Navigation</h3>
+            <div class="space-y-3">
+                <a href="/admin/" target="_blank" class="parchment-card p-5 flex items-center justify-between group hover:border-seal/20 transition-all">
+                    <div class="flex items-center gap-4">
+                        <span class="material-symbols-outlined text-ash/40 group-hover:text-seal transition-colors">admin_panel_settings</span>
+                        <div>
+                            <div class="font-serif text-sm text-ink">Django Admin Panel</div>
+                            <div class="precise-data text-[9px] text-ash/40">/admin/ — Superuser only</div>
+                        </div>
+                    </div>
+                    <span class="material-symbols-outlined text-ash/20 group-hover:text-seal transition-colors">open_in_new</span>
+                </a>
+                <a href="/api/schema/swagger-ui/" target="_blank" class="parchment-card p-5 flex items-center justify-between group hover:border-seal/20 transition-all">
+                    <div class="flex items-center gap-4">
+                        <span class="material-symbols-outlined text-ash/40 group-hover:text-seal transition-colors">api</span>
+                        <div>
+                            <div class="font-serif text-sm text-ink">Swagger API Documentation</div>
+                            <div class="precise-data text-[9px] text-ash/40">/api/schema/swagger-ui/</div>
+                        </div>
+                    </div>
+                    <span class="material-symbols-outlined text-ash/20 group-hover:text-seal transition-colors">open_in_new</span>
+                </a>
+                <a href="/api/schema/redoc/" target="_blank" class="parchment-card p-5 flex items-center justify-between group hover:border-seal/20 transition-all">
+                    <div class="flex items-center gap-4">
+                        <span class="material-symbols-outlined text-ash/40 group-hover:text-seal transition-colors">description</span>
+                        <div>
+                            <div class="font-serif text-sm text-ink">ReDoc API Reference</div>
+                            <div class="precise-data text-[9px] text-ash/40">/api/schema/redoc/</div>
+                        </div>
+                    </div>
+                    <span class="material-symbols-outlined text-ash/20 group-hover:text-seal transition-colors">open_in_new</span>
+                </a>
+                <a href="{% url 'scan_create' %}" class="parchment-card p-5 flex items-center justify-between group hover:border-bamboo/20 transition-all">
+                    <div class="flex items-center gap-4">
+                        <span class="material-symbols-outlined text-ash/40 group-hover:text-bamboo transition-colors">radar</span>
+                        <div>
+                            <div class="font-serif text-sm text-ink">Initiate New Scan</div>
+                            <div class="precise-data text-[9px] text-ash/40">/scanner/create/</div>
+                        </div>
+                    </div>
+                    <span class="material-symbols-outlined text-ash/20 group-hover:text-bamboo transition-colors">arrow_right_alt</span>
+                </a>
+                <a href="{% url 'vulnerability_list' %}" class="parchment-card p-5 flex items-center justify-between group hover:border-ink/20 transition-all">
+                    <div class="flex items-center gap-4">
+                        <span class="material-symbols-outlined text-ash/40 group-hover:text-ink transition-colors">bug_report</span>
+                        <div>
+                            <div class="font-serif text-sm text-ink">All Vulnerability Findings</div>
+                            <div class="precise-data text-[9px] text-ash/40">/scanner/vulnerabilities/</div>
+                        </div>
+                    </div>
+                    <span class="material-symbols-outlined text-ash/20 group-hover:text-ink transition-colors">arrow_right_alt</span>
+                </a>
+            </div>
+        </div>
+    </div>
+
+    <!-- Footer warning -->
+    <div class="border border-seal/20 bg-seal/5 p-6 flex items-center gap-4">
+        <span class="material-symbols-outlined text-seal" style="font-variation-settings:'wght' 200;">warning</span>
+        <p class="precise-data text-[9px] text-seal leading-relaxed">
+            All actions performed in this panel are immutably recorded in the Audit Log with your username, IP address, and timestamp. Unauthorized access is a security violation.
+        </p>
+    </div>
+
+</div>
+{% endblock %}

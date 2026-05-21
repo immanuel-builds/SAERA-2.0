@@ -47,5 +47,6 @@ class DashboardTests(TestCase):
         response = self.client.get(reverse("dashboard"))
 
         self.assertEqual(response.status_code, 200)
-        self.assertContains(response, "Critical Issue")
-        self.assertNotContains(response, "High Issue")
+        recent_vuln_titles = [v.title for v in response.context['recent_vulns']]
+        self.assertIn("Critical Issue", recent_vuln_titles)
+        self.assertNotIn("High Issue", recent_vuln_titles)

@@ -1,177 +1,189 @@
 {% extends 'base.html' %}
 {% load static %}
 
-{% block title %}Register - SAERA Scanner{% endblock %}
-
-{% block extra_css %}
-<style>
-    body {
-        background: url("{% static 'img/login_bg_purple.png' %}") no-repeat center center fixed;
-        background-size: cover;
-    }
-    .register-container {
-        backdrop-filter: blur(8px);
-        -webkit-backdrop-filter: blur(8px);
-        min-height: 100vh;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        background: radial-gradient(circle at center, rgba(2, 6, 23, 0.6) 0%, rgba(2, 6, 23, 0.95) 100%);
-        padding: 2rem 0;
-    }
-    .register-card {
-        width: 100%;
-        max-width: 550px;
-        padding: 3rem;
-    }
-    .form-control {
-        background: rgba(255, 255, 255, 0.08);
-        border: 1px solid rgba(255, 255, 255, 0.2);
-        color: white;
-        padding: 0.8rem 1.2rem;
-        border-radius: 12px;
-        transition: all 0.3s ease;
-    }
-    .form-control:focus {
-        background: rgba(255, 255, 255, 0.08);
-        border-color: var(--primary-color);
-        box-shadow: 0 0 15px rgba(168, 85, 247, 0.2);
-        color: white;
-    }
-    .input-group-text {
-        background: rgba(255, 255, 255, 0.05);
-        border: 1px solid rgba(255, 255, 255, 0.1);
-        color: var(--text-secondary);
-        border-radius: 12px 0 0 12px;
-    }
-    .form-control {
-        border-radius: 0 12px 12px 0;
-    }
-    .brand-logo {
-        width: 60px;
-        height: 60px;
-        background: linear-gradient(135deg, var(--primary-color), var(--accent-red));
-        border-radius: 15px;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        margin: 0 auto 1.5rem;
-        box-shadow: 0 10px 30px rgba(168, 85, 247, 0.4);
-    }
-    .help-text {
-        font-size: 0.7rem;
-        color: var(--text-muted);
-        margin-top: 0.25rem;
-    }
-    .errorlist {
-        list-style: none;
-        padding: 0;
-        margin: 0.5rem 0;
-        color: var(--accent-red);
-        font-size: 0.75rem;
-    }
-</style>
-{% endblock %}
+{% block title %}Register — NetVuln{% endblock %}
+{% block body_class %}auth-page{% endblock %}
 
 {% block content %}
-<div class="register-container">
-    <div class="cyber-card register-card">
-        <div class="text-center mb-4">
-            <div class="brand-logo">
-                <i class="bi bi-shield-plus text-white fs-2"></i>
-            </div>
-            <h2 class="h4 mb-1 text-white">Create Security Profile</h2>
-            <p class="text-muted small text-uppercase tracking-widest">Enroll in the Intelligence Network</p>
-        </div>
+<div class="min-h-[90vh] flex flex-col items-center justify-center py-16 animate-fade-in">
+    <div class="text-center mb-12 space-y-3">
+        <span class="precise-data text-[9px] opacity-30 uppercase tracking-widest">SAERA 2.0</span>
+        <h1 class="atmospheric-h1">Create Profile</h1>
+        <p class="font-serif italic text-ash text-sm">New operative registration</p>
+    </div>
 
-        <form method="post" class="needs-validation" novalidate>
+    <div class="w-full max-w-[520px] space-y-6">
+        {% if form.non_field_errors %}
+        <div class="parchment-card border-l-2 border-l-seal p-5 text-seal animate-fade-in">
+            <div class="flex items-start gap-3">
+                <span class="material-symbols-outlined text-base mt-0.5">error</span>
+                <div class="space-y-1">
+                    <p class="precise-data text-[10px] font-bold uppercase tracking-widest">Registration Error</p>
+                    {% for error in form.non_field_errors %}<p class="font-serif italic text-sm text-ink">{{ error }}</p>{% endfor %}
+                </div>
+            </div>
+        </div>
+        {% endif %}
+
+        <form method="post" class="space-y-10" novalidate id="register-form">
             {% csrf_token %}
 
-            <div class="row g-3">
-                <div class="col-md-12 mb-2">
-                    <label class="form-label text-muted small fw-bold text-uppercase">Identification (Username)</label>
-                    <div class="input-group">
-                        <span class="input-group-text"><i class="bi bi-person"></i></span>
-                        {{ form.username }}
-                    </div>
-                    {% if form.username.errors %}{{ form.username.errors }}{% endif %}
+            <!-- Identity -->
+            <div class="space-y-6">
+                <div class="flex items-center gap-3 border-b border-ink/5 pb-3">
+                    <span class="material-symbols-outlined text-ash/30 text-sm">person</span>
+                    <span class="precise-data text-[9px] text-ash/40 uppercase tracking-widest">Identity</span>
                 </div>
-
-                <div class="col-md-12 mb-2">
-                    <label class="form-label text-muted small fw-bold text-uppercase">Communication Channel (Email)</label>
-                    <div class="input-group">
-                        <span class="input-group-text"><i class="bi bi-envelope"></i></span>
-                        {{ form.email }}
-                    </div>
-                    {% if form.email.errors %}{{ form.email.errors }}{% endif %}
+                <div class="space-y-2 group">
+                    <label for="id_username" class="precise-data text-[9px] opacity-30 group-focus-within:opacity-100 transition-opacity uppercase tracking-widest">Operative ID</label>
+                    <input id="id_username" type="text" name="username" placeholder="unique identifier" autocomplete="username" value="{{ form.username.value|default:'' }}"
+                           class="w-full bg-transparent border-b {% if form.username.errors %}border-seal{% else %}border-ink/10{% endif %} py-3 text-sm font-serif italic focus:border-ink outline-none transition-all placeholder:opacity-20">
+                    {% for error in form.username.errors %}<p class="precise-data text-[9px] text-seal mt-1">✗ {{ error }}</p>{% endfor %}
                 </div>
-
-                <div class="col-md-6 mb-2">
-                    <label class="form-label text-muted small fw-bold text-uppercase">Organization</label>
-                    <div class="input-group">
-                        <span class="input-group-text"><i class="bi bi-building"></i></span>
-                        {{ form.organization }}
-                    </div>
-                </div>
-
-                <div class="col-md-6 mb-2">
-                    <label class="form-label text-muted small fw-bold text-uppercase">Department</label>
-                    <div class="input-group">
-                        <span class="input-group-text"><i class="bi bi-diagram-2"></i></span>
-                        {{ form.department }}
-                    </div>
-                </div>
-
-                <div class="col-md-6 mb-2">
-                    <label class="form-label text-muted small fw-bold text-uppercase">Access Key</label>
-                    <div class="input-group">
-                        <span class="input-group-text"><i class="bi bi-key"></i></span>
-                        {{ form.password1 }}
-                    </div>
-                    {% if form.password1.errors %}{{ form.password1.errors }}{% endif %}
-                </div>
-
-                <div class="col-md-6 mb-4">
-                    <label class="form-label text-muted small fw-bold text-uppercase">Confirm Key</label>
-                    <div class="input-group">
-                        <span class="input-group-text"><i class="bi bi-shield-lock"></i></span>
-                        {{ form.password2 }}
-                    </div>
-                    {% if form.password2.errors %}{{ form.password2.errors }}{% endif %}
+                <div class="space-y-2 group">
+                    <label for="id_email" class="precise-data text-[9px] opacity-30 group-focus-within:opacity-100 transition-opacity uppercase tracking-widest">Email Address</label>
+                    <input id="id_email" type="email" name="email" placeholder="agent@your-org.com" autocomplete="email" value="{{ form.email.value|default:'' }}"
+                           class="w-full bg-transparent border-b {% if form.email.errors %}border-seal{% else %}border-ink/10{% endif %} py-3 text-sm font-serif italic focus:border-ink outline-none transition-all placeholder:opacity-20">
+                    {% for error in form.email.errors %}<p class="precise-data text-[9px] text-seal mt-1">✗ {{ error }}</p>{% endfor %}
                 </div>
             </div>
 
-            {% if form.non_field_errors %}
-                <div class="alert alert-danger bg-opacity-10 border-danger small py-2">
-                    {{ form.non_field_errors }}
+            <!-- Organization -->
+            <div class="space-y-6">
+                <div class="flex items-center gap-3 border-b border-ink/5 pb-3">
+                    <span class="material-symbols-outlined text-ash/30 text-sm">corporate_fare</span>
+                    <span class="precise-data text-[9px] text-ash/40 uppercase tracking-widest">Organization (Optional)</span>
                 </div>
-            {% endif %}
+                <div class="grid grid-cols-2 gap-8">
+                    <div class="space-y-2 group">
+                        <label for="id_organization" class="precise-data text-[9px] opacity-30 group-focus-within:opacity-100 transition-opacity uppercase tracking-widest">Organization</label>
+                        <input id="id_organization" type="text" name="organization" placeholder="e.g., Acme Corp" value="{{ form.organization.value|default:'' }}"
+                               class="w-full bg-transparent border-b border-ink/10 py-3 text-sm font-serif italic focus:border-ink outline-none transition-all placeholder:opacity-20">
+                    </div>
+                    <div class="space-y-2 group">
+                        <label for="id_department" class="precise-data text-[9px] opacity-30 group-focus-within:opacity-100 transition-opacity uppercase tracking-widest">Department</label>
+                        <input id="id_department" type="text" name="department" placeholder="e.g., Red Team" value="{{ form.department.value|default:'' }}"
+                               class="w-full bg-transparent border-b border-ink/10 py-3 text-sm font-serif italic focus:border-ink outline-none transition-all placeholder:opacity-20">
+                    </div>
+                </div>
+            </div>
 
-            <div class="d-grid mt-3">
-                <button type="submit" class="btn btn-primary btn-lg py-3">
-                    Initialize Profile <i class="bi bi-person-check ms-2"></i>
-                </button>
+            <!-- Password -->
+            <div class="space-y-6">
+                <div class="flex items-center gap-3 border-b border-ink/5 pb-3">
+                    <span class="material-symbols-outlined text-ash/30 text-sm">key</span>
+                    <span class="precise-data text-[9px] text-ash/40 uppercase tracking-widest">Access Key</span>
+                </div>
+                <div class="space-y-2 group">
+                    <label for="id_password1" class="precise-data text-[9px] opacity-30 group-focus-within:opacity-100 transition-opacity uppercase tracking-widest">Create Access Key</label>
+                    <div class="relative">
+                        <input id="id_password1" type="password" name="password1" placeholder="minimum 8 characters" autocomplete="new-password"
+                               class="w-full bg-transparent border-b {% if form.password1.errors %}border-seal{% else %}border-ink/10{% endif %} py-3 text-sm font-serif italic focus:border-ink outline-none transition-all placeholder:opacity-20 pr-8">
+                        <button type="button" onclick="togglePw('id_password1','eye1')" class="absolute right-0 top-1/2 -translate-y-1/2 opacity-20 hover:opacity-60 transition-opacity">
+                            <span id="eye1" class="material-symbols-outlined text-sm">visibility</span>
+                        </button>
+                    </div>
+                    <!-- Strength Meter -->
+                    <div id="strength-container" class="hidden space-y-2 pt-1">
+                        <div class="flex gap-1">
+                            <div id="bar-1" class="h-0.5 flex-1 bg-ink/10 rounded-full transition-all duration-300"></div>
+                            <div id="bar-2" class="h-0.5 flex-1 bg-ink/10 rounded-full transition-all duration-300"></div>
+                            <div id="bar-3" class="h-0.5 flex-1 bg-ink/10 rounded-full transition-all duration-300"></div>
+                            <div id="bar-4" class="h-0.5 flex-1 bg-ink/10 rounded-full transition-all duration-300"></div>
+                        </div>
+                        <div class="flex justify-between">
+                            <p id="strength-label" class="precise-data text-[9px]"></p>
+                            <p id="strength-hint" class="precise-data text-[8px] opacity-40"></p>
+                        </div>
+                    </div>
+                    {% for error in form.password1.errors %}<p class="precise-data text-[9px] text-seal mt-1">✗ {{ error }}</p>{% endfor %}
+                </div>
+                <div class="space-y-2 group">
+                    <label for="id_password2" class="precise-data text-[9px] opacity-30 group-focus-within:opacity-100 transition-opacity uppercase tracking-widest">Confirm Access Key</label>
+                    <div class="relative">
+                        <input id="id_password2" type="password" name="password2" placeholder="repeat access key" autocomplete="new-password"
+                               class="w-full bg-transparent border-b {% if form.password2.errors %}border-seal{% else %}border-ink/10{% endif %} py-3 text-sm font-serif italic focus:border-ink outline-none transition-all placeholder:opacity-20 pr-8">
+                        <button type="button" onclick="togglePw('id_password2','eye2')" class="absolute right-0 top-1/2 -translate-y-1/2 opacity-20 hover:opacity-60 transition-opacity">
+                            <span id="eye2" class="material-symbols-outlined text-sm">visibility</span>
+                        </button>
+                    </div>
+                    <p id="match-indicator" class="precise-data text-[9px] hidden"></p>
+                    {% for error in form.password2.errors %}<p class="precise-data text-[9px] text-seal mt-1">✗ {{ error }}</p>{% endfor %}
+                </div>
+            </div>
+
+            <div class="pt-2">
+                <button type="submit" class="saera-action-btn w-full">Initialize Operative Profile</button>
             </div>
         </form>
 
-        <div class="text-center mt-4">
-            <p class="text-muted small">Already have clearance? <a href="{% url 'login' %}" class="text-primary text-decoration-none fw-bold">Sign In Here</a></p>
-            <div class="text-muted" style="font-size: 0.6rem; opacity: 0.6;">
-                <i class="bi bi-info-circle me-1"></i> Account creation is subject to administrative approval.
-            </div>
+        <div class="flex flex-col items-center gap-4 pt-8 border-t border-ink/5">
+            <p class="font-serif italic text-xs text-ash">Already have clearance?</p>
+            <a href="{% url 'login' %}" class="precise-data text-[9px] hover:text-seal transition-colors opacity-40 hover:opacity-100">Sign In →</a>
+            <p class="precise-data text-[8px] opacity-20 text-center leading-relaxed">New accounts default to Analyst role. Contact an Administrator for elevated clearance.</p>
         </div>
     </div>
 </div>
 
+{% block extra_js %}
 <script>
-    // Add bootstrap classes to django form fields
-    document.addEventListener('DOMContentLoaded', function() {
-        const inputs = document.querySelectorAll('input:not([type="checkbox"])');
-        inputs.forEach(input => {
-            if (!input.classList.contains('form-control')) {
-                input.classList.add('form-control');
-            }
+    function togglePw(inputId, eyeId) {
+        const input = document.getElementById(inputId);
+        const eye = document.getElementById(eyeId);
+        if (!input || !eye) return;
+        const show = input.type === 'password';
+        input.type = show ? 'text' : 'password';
+        eye.textContent = show ? 'visibility_off' : 'visibility';
+    }
+
+    const pw1 = document.getElementById('id_password1');
+    const pw2 = document.getElementById('id_password2');
+    const strengthContainer = document.getElementById('strength-container');
+    const strengthLabel = document.getElementById('strength-label');
+    const strengthHint = document.getElementById('strength-hint');
+    const matchIndicator = document.getElementById('match-indicator');
+    const bars = ['bar-1','bar-2','bar-3','bar-4'].map(id => document.getElementById(id));
+    const COLORS = ['','#9F3B32','#d97706','#6B8E6B','#2d6a2d'];
+    const LABELS = ['','Weak','Fair','Good','Strong'];
+
+    function checkStrength(p) {
+        let s = 0, hints = [];
+        if (p.length >= 8) s++; else hints.push('min. 8 chars');
+        if (/[A-Z]/.test(p)) s++; else hints.push('add uppercase');
+        if (/[0-9]/.test(p)) s++; else hints.push('add a number');
+        if (/[^A-Za-z0-9]/.test(p)) s++; else hints.push('add a symbol');
+        return { score: s, label: LABELS[s], color: COLORS[s], hint: hints[0] || '' };
+    }
+
+    function checkMatch() {
+        if (!pw2 || !matchIndicator) return;
+        const v1 = pw1 ? pw1.value : '';
+        const v2 = pw2.value;
+        if (!v2) { matchIndicator.classList.add('hidden'); return; }
+        matchIndicator.classList.remove('hidden');
+        if (v1 === v2) {
+            matchIndicator.textContent = '✓ Passwords match';
+            matchIndicator.className = 'precise-data text-[9px] text-bamboo';
+        } else {
+            matchIndicator.textContent = '✗ Passwords do not match';
+            matchIndicator.className = 'precise-data text-[9px] text-seal';
+        }
+    }
+
+    if (pw1) {
+        pw1.addEventListener('input', function () {
+            const val = this.value;
+            if (!val) { strengthContainer.classList.add('hidden'); return; }
+            strengthContainer.classList.remove('hidden');
+            const { score, label, color, hint } = checkStrength(val);
+            bars.forEach((bar, i) => { bar.style.backgroundColor = i < score ? color : 'rgba(0,0,0,0.08)'; });
+            strengthLabel.textContent = label;
+            strengthLabel.style.color = color;
+            strengthHint.textContent = hint;
+            checkMatch();
         });
-    });
+    }
+    if (pw2) pw2.addEventListener('input', checkMatch);
 </script>
+{% endblock %}
 {% endblock %}

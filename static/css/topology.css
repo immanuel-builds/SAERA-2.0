@@ -1,0 +1,61 @@
+/* 
+   SAERA 2.2 - Topology CSS
+   Controls the visual canvas for Vis.js celestial map topology interfaces and focus mode overrides.
+*/
+
+#network-map-container {
+    width: 100%;
+    height: 75vh;
+    position: relative;
+    background: transparent;
+    transition: var(--transition-slow);
+}
+
+#network-map-container.fullscreen {
+    position: fixed;
+    inset: 0;
+    z-index: var(--z-fullscreen, 1000);
+    height: 100vh;
+    width: 100vw;
+    background: var(--bg-parchment);
+    padding: var(--space-xl);
+}
+
+#network-map {
+    width: 100%;
+    height: 100%;
+    background-color: transparent;
+}
+
+/* Legend Overlays */
+.topology-legend {
+    position: absolute;
+    top: var(--space-md);
+    left: var(--space-md);
+    z-index: var(--z-overlay, 50);
+    background: var(--surface-variant);
+    border: 1px solid var(--border-subtle);
+    padding: var(--space-sm) var(--space-md);
+    backdrop-filter: blur(8px);
+}
+
+.topology-legend-item {
+    display: flex;
+    align-items: center;
+    gap: var(--space-xs);
+    font-size: 10px;
+    font-family: var(--font-sans);
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+}
+
+.legend-pip {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    display: inline-block;
+}
+
+.legend-pip.host { background: var(--ink-black); }
+.legend-pip.service { background: var(--ash-gray); border: 1px solid var(--border-subtle); }
+.legend-pip.exposure { background: var(--seal-red); }

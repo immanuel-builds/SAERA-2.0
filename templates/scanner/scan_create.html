@@ -1,136 +1,259 @@
 {% extends 'base.html' %}
 {% load static %}
 
-{% block title %}Tactical Coordinates - SAERA{% endblock %}
-
-{% block body_class %}ops-page{% endblock %}
+{% block title %}New Scan - NetVuln{% endblock %}
 
 {% block content %}
-<div class="max-w-4xl mx-auto space-y-16 animate-in fade-in zoom-in duration-1000">
-    <!-- Hero Section: The Invitation to Observe -->
-    <div class="text-center space-y-6">
-        <span class="text-[10px] font-bold text-ash uppercase tracking-[0.5em]">Sector Initialization</span>
-        <h1 class="text-5xl text-ink font-serif tracking-tighter">Tactical Coordinates</h1>
-        <p class="text-lg text-ink/60 font-serif italic max-w-2xl mx-auto leading-relaxed">
-            Initialize a high-precision digital pulse. Define your target parameters with the clarity of a brushstroke on fresh parchment.
+<div class="animate-fade-in max-w-4xl mx-auto space-y-16">
+    <!-- Scan Header -->
+    <div class="flex flex-col gap-6 text-center max-w-2xl mx-auto">
+        <span class="precise-data text-[10px] opacity-40">Scan Setup</span>
+        <h1 class="atmospheric-h1">New Scan</h1>
+        <p class="font-serif italic text-lg text-ash leading-relaxed">
+            Enter a target you own or have permission to test.
         </p>
-        <div class="w-16 h-[0.5px] bg-ink/10 mx-auto"></div>
     </div>
 
-    <!-- Input Deck: The Scholarly Form -->
-    <div class="parchment-card p-12 space-y-12 relative overflow-hidden group">
-        <!-- Background Enso Ghost -->
-        <div class="absolute -top-12 -right-12 w-64 h-64 opacity-[0.03] group-hover:opacity-[0.08] transition-opacity pointer-events-none" style="background-image: url('{% static 'img/zen_enso.png' %}'); background-size: contain; background-repeat: no-repeat;"></div>
+    <!-- The Inscription Form -->
+    <div class="parchment-card p-16 space-y-16 relative group">
+        <div class="absolute top-12 right-12 fingerprint-seal opacity-[0.03] group-hover:opacity-[0.08] transition-opacity pointer-events-none"></div>
 
-        <form method="post" class="space-y-12 relative z-10">
+        <form method="post" class="space-y-16 relative z-10 scan-form" id="scan-form">
             {% csrf_token %}
-            
-            <!-- Target IP / Domain -->
-            <div class="space-y-6">
+
+            <!-- Target Definition -->
+            <div class="space-y-8">
                 <div class="flex justify-between items-end border-b border-ink/5 pb-4">
-                    <label for="id_target" class="text-[10px] font-bold text-ash uppercase tracking-widest">Target Designation</label>
-                    <span class="text-[9px] font-serif italic text-ash/40">Ready for Inscription</span>
+                    <label for="id_target" class="precise-data text-[10px] opacity-40">Target</label>
+                    <span class="font-serif italic text-[10px] text-ash/20">IP address, domain, or CIDR</span>
                 </div>
-                <div class="relative group">
+                <div class="relative">
                     <input type="text" name="target" id="id_target" required
-                           class="w-full bg-transparent py-6 font-serif text-3xl text-ink placeholder:text-ash/20 focus:outline-none transition-all duration-700" 
-                           placeholder="e.g. 192.168.1.1 or internal.void">
-                    <div class="absolute bottom-0 left-0 h-[0.5px] w-0 bg-ink group-focus-within:w-full transition-all duration-1000"></div>
+                           class="w-full bg-transparent py-4 font-serif text-4xl text-ink placeholder:text-ash/10 focus:outline-none"
+                           placeholder="192.168.1.1">
+                    <div class="w-full h-px bg-ink/5 group-focus-within:bg-seal/40 transition-colors"></div>
                 </div>
                 {% if form.target.errors %}
-                <p class="text-seal text-[9px] font-bold uppercase tracking-widest">{{ form.target.errors.0 }}</p>
+                <p class="precise-data text-[9px] text-seal">{{ form.target.errors.0 }}</p>
                 {% endif %}
             </div>
 
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-12">
-                <!-- Intensity Dial: The Three States of Observation -->
-                <div class="space-y-6">
-                    <label class="text-[10px] font-bold text-ash uppercase tracking-widest block">Observation Intensity</label>
-                    <div class="flex p-1 border border-ink/5 bg-background/50">
-                        <label class="flex-1 text-center py-4 cursor-pointer transition-all has-[:checked]:bg-ink has-[:checked]:text-parchment text-ash text-[10px] font-bold uppercase tracking-widest">
-                            <input type="radio" name="scan_type" value="quick" class="hidden">
-                            Glimpse
+            <div class="grid grid-cols-2 gap-16">
+                <!-- Intensity Protocols -->
+                <div class="space-y-8">
+                    <label class="precise-data text-[10px] opacity-40 uppercase tracking-widest">Scan Type</label>
+                    <div class="flex flex-col gap-4">
+                        <label class="flex items-center justify-between p-6 border border-ink/5 hover:border-seal/20 transition-all cursor-pointer group">
+                            <input type="radio" name="scan_type" value="quick" class="accent-seal">
+                            <div class="flex-grow pl-6">
+                                <span class="font-serif text-sm italic">Quick Scan</span>
+                                <span class="precise-data text-[8px] block opacity-20">Fast check of common ports</span>
+                            </div>
                         </label>
-                        <label class="flex-1 text-center py-4 cursor-pointer transition-all has-[:checked]:bg-ink has-[:checked]:text-parchment text-ash text-[10px] font-bold uppercase tracking-widest">
-                            <input type="radio" name="scan_type" value="full" checked class="hidden">
-                            Standard
-                        </label>
-                        <label class="flex-1 text-center py-4 cursor-pointer transition-all has-[:checked]:bg-ink has-[:checked]:text-parchment text-ash text-[10px] font-bold uppercase tracking-widest">
-                            <input type="radio" name="scan_type" value="deep" class="hidden">
-                            Meditate
+                        <label class="flex items-center justify-between p-6 border border-ink/5 hover:border-seal/20 transition-all cursor-pointer group">
+                            <input type="radio" name="scan_type" value="standard" checked class="accent-seal">
+                            <div class="flex-grow pl-6">
+                                <span class="font-serif text-sm italic">Standard Scan</span>
+                                <span class="precise-data text-[8px] block opacity-20">Service detection and basic findings</span>
+                            </div>
                         </label>
                     </div>
                 </div>
 
-                <!-- Toggles Deck: Refined Protocols -->
-                <div class="space-y-6">
-                    <label class="text-[10px] font-bold text-ash uppercase tracking-widest block">Scholarly Modules</label>
-                    <div class="space-y-4">
-                        <label class="flex items-center justify-between p-5 border border-ink/5 hover:border-ink/20 transition-all cursor-pointer group">
+                <!-- Optional Checks -->
+                <div class="space-y-8">
+                    <label class="precise-data text-[10px] opacity-40 uppercase tracking-widest">Options</label>
+                    <div class="space-y-6">
+                        <label class="flex items-center justify-between group cursor-pointer">
                             <div class="flex flex-col">
-                                <span class="text-sm font-serif text-ink italic">Fingerprint Services</span>
-                                <span class="text-[9px] font-mono text-ash/40 uppercase">Identify the subtle signatures</span>
+                                <span class="font-serif text-sm italic">Service Detection</span>
+                                <span class="precise-data text-[8px] opacity-20 uppercase">Identify service versions</span>
                             </div>
-                            <input type="checkbox" name="enable_service_detection" checked class="accent-ink w-4 h-4">
+                            <input type="checkbox" name="enable_service_detection" checked class="accent-ink">
                         </label>
-                        <label class="flex items-center justify-between p-5 border border-ink/5 hover:border-ink/20 transition-all cursor-pointer group">
+                        <label class="flex items-center justify-between group cursor-pointer">
                             <div class="flex flex-col">
-                                <span class="text-sm font-serif text-ink italic">Correlate Threats</span>
-                                <span class="text-[9px] font-mono text-ash/40 uppercase">Cross-reference with archives</span>
+                                <span class="font-serif text-sm italic">Vulnerability Checks</span>
+                                <span class="precise-data text-[8px] opacity-20 uppercase">Create basic findings</span>
                             </div>
-                            <input type="checkbox" name="enable_script_scan" class="accent-ink w-4 h-4">
+                            <input type="checkbox" name="enable_vuln_detection" checked class="accent-ink">
                         </label>
                     </div>
                 </div>
             </div>
 
-            <!-- Execute Action: The Final Seal -->
-            <div class="pt-12 flex flex-col items-center gap-8">
-                <button type="submit" class="saera-button px-16 py-8 group">
-                    <span class="flex items-center gap-6">
-                        <span class="material-symbols-outlined text-2xl group-hover:rotate-180 transition-transform duration-1000">filter_vintage</span>
-                        <span class="text-xs font-bold uppercase tracking-[0.3em]">Begin the Sweep</span>
-                    </span>
+            <!-- Execution Seal -->
+            <div class="pt-12 text-center space-y-8">
+                <button type="submit" id="scan-submit-btn" class="saera-action-btn py-6 px-24 text-xs font-bold tracking-[0.4em]">
+                    Start Scan
                 </button>
-                <div class="flex items-center gap-3">
-                    <span class="w-1 h-1 rounded-full bg-bamboo/40"></span>
-                    <p class="text-[9px] text-ash/60 font-serif italic uppercase tracking-widest">
-                        Your observation will be recorded in the persistent chronicle.
-                    </p>
+                <div class="flex items-center justify-center gap-4 opacity-40">
+                    <span class="status-pip bg-bamboo"></span>
+                    <p class="precise-data text-[9px] italic">Results will be saved in the scan history.</p>
                 </div>
             </div>
         </form>
     </div>
+</div>
 
-    <!-- System Status Seals -->
-    <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
-        <div class="parchment-card p-8 flex items-center gap-6 group">
-            <div class="size-12 border border-ink/5 flex items-center justify-center group-hover:border-ink/20 transition-colors">
-                <span class="material-symbols-outlined text-ash/40">waves</span>
+<!-- ══════════════════════════════════════════════════════ -->
+<!-- SCANNING OVERLAY — fullscreen, shown on form submit   -->
+<!-- ══════════════════════════════════════════════════════ -->
+<div id="scan-overlay"
+     class="fixed inset-0 z-[9999] flex-col items-center justify-center hidden"
+     style="background:rgba(10,10,12,0.97); backdrop-filter:blur(8px);">
+
+    <div class="flex flex-col items-center gap-10 max-w-lg w-full px-8">
+
+        <!-- Pulsing observatory ring -->
+        <div class="relative flex items-center justify-center w-24 h-24">
+            <div class="absolute inset-0 rounded-full border border-seal/20 animate-ping"></div>
+            <div class="absolute inset-2 rounded-full border border-seal/10 animate-ping" style="animation-delay:.35s"></div>
+            <svg class="w-10 h-10 text-seal/60 animate-spin" style="animation-duration:3s"
+                 viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1">
+                <circle cx="12" cy="12" r="10"/>
+                <path d="M12 2 A10 10 0 0 1 22 12"/>
+            </svg>
+        </div>
+
+        <!-- Heading -->
+        <div class="text-center space-y-3">
+            <p class="precise-data text-[9px] text-seal/50 tracking-[0.4em] uppercase">SAERA Observatory</p>
+            <h2 class="font-serif italic text-2xl text-parchment/90">Reconnaissance in progress</h2>
+            <p id="overlay-target-display" class="precise-data text-[10px] text-ash/40 mt-1"></p>
+        </div>
+
+        <!-- Progress bar -->
+        <div class="w-full space-y-3">
+            <div class="w-full h-px bg-parchment/5 relative overflow-hidden rounded-full">
+                <div id="overlay-bar"
+                     class="absolute left-0 top-0 h-full bg-seal/60 rounded-full"
+                     style="width:0%; transition: width 0.9s linear;"></div>
+                <div class="absolute inset-0 bg-gradient-to-r from-transparent via-seal/20 to-transparent"
+                     style="animation: shimmer 2.2s infinite linear;"></div>
             </div>
-            <div>
-                <div class="text-[9px] font-bold text-ash uppercase tracking-widest">Node Resonance</div>
-                <div class="text-xl text-ink font-serif italic">99.98% Stable</div>
+            <div class="flex justify-between">
+                <span id="overlay-phase" class="precise-data text-[8px] text-ash/30 italic">
+                    Initialising telemetry acquisition...
+                </span>
+                <span id="overlay-pct" class="precise-data text-[8px] text-seal/40 tabular-nums">0%</span>
             </div>
         </div>
-        <div class="parchment-card p-8 flex items-center gap-6 group">
-            <div class="size-12 border border-ink/5 flex items-center justify-center group-hover:border-ink/20 transition-colors">
-                <span class="material-symbols-outlined text-ash/40">hourglass_empty</span>
-            </div>
-            <div>
-                <div class="text-[9px] font-bold text-ash uppercase tracking-widest">Pulse Latency</div>
-                <div class="text-xl text-ink font-serif italic">12ms Inhale</div>
-            </div>
-        </div>
-        <div class="parchment-card p-8 flex items-center gap-6 group">
-            <div class="size-12 border border-ink/5 flex items-center justify-center group-hover:border-ink/20 transition-colors">
-                <span class="material-symbols-outlined text-ash/40">fingerprint</span>
-            </div>
-            <div>
-                <div class="text-[9px] font-bold text-ash uppercase tracking-widest">Active Analytes</div>
-                <div class="text-xl text-ink font-serif italic">02 Observing</div>
-            </div>
-        </div>
+
+        <!-- Rotating flavour message -->
+        <p id="overlay-msg" class="font-serif italic text-sm text-ash/30 text-center min-h-[1.5rem]
+                                   transition-opacity duration-700"></p>
+
+        <!-- Elapsed time -->
+        <p class="precise-data text-[8px] text-ash/20">
+            Elapsed: <span id="overlay-timer">0s</span>
+        </p>
+
+        <p class="precise-data text-[8px] text-ash/15 text-center max-w-xs leading-relaxed">
+            The sweep runs synchronously. This page will redirect automatically when complete.
+        </p>
     </div>
 </div>
+
+<style>
+@keyframes shimmer {
+    0%   { transform: translateX(-100%); }
+    100% { transform: translateX(250%); }
+}
+</style>
+
+<script>
+(function () {
+    const form       = document.getElementById('scan-form');
+    const overlay    = document.getElementById('scan-overlay');
+    const bar        = document.getElementById('overlay-bar');
+    const pctLabel   = document.getElementById('overlay-pct');
+    const phaseEl    = document.getElementById('overlay-phase');
+    const msgEl      = document.getElementById('overlay-msg');
+    const timerEl    = document.getElementById('overlay-timer');
+    const targetDisp = document.getElementById('overlay-target-display');
+
+    /* Phase milestones with labels */
+    const phases = [
+        { pct:  5, label: 'Initiating network probe...' },
+        { pct: 15, label: 'Sending SYN packets to target...' },
+        { pct: 28, label: 'Mapping open port vectors...' },
+        { pct: 42, label: 'Fingerprinting services & versions...' },
+        { pct: 56, label: 'Parsing raw telemetry...' },
+        { pct: 68, label: 'Cross-referencing Knowledge Base...' },
+        { pct: 78, label: 'Applying risk enrichment (CVSS × EPSS)...' },
+        { pct: 88, label: 'Running lifecycle analysis...' },
+        { pct: 95, label: 'Persisting findings to the ledger...' },
+    ];
+
+    /* Flavour messages that rotate every ~4.5 s */
+    const flavour = [
+        "Patience is the first discipline of the observatory.",
+        "Every open port is a question waiting to be answered.",
+        "The scan does not rush — the network reveals itself.",
+        "Telemetry is accumulating. The dossier takes shape.",
+        "Risk is being calculated: CVSS × (1 + EPSS).",
+        "A thorough sweep leaves no shadow unexamined.",
+        "Lifecycle patterns are being traced across history.",
+    ];
+
+    let currentPct = 0, flavIdx = 0;
+
+    /* Smoothly animate bar from currentPct → targetPct */
+    function animateTo(targetPct, onDone) {
+        if (currentPct >= targetPct) { onDone && onDone(); return; }
+        const step = () => {
+            currentPct = Math.min(currentPct + 1, targetPct);
+            bar.style.width = currentPct + '%';
+            pctLabel.textContent = currentPct + '%';
+            if (currentPct < targetPct) {
+                setTimeout(step, 60 + Math.random() * 80);
+            } else {
+                onDone && onDone();
+            }
+        };
+        setTimeout(step, 60);
+    }
+
+    /* Walk through phases sequentially */
+    function runPhases(idx) {
+        if (idx >= phases.length) return; // hold at 95 % until redirect
+        phaseEl.textContent = phases[idx].label;
+        animateTo(phases[idx].pct, () => {
+            const pause = 900 + Math.random() * 1400;
+            setTimeout(() => runPhases(idx + 1), pause);
+        });
+    }
+
+    form.addEventListener('submit', function () {
+        /* Populate target label */
+        const tv = document.getElementById('id_target').value;
+        if (tv) targetDisp.textContent = 'Target: ' + tv;
+
+        /* Reveal overlay */
+        overlay.classList.remove('hidden');
+        overlay.classList.add('flex');
+
+        /* Elapsed timer */
+        let secs = 0;
+        const timerInterval = setInterval(() => {
+            timerEl.textContent = (++secs) + 's';
+        }, 1000);
+
+        /* Flavour rotator */
+        msgEl.textContent = flavour[0];
+        setInterval(() => {
+            msgEl.style.opacity = '0';
+            setTimeout(() => {
+                flavIdx = (flavIdx + 1) % flavour.length;
+                msgEl.textContent = flavour[flavIdx];
+                msgEl.style.opacity = '1';
+            }, 700);
+        }, 4500);
+
+        /* Kick off progress simulation */
+        setTimeout(() => runPhases(0), 300);
+    });
+})();
+</script>
 {% endblock %}

@@ -1,0 +1,124 @@
+/* 
+   SAERA 2.2 - Components CSS
+   Encapsulates reusable cards, status badges, threat seals, buttons, and navigation elements.
+*/
+
+/* 1. The Core Archival Card */
+.parchment-card {
+    background: var(--surface);
+    border: 1px solid var(--border-subtle);
+    padding: var(--space-md);
+    position: relative;
+    transition: var(--transition-slow);
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.02);
+}
+
+.parchment-card:hover {
+    border-color: var(--seal-red);
+    box-shadow: 0 8px 32px rgba(159, 59, 50, 0.08);
+}
+
+body.dark .parchment-card {
+    background: rgba(18, 18, 18, 0.8);
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.4);
+}
+
+body.dark .parchment-card:hover {
+    background: rgba(24, 24, 24, 0.9);
+    box-shadow: 0 0 20px rgba(140, 64, 54, 0.15);
+}
+
+/* 2. Reusable Severity Seals */
+.severity-seal {
+    font-family: var(--font-sans);
+    font-size: 10px;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    padding: var(--space-2xs) var(--space-xs);
+    border: 1px solid currentColor;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.severity-seal.critical {
+    color: var(--seal-red);
+    background: rgba(159, 59, 50, 0.05);
+}
+
+.severity-seal.high {
+    color: var(--amber-brass);
+    background: rgba(184, 142, 82, 0.05);
+}
+
+.severity-seal.medium {
+    color: var(--mist-blue);
+    background: rgba(93, 107, 117, 0.05);
+}
+
+.severity-seal.low {
+    color: var(--bamboo-green);
+    background: rgba(78, 107, 87, 0.05);
+}
+
+/* 3. Temporal Drift Badges */
+.drift-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--space-xs);
+    font-family: var(--font-mono);
+    font-size: 11px;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+}
+
+.drift-badge.escalating {
+    color: var(--seal-red);
+}
+
+.drift-badge.improving {
+    color: var(--bamboo-green);
+}
+
+.drift-badge.stabilized {
+    color: var(--ash-gray);
+}
+
+/* 4. Action Buttons */
+.saera-action-btn {
+    font-family: var(--font-sans);
+    font-size: 11px;
+    text-transform: uppercase;
+    letter-spacing: 0.15em;
+    padding: var(--space-sm) var(--space-md);
+    background: transparent;
+    border: 1px solid var(--border-subtle);
+    color: var(--ink-black);
+    cursor: pointer;
+    transition: var(--transition-fast);
+}
+
+.saera-action-btn:hover {
+    border-color: var(--seal-red);
+    color: var(--seal-red);
+}
+
+/* 5. Navigation Items */
+.saera-nav-link {
+    font-family: var(--font-sans);
+    font-size: 11px;
+    text-transform: uppercase;
+    letter-spacing: 0.25em;
+    color: var(--ash-gray);
+    padding: var(--space-sm) 0;
+    border-bottom: 1px solid transparent;
+    transition: var(--transition-fast);
+    display: flex;
+    align-items: center;
+    gap: var(--space-sm);
+}
+
+.saera-nav-link:hover, .saera-nav-link.active {
+    color: var(--ink-black);
+    border-bottom-color: var(--ink-black);
+}

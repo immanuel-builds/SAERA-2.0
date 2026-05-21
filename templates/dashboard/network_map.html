@@ -1,59 +1,91 @@
 {% extends 'base.html' %}
 {% load static %}
 
-{% block title %}Signal Topography - SAERA{% endblock %}
+{% block title %}Network Map - NetVuln{% endblock %}
 
 {% block extra_css %}
 <style>
+    #network-map-container {
+        width: 100%;
+        height: 85vh;
+        position: relative;
+        transition: all 0.5s cubic-bezier(0.22, 1, 0.36, 1);
+    }
+    #network-map-container.fullscreen {
+        position: fixed;
+        inset: 0;
+        z-index: 1000;
+        height: 100vh;
+        background: var(--bg-parchment);
+    }
     #network-map {
         width: 100%;
-        height: 700px;
+        height: 100%;
         background-color: transparent;
     }
+    .map-controls {
+        opacity: 0.8;
+        transition: opacity 0.3s;
+    }
+    .map-controls:hover { opacity: 1; }
 </style>
 {% endblock %}
 
 {% block content %}
-<div class="animate-in fade-in duration-1000">
-    <div class="flex justify-between items-end mb-12">
-        <div>
-            <span class="text-[10px] font-bold text-ash uppercase tracking-[0.4em] block mb-2">Network Topology</span>
-            <h1 class="text-5xl text-ink font-serif tracking-tighter">Signal Topography</h1>
-            <p class="text-sm text-ink/60 font-serif italic mt-2">Visualizing the invisible relationships between digital sectors.</p>
+<div class="animate-fade-in space-y-12">
+    <!-- Network Map Header -->
+    <div class="flex justify-between items-end border-b border-ink/5 pb-8">
+        <div class="space-y-2">
+            <span class="precise-data text-xs opacity-40">Visual Overview</span>
+            <h1 class="atmospheric-h1">Network Map</h1>
+            <p class="font-serif italic text-lg text-ash leading-relaxed max-w-3xl">
+                A simple visual map of targets, open services, and findings.
+            </p>
         </div>
-        <div class="flex gap-8">
-            <div class="flex items-center gap-3">
-                <span class="w-2 h-2 rounded-full bg-bamboo shadow-[0_0_8px_rgba(78,107,87,0.4)]"></span>
-                <span class="text-[9px] font-bold text-ash uppercase tracking-widest">Stable Presence</span>
-            </div>
-            <div class="flex items-center gap-3">
-                <span class="w-2 h-2 rounded-full bg-ash shadow-[0_0_8px_rgba(107,107,107,0.4)]"></span>
-                <span class="text-[9px] font-bold text-ash uppercase tracking-widest">Observing...</span>
-            </div>
-            <div class="flex items-center gap-3">
-                <span class="w-2 h-2 rounded-full bg-seal shadow-[0_0_8px_rgba(159,59,50,0.4)] animate-pulse"></span>
-                <span class="text-[9px] font-bold text-seal uppercase tracking-widest">Critical Anomaly</span>
+
+        <!-- Filters Overlay -->
+        <div class="flex flex-col gap-4 text-right">
+            <div class="flex items-center justify-end gap-6 bg-ink/5 px-6 py-3 border border-ink/10">
+                <label class="flex items-center gap-2 cursor-pointer group">
+                    <input type="checkbox" checked onchange="filterMap('target', this.checked)" class="w-3 h-3 rounded-none bg-transparent border-ink/20 text-ink focus:ring-0">
+                    <span class="precise-data text-[10px] opacity-40 group-hover:opacity-100 transition-opacity">Targets</span>
+                </label>
+                <label class="flex items-center gap-2 cursor-pointer group">
+                    <input type="checkbox" checked onchange="filterMap('service', this.checked)" class="w-3 h-3 rounded-none bg-transparent border-ink/20 text-ink focus:ring-0">
+                    <span class="precise-data text-[10px] opacity-40 group-hover:opacity-100 transition-opacity">Services</span>
+                </label>
+                <label class="flex items-center gap-2 cursor-pointer group">
+                    <input type="checkbox" checked onchange="filterMap('vulnerability', this.checked)" class="w-3 h-3 rounded-none bg-transparent border-ink/20 text-ink focus:ring-0">
+                    <span class="precise-data text-[10px] opacity-40 group-hover:opacity-100 transition-opacity">Findings</span>
+                </label>
+                <label class="flex items-center gap-2 cursor-pointer group border-l border-ink/10 pl-6">
+                    <input type="checkbox" onchange="toggleSuppressedFilter(this.checked)" class="w-3 h-3 rounded-none bg-transparent border-ink/20 text-ink focus:ring-0">
+                    <span class="precise-data text-[10px] opacity-40 group-hover:opacity-100 transition-opacity text-seal">Hide Suppressed</span>
+                </label>
+                <label class="flex items-center gap-2 cursor-pointer group">
+                    <input type="checkbox" onchange="toggleCollapsePorts(this.checked)" class="w-3 h-3 rounded-none bg-transparent border-ink/20 text-ink focus:ring-0">
+                    <span class="precise-data text-[10px] opacity-40 group-hover:opacity-100 transition-opacity">Collapse Ports</span>
+                </label>
             </div>
         </div>
     </div>
 
-    <div class="parchment-card p-0 overflow-hidden relative border border-ink/5 group">
-        <!-- Background Sumi-e Landscape Asset -->
-        <div class="absolute inset-0 opacity-10 mix-blend-multiply pointer-events-none transition-transform duration-[20s] group-hover:scale-110" 
-             style="background-image: url('{% static 'img/jap 10.png' %}'); background-size: cover; background-position: center;"></div>
-        
-        <div id="network-map" class="relative z-10"></div>
-        
+    <!-- Map Canvas Container -->
+    <div id="network-map-container" class="parchment-card p-0 overflow-hidden relative border-none bg-transparent">
+        <div id="network-map" class="relative z-10 cursor-grab active:cursor-grabbing"></div>
+
         <!-- Controls Overlay -->
-        <div class="absolute bottom-10 left-10 z-20 flex gap-4">
-            <button onclick="network.stabilize()" class="w-10 h-10 flex items-center justify-center border border-ink/5 bg-background/80 hover:bg-ink/5 transition-all">
-                <span class="material-symbols-outlined text-ash text-sm">recenter</span>
+        <div class="absolute bottom-12 left-12 z-20 flex gap-6 map-controls">
+            <button onclick="toggleFullscreen()" class="saera-action-btn py-3 px-6 text-[10px]">
+                <span class="material-symbols-outlined text-sm align-middle mr-2">fullscreen</span>
+                Focus Mode
             </button>
-            <button class="px-6 flex items-center gap-3 border border-ink/5 bg-background/80 text-[9px] font-bold text-ash uppercase tracking-widest hover:bg-ink/5 transition-all">
-                <span class="material-symbols-outlined text-xs">auto_graph</span>
-                Force-Directed Flow
-            </button>
+            <button onclick="network.stabilize()" class="saera-action-btn py-3 px-6 text-[10px]">Re-Align</button>
+
         </div>
+
+        <!-- Subtle Watermark -->
+        <div class="absolute top-12 right-12 fingerprint-seal opacity-[0.05] pointer-events-none"></div>
     </div>
 </div>
 
@@ -61,77 +93,184 @@
 <script src="https://unpkg.com/vis-network/standalone/umd/vis-network.min.js"></script>
 <script>
     let network;
+    let allNodesData;
+    let allEdgesData;
+    let nodesView;
+
+    function toggleFullscreen() {
+        const container = document.getElementById('network-map-container');
+        container.classList.toggle('fullscreen');
+        network.setSize('100%', container.classList.contains('fullscreen') ? '100vh' : '85vh');
+        network.fit();
+    }
+
+    let hideSuppressed = false;
+    let collapsePorts = false;
+    let categoryVisibility = {
+        target: true,
+        service: true,
+        vulnerability: true
+    };
+
+    function filterMap(group, isVisible) {
+        categoryVisibility[group] = isVisible;
+        applyFilters();
+    }
+
+    function toggleSuppressedFilter(checked) {
+        hideSuppressed = checked;
+        applyFilters();
+    }
+
+    function toggleCollapsePorts(checked) {
+        collapsePorts = checked;
+        applyFilters();
+    }
+
+    function applyFilters() {
+        const allNodes = allNodesData.get();
+        const updates = allNodes.map(node => {
+            let hidden = false;
+
+            // 1. Basic Category visibility check
+            if (!categoryVisibility[node.group]) {
+                hidden = true;
+            }
+
+            // 2. Hide Suppressed check
+            if (hideSuppressed && node.is_suppressed) {
+                hidden = true;
+            }
+
+            // 3. Collapse Redundant Ports check
+            if (collapsePorts && node.group === 'service') {
+                const connected = network.getConnectedNodes(node.id);
+                // If the port has no associated active vulnerability nodes connected, collapse/hide it
+                const hasVulns = connected.some(id => String(id).startsWith('vuln_'));
+                if (!hasVulns) {
+                    hidden = true;
+                }
+            }
+
+            return { id: node.id, hidden: hidden };
+        });
+
+        allNodesData.update(updates);
+    }
+
     document.addEventListener('DOMContentLoaded', function() {
-        const nodes = new vis.DataSet({{ nodes_json|safe }});
-        const edges = new vis.DataSet({{ edges_json|safe }});
+        let rawNodes = {{ nodes_json|safe }};
+        let rawEdges = {{ edges_json|safe }};
+
+        // Performance Safeguard: Limit topology to 150 nodes maximum to guarantee smooth visual transitions
+        if (rawNodes.length > 150) {
+            console.warn("Performance safeguard: Node count exceeds 150. Collapsing minor nodes to prevent browser latency.");
+            rawNodes = rawNodes.slice(0, 150);
+            const activeNodeIds = new Set(rawNodes.map(n => n.id));
+            rawEdges = rawEdges.filter(e => activeNodeIds.has(e.from) && activeNodeIds.has(e.to));
+
+            const banner = document.createElement('div');
+            banner.className = 'absolute top-12 left-12 z-20 bg-seal/10 border border-seal/20 text-seal px-4 py-2 text-[10px] precise-data uppercase';
+            banner.innerHTML = 'Topology Decoupled: Complex Networks Collapsed for Smooth Display';
+            document.getElementById('network-map-container').appendChild(banner);
+        }
+
+        allNodesData = new vis.DataSet(rawNodes);
+        allEdgesData = new vis.DataSet(rawEdges);
+        nodesView = new vis.DataView(allNodesData);
 
         const container = document.getElementById('network-map');
-        const data = { nodes: nodes, edges: edges };
-        
-        const options = {
-            nodes: {
-                font: {
-                    face: 'Zen Old Mincho',
-                    color: '#1A1A1A',
-                    size: 14,
-                    bold: { color: '#1A1A1A', size: 14 }
+        const data = { nodes: nodesView, edges: allEdgesData };
+
+        const getNetworkOptions = () => {
+            const style = getComputedStyle(document.body);
+            const inkColor = style.getPropertyValue('--ink-black').trim() || '#1A1A1A';
+            const bgColor = style.getPropertyValue('--bg-parchment').trim() || '#EAE2D6';
+            const sealColor = style.getPropertyValue('--seal-red').trim() || '#9F3B32';
+            const ashColor = style.getPropertyValue('--ash-gray').trim() || '#6B6B6B';
+
+            return {
+                nodes: {
+                    font: {
+                        face: 'Zen Old Mincho',
+                        color: inkColor,
+                        size: 14,
+                        bold: { color: inkColor, size: 14 }
+                    },
+                    borderWidth: 1,
+                    borderWidthSelected: 2,
+                    color: {
+                        border: ashColor + '44',
+                        background: bgColor,
+                        highlight: { border: sealColor, background: bgColor }
+                    },
+                    shape: 'dot',
+                    size: 20,
+                    shadow: { enabled: true, color: 'rgba(0,0,0,0.15)', size: 10, x: 0, y: 5 }
                 },
-                borderWidth: 1,
-                borderWidthSelected: 2,
-                shadow: {
-                    enabled: true,
-                    color: 'rgba(0,0,0,0.1)',
-                    size: 5,
-                    x: 2,
-                    y: 2
-                }
-            },
-            edges: {
-                width: 1,
-                color: { 
-                    color: '#1A1A1A', 
-                    highlight: '#9F3B32',
-                    hover: '#1A1A1A',
-                    opacity: 0.1 
+                groups: {
+                    target: { shape: 'dot', size: 30, color: { background: inkColor, border: inkColor } },
+                    service: { shape: 'dot', size: 16, color: { background: bgColor, border: ashColor } },
+                    vulnerability: { shape: 'dot', size: 12, color: { background: sealColor, border: sealColor } }
                 },
-                smooth: {
-                    type: 'curvedCW',
-                    forceDirection: 'none',
-                    roundness: 0.3
-                }
-            },
-            interaction: {
-                hover: true,
-                tooltipDelay: 200,
-                zoomView: true
-            },
-            physics: {
-                forceAtlas2Based: {
-                    gravitationalConstant: -100,
-                    centralGravity: 0.005,
-                    springLength: 150,
-                    springConstant: 0.18,
-                    avoidOverlap: 1.5
+                edges: {
+                    width: 0.5,
+                    color: { color: ashColor, highlight: sealColor, opacity: 0.15 },
+                    smooth: { type: 'continuous', roundness: 0.4 },
+                    arrows: { to: { enabled: false } }
                 },
-                maxVelocity: 50,
-                solver: 'forceAtlas2Based',
-                timestep: 0.35,
-                stabilization: { 
-                    iterations: 150,
-                    updateInterval: 25 
+                interaction: { hover: true, tooltipDelay: 400, hideEdgesOnDrag: true },
+                physics: {
+                    forceAtlas2Based: { gravitationalConstant: -180, centralGravity: 0.01, springLength: 200, springConstant: 0.02 },
+                    solver: 'forceAtlas2Based',
+                    stabilization: { iterations: 200 },
+                    timestep: 0.25 // Slower, "underwater" meditative movement
                 }
-            }
+            };
         };
 
-        network = new vis.Network(container, data, options);
+        network = new vis.Network(container, data, getNetworkOptions());
 
-        // Click interaction
-        network.on("click", function (params) {
-            if (params.nodes.length > 0) {
-                const nodeId = params.nodes[0];
-                const node = nodes.get(nodeId);
-                console.log("Selected Node:", node.label);
-            }
+        // Highlight/Dim Interaction (Trace selection)
+        network.on("selectNode", function (params) {
+            const selectedId = params.nodes[0];
+            const connectedNodes = network.getConnectedNodes(selectedId);
+            const allNodes = allNodesData.getIds();
+
+            // Dim unconnected nodes to a faint trace (0.15 opacity)
+            allNodesData.update(allNodes.map(id => ({
+                id: id,
+                opacity: (id === selectedId || connectedNodes.includes(id)) ? 1.0 : 0.15
+            })));
+
+            // Highlight connected edges
+            const allEdges = allEdgesData.get();
+            allEdgesData.update(allEdges.map(edge => ({
+                id: edge.id,
+                color: { opacity: (edge.from === selectedId || edge.to === selectedId) ? 0.8 : 0.05 }
+            })));
+        });
+
+        network.on("deselectNode", function (params) {
+            const allNodes = allNodesData.getIds();
+            allNodesData.update(allNodes.map(id => ({ id: id, opacity: 1.0 })));
+
+            const allEdges = allEdgesData.get();
+            allEdgesData.update(allEdges.map(edge => ({
+                id: edge.id,
+                color: { opacity: 0.2 }
+            })));
+        });
+
+        // Listen for Dark/Light Theme Switch to recalculate node styles instantly
+        const observer = new MutationObserver(() => {
+            network.setOptions(getNetworkOptions());
+        });
+        observer.observe(document.body, { attributes: true, attributeFilter: ['class'] });
+
+        window.addEventListener('resize', () => {
+            const container = document.getElementById('network-map-container');
+            network.setSize('100%', container.classList.contains('fullscreen') ? '100vh' : '85vh');
         });
     });
 </script>

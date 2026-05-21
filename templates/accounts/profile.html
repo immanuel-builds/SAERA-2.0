@@ -1,7 +1,7 @@
 {% extends 'base.html' %}
 {% load static %}
 
-{% block title %}Security Clearance Profile - SAERA{% endblock %}
+{% block title %}Profile - NetVuln{% endblock %}
 
 {% block content %}
 <div class="row g-4">
@@ -53,7 +53,7 @@
                         <thead>
                             <tr>
                                 <th>Directive</th>
-                                <th>Intelligence Output</th>
+                                <th>Scan Output</th>
                                 <th>Timestamp</th>
                             </tr>
                         </thead>
@@ -78,7 +78,7 @@
         <div class="cyber-card">
             <div class="card-header d-flex justify-content-between align-items-center">
                 <h5 class="mb-0 text-white"><i class="bi bi-shield-check me-2"></i> Security Assessments</h5>
-                <a href="{% url 'scan_list' %}" class="btn btn-sm btn-outline-cyan">Access Archive</a>
+                <a href="{% url 'scan_list' %}" class="btn btn-sm btn-outline-cyan">View Scans</a>
             </div>
             <div class="card-body p-0">
                 <div class="table-responsive">

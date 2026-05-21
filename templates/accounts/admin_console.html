@@ -1,196 +1,298 @@
 {% extends 'base.html' %}
 {% load static %}
 
-{% block title %}Engine Core - Silent Observatory Archive{% endblock %}
+{% block title %}Admin Console — NetVuln{% endblock %}
 
 {% block content %}
-<div class="space-y-24 animate-in fade-in duration-1000">
-    <!-- Hero: The Archival Engine -->
-    <div class="flex flex-col gap-4">
-        <h1 class="text-6xl text-ink font-serif font-medium tracking-tight">Engine <span class="text-ash italic">Core</span></h1>
-        <p class="text-lg text-ash max-w-2xl font-serif italic">The silent heartbeat of the observatory. Monitor the relational flux, manage operatives, and maintain the integrity of the chronicle.</p>
+<div class="space-y-20 animate-in fade-in duration-1000">
+
+    <!-- Header -->
+    <div class="flex flex-col gap-3">
+        <div class="flex items-center gap-4">
+            <h1 class="text-5xl text-ink font-serif font-medium tracking-tight">Engine <span class="text-ash italic">Core</span></h1>
+            {% if request.user.is_superuser %}
+            <span class="precise-data text-[8px] px-2 py-0.5 border border-seal/30 text-seal bg-seal/5">SUPERUSER</span>
+            {% endif %}
+        </div>
+        <p class="font-serif italic text-ash text-lg max-w-2xl">System overview — users, activity, diagnostics, and audit trail.</p>
+        <div class="flex gap-4 pt-1">
+            <a href="{% url 'backdoor' %}" class="precise-data text-[9px] hover:text-seal transition-colors opacity-40 hover:opacity-100 flex items-center gap-1">
+                <span class="material-symbols-outlined text-sm">terminal</span> Developer Backdoor
+            </a>
+            <a href="/admin/" target="_blank" class="precise-data text-[9px] hover:text-seal transition-colors opacity-40 hover:opacity-100 flex items-center gap-1">
+                <span class="material-symbols-outlined text-sm">open_in_new</span> Django Admin
+            </a>
+        </div>
     </div>
 
-    <!-- Engine Health Seals -->
-    <div class="grid grid-cols-1 md:grid-cols-4 gap-8">
-        <div class="parchment-card p-8 flex flex-col gap-6">
-            <span class="text-[10px] font-bold text-ash uppercase tracking-widest">Web Server</span>
-            <div class="flex items-center justify-between">
-                <span class="text-xl text-ink font-serif">Django Flux</span>
+    <!-- Stats Grid -->
+    <div class="grid grid-cols-2 md:grid-cols-4 gap-6">
+        <div class="parchment-card p-7 flex flex-col gap-4">
+            <span class="precise-data text-[9px] text-ash uppercase tracking-widest">Operatives</span>
+            <div class="flex items-end justify-between">
+                <span class="text-4xl text-ink font-serif">{{ stats.total_users }}</span>
+                <span class="precise-data text-[8px] text-ash/40">{{ stats.active_users }} active</span>
+            </div>
+            <div class="w-full h-px bg-ink/5"></div>
+            <div class="flex gap-4 text-[9px] precise-data">
+                <span class="text-seal">{{ stats.admin_users }} admin</span>
+                <span class="text-ash/50">{{ stats.analyst_users }} analyst</span>
+            </div>
+        </div>
+        <div class="parchment-card p-7 flex flex-col gap-4">
+            <span class="precise-data text-[9px] text-ash uppercase tracking-widest">Observations</span>
+            <div class="flex items-end justify-between">
+                <span class="text-4xl text-ink font-serif">{{ stats.total_scans }}</span>
+                <span class="precise-data text-[8px] text-ash/40">total scans</span>
+            </div>
+            <div class="w-full h-px bg-ink/5"></div>
+            <div class="flex gap-4 text-[9px] precise-data">
+                <span class="text-bamboo">{{ stats.completed_scans }} done</span>
+                <span class="text-seal">{{ stats.failed_scans }} failed</span>
+            </div>
+        </div>
+        <div class="parchment-card p-7 flex flex-col gap-4">
+            <span class="precise-data text-[9px] text-ash uppercase tracking-widest">Anomalies</span>
+            <div class="flex items-end justify-between">
+                <span class="text-4xl text-seal font-serif">{{ stats.total_vulns }}</span>
+                <span class="precise-data text-[8px] text-ash/40">findings</span>
+            </div>
+            <div class="w-full h-px bg-ink/5"></div>
+            <span class="precise-data text-[8px] text-ash/40">Across all scan jobs</span>
+        </div>
+        <div class="parchment-card p-7 flex flex-col gap-4">
+            <span class="precise-data text-[9px] text-ash uppercase tracking-widest">Scanner</span>
+            <div class="flex items-end justify-between">
+                <span class="text-xl text-ink font-serif">Direct</span>
                 <span class="w-2 h-2 rounded-full bg-bamboo animate-pulse"></span>
             </div>
-            <span class="text-[9px] font-mono text-ash/60 uppercase">System Nominal</span>
-        </div>
-        <div class="parchment-card p-8 flex flex-col gap-6">
-            <span class="text-[10px] font-bold text-ash uppercase tracking-widest">Task Broker</span>
-            <div class="flex items-center justify-between">
-                <span class="text-xl text-ink font-serif">Redis Signal</span>
-                <span class="w-2 h-2 rounded-full {% if stats.engine_status == 'online' %}bg-bamboo{% else %}bg-seal{% endif %}"></span>
-            </div>
-            <span class="text-[9px] font-mono text-ash/60 uppercase">Port: 6379</span>
-        </div>
-        <div class="parchment-card p-8 flex flex-col gap-6">
-            <span class="text-[10px] font-bold text-ash uppercase tracking-widest">Scanner Node</span>
-            <div class="flex items-center justify-between">
-                <span class="text-xl text-ink font-serif">Celery Pulse</span>
-                <span class="w-2 h-2 rounded-full {% if stats.engine_status == 'online' %}bg-bamboo{% else %}bg-seal{% endif %}"></span>
-            </div>
-            <span class="text-[9px] font-mono text-ash/60 uppercase">Status: {{ stats.engine_status|upper }}</span>
-        </div>
-        <div class="parchment-card p-8 flex flex-col gap-6">
-            <span class="text-[10px] font-bold text-ash uppercase tracking-widest">Data Engine</span>
-            <div class="flex items-center justify-between">
-                <span class="text-xl text-ink font-serif">SQLite Logic</span>
-                <span class="w-2 h-2 rounded-full bg-bamboo"></span>
-            </div>
-            <span class="text-[9px] font-mono text-ash/60 uppercase">Relational Sync</span>
+            <div class="w-full h-px bg-ink/5"></div>
+            <span class="precise-data text-[8px] text-bamboo uppercase">{{ stats.engine_status }}</span>
         </div>
     </div>
 
-    <!-- The Living Archive Map -->
-    <div class="parchment-card p-12 min-h-[500px] overflow-hidden flex flex-col justify-between">
-        <div class="relative z-10 space-y-2">
-            <h3 class="text-3xl text-ink font-serif">The Living Map</h3>
-            <p class="text-[10px] text-ash uppercase tracking-[0.3em]">Active Intelligence Nodes • Relational Flow</p>
-        </div>
-        
-        <!-- Abstract Ink Map Visualization -->
-        <div class="absolute inset-0 flex items-center justify-center pointer-events-none">
-            <svg class="w-full h-full opacity-10" viewBox="0 0 1000 500">
-                <defs>
-                    <filter id="inkStain">
-                        <feTurbulence type="fractalNoise" baseFrequency="0.05" numOctaves="2" result="noise" />
-                        <feDisplacementMap in="SourceGraphic" in2="noise" scale="10" />
-                    </filter>
-                </defs>
-                <g filter="url(#inkStain)">
-                    <circle cx="500" cy="250" r="40" fill="currentColor" class="text-ink" />
-                    <circle cx="300" cy="150" r="20" fill="currentColor" class="text-ash" />
-                    <circle cx="700" cy="150" r="15" fill="currentColor" class="text-ash" />
-                    <circle cx="400" cy="350" r="25" fill="currentColor" class="text-ash" />
-                    <circle cx="650" cy="380" r="30" fill="currentColor" class="text-ash" />
-                </g>
-                <path d="M500,250 Q400,200 300,150" fill="none" stroke="currentColor" stroke-width="0.5" stroke-dasharray="2 4" class="text-ink" />
-                <path d="M500,250 Q600,200 700,150" fill="none" stroke="currentColor" stroke-width="0.5" stroke-dasharray="2 4" class="text-ink" />
-                <path d="M500,250 Q450,300 400,350" fill="none" stroke="currentColor" stroke-width="0.5" stroke-dasharray="2 4" class="text-ink" />
-                <path d="M500,250 Q575,315 650,380" fill="none" stroke="currentColor" stroke-width="0.5" stroke-dasharray="2 4" class="text-ink" />
-            </svg>
-            <div class="absolute inset-0 bg-gradient-to-t from-background to-transparent opacity-40"></div>
-        </div>
+    <!-- Main Body: Personnel + Field Journal -->
+    <div class="grid grid-cols-1 lg:grid-cols-12 gap-14">
 
-        <div class="flex gap-12 self-end relative z-10">
-            <div class="text-right">
-                <div class="text-[9px] font-bold text-ash uppercase tracking-widest">Operatives</div>
-                <div class="text-4xl text-ink font-serif">{{ stats.total_users }}</div>
+        <!-- Personnel Archive — improved table -->
+        <div class="lg:col-span-7 parchment-card p-0 overflow-hidden flex flex-col">
+            <div class="px-10 py-6 border-b border-ink/5 flex justify-between items-center">
+                <div>
+                    <h3 class="font-serif text-xl text-ink">Personnel Archive</h3>
+                    <p class="precise-data text-[9px] text-ash/40 mt-0.5">{{ stats.total_users }} registered operatives</p>
+                </div>
+                <div class="flex items-center gap-3">
+                    <input type="text" id="user-search" placeholder="Search…"
+                           class="bg-transparent border-b border-ink/10 text-xs py-1 px-2 w-32 focus:outline-none focus:border-ink font-mono placeholder:opacity-30 transition-all">
+                </div>
             </div>
-            <div class="text-right border-l border-ink/5 pl-12">
-                <div class="text-[9px] font-bold text-ash uppercase tracking-widest">Observations</div>
-                <div class="text-4xl text-ink font-serif">{{ stats.total_scans }}</div>
-            </div>
-            <div class="text-right border-l border-ink/5 pl-12">
-                <div class="text-[9px] font-bold text-ash uppercase tracking-widest">Anomalies</div>
-                <div class="text-4xl text-seal font-serif">{{ stats.total_vulns }}</div>
-            </div>
-        </div>
-    </div>
-
-    <!-- Data Registry & Personnel Archive -->
-    <div class="grid grid-cols-1 lg:grid-cols-12 gap-16">
-        <!-- Personnel Archive -->
-        <div class="lg:col-span-7 parchment-card p-0 flex flex-col">
-            <div class="p-10 border-b border-ink/5 flex justify-between items-center">
-                <h3 class="text-2xl text-ink font-serif">Personnel Archive</h3>
-                <span class="text-[10px] font-mono text-ash uppercase tracking-widest">{{ stats.total_users }} Registered</span>
-            </div>
-            <div class="overflow-x-auto">
-                <table class="w-full text-left font-sans">
-                    <thead class="bg-ash/5">
+            <div class="overflow-x-auto flex-1">
+                <table class="w-full text-left font-sans" id="personnel-table">
+                    <thead class="bg-ash/5 sticky top-0">
                         <tr>
-                            <th class="px-10 py-4 text-[10px] font-bold text-ash uppercase tracking-wider">Operative</th>
-                            <th class="px-10 py-4 text-[10px] font-bold text-ash uppercase tracking-wider">Clearance</th>
-                            <th class="px-10 py-4 text-[10px] font-bold text-ash uppercase tracking-wider">Action</th>
+                            <th class="px-8 py-4 text-[9px] font-bold text-ash uppercase tracking-wider">Operative</th>
+                            <th class="px-8 py-4 text-[9px] font-bold text-ash uppercase tracking-wider">Email</th>
+                            <th class="px-8 py-4 text-[9px] font-bold text-ash uppercase tracking-wider">Clearance</th>
+                            <th class="px-8 py-4 text-[9px] font-bold text-ash uppercase tracking-wider">Scans</th>
+                            <th class="px-8 py-4 text-[9px] font-bold text-ash uppercase tracking-wider">Joined</th>
+                            <th class="px-8 py-4 text-[9px] font-bold text-ash uppercase tracking-wider">Status</th>
+                            <th class="px-8 py-4 text-[9px] font-bold text-ash uppercase tracking-wider">Action</th>
                         </tr>
                     </thead>
-                    <tbody class="divide-y divide-ink/5">
-                        {% for user in new_users %}
-                        <tr class="hover:bg-ash/5 transition-all">
-                            <td class="px-10 py-6">
-                                <div class="flex items-center gap-4">
-                                    <div class="size-8 flex items-center justify-center font-serif text-ash border border-ink/10">
-                                        {{ user.username|make_list|first|upper }}
+                    <tbody class="divide-y divide-ink/5" id="personnel-body">
+                        {% for u in new_users %}
+                        <tr class="hover:bg-ash/5 transition-all user-row" data-username="{{ u.username|lower }}" data-email="{{ u.email|lower }}">
+                            <td class="px-8 py-5">
+                                <div class="flex items-center gap-3">
+                                    <div class="w-7 h-7 flex items-center justify-center font-serif text-ash border border-ink/10 text-sm shrink-0">
+                                        {{ u.username|make_list|first|upper }}
                                     </div>
-                                    <span class="text-sm font-medium text-ink">{{ user.username }}</span>
+                                    <span class="text-sm font-medium text-ink">{{ u.username }}</span>
                                 </div>
                             </td>
-                            <td class="px-10 py-6">
-                                <span class="severity-seal text-[9px]">
-                                    {{ user.role|upper }}
+                            <td class="px-8 py-5 font-mono text-[10px] text-ash/60">{{ u.email|default:"—" }}</td>
+                            <td class="px-8 py-5">
+                                <span class="precise-data text-[8px] px-2 py-0.5 font-bold uppercase
+                                    {% if u.role == 'admin' %}bg-seal/10 text-seal border border-seal/20
+                                    {% else %}bg-ink/5 text-ash border border-ink/10{% endif %}">
+                                    {{ u.role }}
                                 </span>
                             </td>
-                            <td class="px-10 py-6">
-                                {% if user != request.user %}
-                                <button class="text-ash/40 hover:text-seal transition-colors" 
-                                        onclick="confirmDecommission('{{ user.username }}', '{{ user.id }}')">
-                                    <span class="material-symbols-outlined text-lg">close</span>
+                            <td class="px-8 py-5 font-mono text-sm text-ink font-bold">{{ u.scan_count }}</td>
+                            <td class="px-8 py-5 font-mono text-[10px] text-ash/40">{{ u.date_joined|date:"Y-m-d" }}</td>
+                            <td class="px-8 py-5">
+                                <div class="flex items-center gap-1.5">
+                                    <span class="w-1.5 h-1.5 rounded-full {% if u.is_active %}bg-bamboo{% else %}bg-ash/30{% endif %}"></span>
+                                    <span class="precise-data text-[8px] {% if u.is_active %}text-bamboo{% else %}text-ash/30{% endif %}">
+                                        {% if u.is_active %}Active{% else %}Inactive{% endif %}
+                                    </span>
+                                </div>
+                            </td>
+                            <td class="px-8 py-5">
+                                {% if u != request.user %}
+                                <button class="text-ash/30 hover:text-seal transition-colors"
+                                        onclick="confirmDecommission('{{ u.username }}', '{{ u.id }}')">
+                                    <span class="material-symbols-outlined text-base">close</span>
                                 </button>
+                                {% else %}
+                                <span class="precise-data text-[8px] text-ash/20">—</span>
                                 {% endif %}
                             </td>
                         </tr>
+                        {% empty %}
+                        <tr><td colspan="7" class="px-8 py-12 text-center font-serif italic text-ash/30 text-sm">No operatives registered.</td></tr>
                         {% endfor %}
                     </tbody>
                 </table>
             </div>
         </div>
 
-        <!-- Audit Stream: The Field Journal -->
-        <div class="lg:col-span-5 flex flex-col gap-8">
-            <div class="flex justify-between items-center px-2">
-                <h3 class="text-2xl text-ink font-serif">The Field Journal</h3>
-                <span class="text-[10px] font-mono text-ash uppercase tracking-widest">Real-time Stream</span>
+        <!-- Field Journal: Audit Stream -->
+        <div class="lg:col-span-5 flex flex-col gap-6">
+            <div class="flex justify-between items-center px-1">
+                <div>
+                    <h3 class="font-serif text-xl text-ink">Field Journal</h3>
+                    <p class="precise-data text-[9px] text-ash/40 mt-0.5">Immutable audit stream</p>
+                </div>
+                <span class="precise-data text-[9px] text-ash/40 uppercase">Live</span>
             </div>
-            <div class="terminal-window h-[500px] overflow-y-auto custom-scrollbar">
-                <div class="space-y-8">
-                    {% for log in recent_logs %}
-                    <div class="flex gap-6 group">
-                        <span class="text-[10px] font-mono text-ash/40 mt-1 whitespace-nowrap">{{ log.created_at|date:"H:i:s" }}</span>
-                        <div class="flex flex-col gap-2">
-                            <span class="text-sm font-bold text-ink group-hover:text-seal transition-colors tracking-tight">{{ log.get_action_display }}</span>
-                            <p class="text-xs text-ash/80 leading-relaxed font-serif italic">{{ log.description }}</p>
-                        </div>
+            <div class="terminal-window h-[520px] overflow-y-auto custom-scrollbar space-y-6">
+                {% for log in recent_logs %}
+                <div class="flex gap-5 group">
+                    <span class="text-[9px] font-mono text-ash/30 mt-0.5 whitespace-nowrap shrink-0">{{ log.created_at|date:"H:i:s" }}</span>
+                    <div class="flex flex-col gap-1 min-w-0">
+                        <span class="text-xs font-bold text-ink group-hover:text-seal transition-colors tracking-tight">
+                            {{ log.get_action_display }}
+                            {% if log.user %}<span class="font-normal text-ash/60"> · {{ log.user.username }}</span>{% endif %}
+                        </span>
+                        <p class="text-xs text-ash/70 leading-relaxed font-serif italic truncate" title="{{ log.description }}">{{ log.description }}</p>
+                        {% if log.ip_address %}
+                        <span class="precise-data text-[8px] text-ash/25 font-mono">{{ log.ip_address }}</span>
+                        {% endif %}
                     </div>
-                    {% endfor %}
+                </div>
+                {% empty %}
+                <p class="font-serif italic text-xs text-ash/30 text-center pt-16">No audit entries yet.</p>
+                {% endfor %}
+            </div>
+        </div>
+    </div>
+
+    <!-- System Diagnostics -->
+    <div class="parchment-card p-0 overflow-hidden">
+        <div class="px-10 py-6 border-b border-ink/5 flex justify-between items-center">
+            <div>
+                <h3 class="font-serif text-xl text-ink">System Diagnostics</h3>
+                <p class="precise-data text-[9px] text-ash/40 mt-0.5">Parser latency · Lifecycle metrics · Ingestion telemetry</p>
+            </div>
+            <span class="precise-data text-[9px] px-2 py-0.5 bg-bamboo/10 text-bamboo">All Systems Nominal</span>
+        </div>
+        <div class="grid grid-cols-1 md:grid-cols-3">
+            <!-- Health Log Table -->
+            <div class="md:col-span-2 overflow-x-auto border-r border-ink/5">
+                <table class="w-full text-left text-xs">
+                    <thead class="bg-ash/5">
+                        <tr>
+                            <th class="px-8 py-4 text-[9px] font-bold text-ash uppercase tracking-wider">Operation</th>
+                            <th class="px-8 py-4 text-[9px] font-bold text-ash uppercase tracking-wider">Duration</th>
+                            <th class="px-8 py-4 text-[9px] font-bold text-ash uppercase tracking-wider">Status</th>
+                            <th class="px-8 py-4 text-[9px] font-bold text-ash uppercase tracking-wider">Recorded</th>
+                        </tr>
+                    </thead>
+                    <tbody class="divide-y divide-ink/5 font-mono text-[10px] text-ash/70">
+                        {% for log in health_logs %}
+                        <tr class="hover:bg-ash/5 transition-all">
+                            <td class="px-8 py-4 text-ink font-bold font-sans text-xs">{{ log.metric_name }}</td>
+                            <td class="px-8 py-4">{{ log.duration_ms|floatformat:1 }} ms</td>
+                            <td class="px-8 py-4">
+                                <span class="precise-data text-[8px] px-1.5 py-0.5
+                                    {% if log.status == 'success' %}bg-bamboo/10 text-bamboo{% else %}bg-seal/10 text-seal{% endif %}">
+                                    {{ log.status|upper }}
+                                </span>
+                            </td>
+                            <td class="px-8 py-4 text-ash/30">{{ log.created_at|date:"H:i:s" }}</td>
+                        </tr>
+                        {% empty %}
+                        <tr>
+                            <td colspan="4" class="px-8 py-12 text-center font-serif italic text-ash/30">
+                                No telemetry recorded yet. Trigger a scan to generate metrics.
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+            <!-- Performance Reference Card -->
+            <div class="p-10 flex flex-col justify-between gap-8">
+                <div class="space-y-3">
+                    <span class="precise-data text-[9px] text-ash uppercase tracking-widest block">Performance Reference</span>
+                    <p class="font-serif italic text-xs text-ash/60 leading-relaxed">
+                        These thresholds indicate healthy ingestion performance for SAERA 2.0 under standard lab conditions.
+                    </p>
+                </div>
+                <div class="space-y-5 pt-6 border-t border-ink/5">
+                    <div class="flex justify-between items-center">
+                        <span class="precise-data text-[9px] text-ash uppercase">XML Parse</span>
+                        <span class="font-mono text-xs text-ink">&lt; 15 ms</span>
+                    </div>
+                    <div class="flex justify-between items-center">
+                        <span class="precise-data text-[9px] text-ash uppercase">Lifecycle Shift</span>
+                        <span class="font-mono text-xs text-ink">&lt; 35 ms</span>
+                    </div>
+                    <div class="flex justify-between items-center">
+                        <span class="precise-data text-[9px] text-ash uppercase">Risk Engine</span>
+                        <span class="font-mono text-xs text-ink">&lt; 50 ms</span>
+                    </div>
+                    <div class="flex justify-between items-center">
+                        <span class="precise-data text-[9px] text-ash uppercase">Full Scan (Quick)</span>
+                        <span class="font-mono text-xs text-ink">&lt; 60 sec</span>
+                    </div>
                 </div>
             </div>
         </div>
     </div>
+
 </div>
 
-<!-- Decommission Protocol Modal -->
+<!-- Decommission Modal -->
 <div id="decommission-modal" class="fixed inset-0 z-[200] hidden items-center justify-center p-6 backdrop-blur-sm bg-background/90">
-    <div class="parchment-card max-w-md w-full p-12 space-y-10 animate-in zoom-in duration-300 border-seal/30">
-        <div class="text-center space-y-6">
-            <span class="material-symbols-outlined text-seal text-6xl" style="font-variation-settings: 'wght' 200;">ink_eraser</span>
-            <h3 class="text-3xl text-ink font-serif">Decommission Operative</h3>
-            <p class="text-sm text-ash font-serif italic">Are you certain you wish to erase operative <span id="target-operative" class="text-seal font-bold"></span> from the chronicle? This action is absolute.</p>
+    <div class="parchment-card max-w-md w-full p-12 space-y-10 animate-in zoom-in duration-300 border border-seal/20">
+        <div class="text-center space-y-5">
+            <span class="material-symbols-outlined text-seal text-5xl" style="font-variation-settings:'wght' 200;">person_remove</span>
+            <h3 class="text-2xl text-ink font-serif">Decommission Operative</h3>
+            <p class="text-sm text-ash font-serif italic">
+                Delete user <span id="target-operative" class="text-seal font-bold not-italic"></span>?
+                This removes their account permanently. Audit logs are preserved.
+            </p>
         </div>
         <div class="flex gap-4">
-            <button onclick="closeModal()" class="flex-1 px-8 py-4 border border-ink/10 text-ash text-[10px] font-bold uppercase tracking-widest hover:bg-ash/5 transition-all">Abort</button>
+            <button onclick="closeModal()" class="flex-1 px-6 py-3 border border-ink/10 text-ash text-[10px] font-bold uppercase tracking-widest hover:bg-ash/5 transition-all">Abort</button>
             <form id="decommission-form" method="post" class="flex-1">
                 {% csrf_token %}
-                <button type="submit" class="w-full px-8 py-4 bg-seal text-white text-[10px] font-bold uppercase tracking-widest hover:scale-105 transition-all">Confirm Erase</button>
+                <button type="submit" class="w-full px-6 py-3 bg-seal text-white text-[10px] font-bold uppercase tracking-widest hover:bg-seal/80 transition-all">Confirm Erase</button>
             </form>
         </div>
     </div>
 </div>
 
 <script>
+    // Search filter
+    const searchInput = document.getElementById('user-search');
+    if (searchInput) {
+        searchInput.addEventListener('input', function () {
+            const q = this.value.toLowerCase();
+            document.querySelectorAll('.user-row').forEach(row => {
+                const username = row.dataset.username || '';
+                const email = row.dataset.email || '';
+                row.style.display = (username.includes(q) || email.includes(q)) ? '' : 'none';
+            });
+        });
+    }
+
     function confirmDecommission(username, userId) {
         const modal = document.getElementById('decommission-modal');
-        const target = document.getElementById('target-operative');
-        const form = document.getElementById('decommission-form');
-        
-        target.innerText = username;
-        form.action = `/accounts/user/${userId}/delete/`;
+        document.getElementById('target-operative').innerText = username;
+        document.getElementById('decommission-form').action = `/accounts/user/${userId}/delete/`;
         modal.classList.remove('hidden');
         modal.classList.add('flex');
     }
@@ -200,5 +302,10 @@
         modal.classList.add('hidden');
         modal.classList.remove('flex');
     }
+
+    // Close on backdrop click
+    document.getElementById('decommission-modal').addEventListener('click', function(e) {
+        if (e.target === this) closeModal();
+    });
 </script>
 {% endblock %}

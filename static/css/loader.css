@@ -1,0 +1,51 @@
+/* Iroh Tea‑Cup Loading Overlay CSS */
+.teacup {
+    width: 60px;
+    height: 50px;
+    border: 2px solid var(--ink-black);
+    border-radius: 0 0 12px 12px;
+    position: relative;
+    margin: 20px auto;
+}
+.teacup::before {
+    content: '';
+    position: absolute;
+    right: -12px;
+    top: 10px;
+    width: 12px;
+    height: 12px;
+    border: 2px solid var(--ink-black);
+    border-left: none;
+    border-bottom: none;
+    border-radius: 0 4px 0 0;
+    background: var(--soft-cream);
+}
+.teacup-fill {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    width: 100%;
+    height: 0%;               /* starts empty */
+    background: var(--bamboo-green);
+    opacity: 0.3;
+    transition: height 0.5s linear;
+}
+/* Steam animation */
+.teacup::after {
+    content: '';
+    position: absolute;
+    top: -30px;
+    left: 50%;
+    width: 12px;
+    height: 12px;
+    background: linear-gradient(45deg, var(--bamboo-green) 0%, transparent 70%);
+    opacity: .3;
+    border-radius: 50%;
+    transform: translateX(-50%) scaleY(1.2);
+    animation: steam 4s infinite ease-in-out;
+}
+@keyframes steam {
+    0%   { opacity:.2; transform:translate(-50%,0) scaleY(1); }
+    50%  { opacity:.5; transform:translate(-50%,-8px) scaleY(1.2); }
+    100% { opacity:.2; transform:translate(-50%,0) scaleY(1); }
+}

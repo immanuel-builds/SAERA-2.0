@@ -17,7 +17,6 @@ class User(AbstractUser):
     organization = models.CharField(max_length=255, blank=True)
     department = models.CharField(max_length=255, blank=True)
     can_initiate_scans = models.BooleanField(default=True)
-    can_export_reports = models.BooleanField(default=True)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
     
@@ -43,8 +42,6 @@ class AuditLog(models.Model):
         ('scan_initiated', 'Scan Initiated'),
         ('scan_completed', 'Scan Completed'),
         ('scan_failed', 'Scan Failed'),
-        ('report_generated', 'Report Generated'),
-        ('report_exported', 'Report Exported'),
         ('user_login', 'User Login'),
         ('user_logout', 'User Logout'),
         ('user_signup', 'User Account Created'),

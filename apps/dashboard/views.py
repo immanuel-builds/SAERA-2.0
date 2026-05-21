@@ -4,6 +4,13 @@ from django.contrib.auth.decorators import login_required
 from apps.api.services.dashboard_service import DashboardService
 from apps.api.services.intelligence_service import IntelligenceService
 
+def landing(request):
+    """Render public landing page. If authenticated, redirect to dashboard."""
+    if request.user.is_authenticated:
+        from django.shortcuts import redirect
+        return redirect('dashboard')
+    return render(request, 'landing.html')
+
 @login_required
 def dashboard(request):
     """

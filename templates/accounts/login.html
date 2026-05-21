@@ -1,69 +1,171 @@
 {% extends 'base.html' %}
 {% load static %}
 
-{% block title %}Initial Observation - SAERA{% endblock %}
-
+{% block title %}Login — NetVuln{% endblock %}
 {% block body_class %}auth-page{% endblock %}
 
-{% block background_image %}{% static 'img/jap 26.png' %}{% endblock %}
-
 {% block content %}
-<div class="min-h-[90vh] flex items-center justify-center py-24">
-    <div class="w-full max-w-md space-y-16 animate-in fade-in zoom-in duration-1000">
-        <!-- Logo & Title -->
-        <div class="text-center space-y-6">
-            <div class="text-6xl text-ink font-serif tracking-tighter">SAERA</div>
-            <div class="flex flex-col items-center">
-                <span class="text-[10px] font-bold text-ash uppercase tracking-[0.4em]">Silent Observatory</span>
-                <div class="w-16 h-[0.5px] bg-ink/10 mt-6"></div>
+<div class="min-h-[90vh] flex flex-col items-center justify-center animate-fade-in">
+
+    <!-- Seal -->
+    <div class="mb-14 relative">
+        <div class="fingerprint-seal pulse"
+             style="background-image: url('{% static 'img/ink_fingerprint_seal.png' %}'); width: 140px; height: 140px;"></div>
+        <div class="absolute inset-0 border border-ink opacity-[0.02] -m-4"></div>
+    </div>
+
+    <div class="text-center mb-12 space-y-3">
+        <h1 class="atmospheric-h1">NetVuln</h1>
+        <p class="precise-data text-[10px] opacity-40">Network Vulnerability Scanner · SAERA 2.0</p>
+    </div>
+
+    <div class="w-full max-w-[360px] space-y-8">
+
+        <!-- Lockout Warning -->
+        {% if is_locked_out %}
+        <div role="alert" class="parchment-card border-l-2 border-l-seal p-5 text-seal bg-seal/5 animate-fade-in">
+            <div class="flex items-start gap-3">
+                <span class="material-symbols-outlined text-base mt-0.5" style="font-variation-settings:'wght' 200;">lock</span>
+                <div class="space-y-1">
+                    <p class="precise-data text-[10px] font-bold uppercase tracking-widest">Access Suspended</p>
+                    <p class="font-serif italic text-sm text-ink">{{ failed_attempts }} consecutive failed attempts detected. Reset your password to regain access.</p>
+                    <a href="{% url 'password_reset' %}" class="precise-data text-[9px] text-seal hover:underline block mt-2">→ Reset Password</a>
+                </div>
             </div>
         </div>
+        {% elif login_error %}
+        <!-- Auth Error -->
+        <div role="alert" aria-live="assertive" class="parchment-card border-l-2 border-l-seal p-5 text-seal animate-fade-in">
+            <div class="flex items-start gap-3">
+                <span class="material-symbols-outlined text-base mt-0.5" style="font-variation-settings:'wght' 200;">error</span>
+                <div class="space-y-1">
+                    <p class="precise-data text-[10px] font-bold uppercase tracking-widest">Authentication Failed</p>
+                    <p class="font-serif italic text-sm text-ink">{{ login_error }}</p>
+                    {% if failed_attempts >= 2 %}
+                    <p class="precise-data text-[9px] text-seal/70 mt-1">
+                        {{ attempts_remaining }} attempt{{ attempts_remaining|pluralize }} remaining before access is suspended.
+                    </p>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+        {% endif %}
 
-        <!-- Auth Panel -->
-        <div class="parchment-card p-12 space-y-12 relative overflow-hidden group">
-            <div class="absolute top-0 right-0 p-8 opacity-10 pointer-events-none group-hover:opacity-20 transition-opacity">
-                <span class="material-symbols-outlined text-8xl font-thin text-ash" style="font-variation-settings: 'wght' 100;">ink_highlighter</span>
+        <!-- Login Form -->
+        <form method="post" class="space-y-8" novalidate id="login-form">
+            {% csrf_token %}
+
+            <!-- Username -->
+            <div class="space-y-2 group">
+                <label for="id_username" class="precise-data text-[9px] opacity-30 group-focus-within:opacity-100 transition-opacity uppercase tracking-widest">
+                    Username
+                </label>
+                <div class="relative">
+                    <input id="id_username" type="text" name="username"
+                           placeholder="operative ID"
+                           required
+                           autocomplete="username"
+                           value="{{ submitted_username|default:'' }}"
+                           class="w-full bg-transparent border-b {% if login_error %}border-seal{% else %}border-ink/10{% endif %} py-3 text-sm font-serif italic focus:border-ink outline-none transition-all placeholder:opacity-20 pr-8">
+                    <!-- Caps lock indicator repositioned to password field -->
+                </div>
             </div>
 
-            <form method="post" class="space-y-10">
-                {% csrf_token %}
-                
-                <div class="space-y-4">
-                    <label class="text-[10px] font-bold text-ash uppercase tracking-widest px-2">Analyst Identity</label>
-                    <div class="relative">
-                        <span class="material-symbols-outlined absolute left-4 top-1/2 -translate-y-1/2 text-ash/40 text-sm">person</span>
-                        <input type="text" name="username" placeholder="Registry ID" required class="w-full bg-background border border-ink/5 rounded-sm py-4 pl-12 pr-6 text-sm font-serif italic focus:ring-1 focus:ring-ink/10 focus:border-ink/20 outline-none transition-all">
-                    </div>
+            <!-- Password -->
+            <div class="space-y-2 group">
+                <div class="flex justify-between items-center">
+                    <label for="id_password" class="precise-data text-[9px] opacity-30 group-focus-within:opacity-100 transition-opacity uppercase tracking-widest">
+                        Password
+                    </label>
+                    <a href="{% url 'password_reset' %}" class="precise-data text-[8px] opacity-20 hover:opacity-60 transition-opacity">Forgot?</a>
                 </div>
-
-                <div class="space-y-4">
-                    <div class="flex justify-between items-center px-2">
-                        <label class="text-[10px] font-bold text-ash uppercase tracking-widest">Access Key</label>
-                        <a href="{% url 'password_reset' %}" class="text-[9px] text-ash/40 hover:text-ink transition-colors uppercase tracking-widest">Recover</a>
-                    </div>
-                    <div class="relative">
-                        <span class="material-symbols-outlined absolute left-4 top-1/2 -translate-y-1/2 text-ash/40 text-sm">key</span>
-                        <input type="password" name="password" placeholder="••••••••" required class="w-full bg-background border border-ink/5 rounded-sm py-4 pl-12 pr-6 text-sm font-serif italic focus:ring-1 focus:ring-ink/10 focus:border-ink/20 outline-none transition-all">
-                    </div>
+                <div class="relative">
+                    <input id="id_password" type="password" name="password"
+                           placeholder="access key"
+                           required
+                           autocomplete="current-password"
+                           {% if login_error %}aria-invalid="true"{% endif %}
+                           class="w-full bg-transparent border-b {% if login_error %}border-seal{% else %}border-ink/10{% endif %} py-3 text-sm font-serif italic focus:border-ink outline-none transition-all placeholder:opacity-20 pr-8">
+                    <!-- Show/Hide toggle -->
+                    <button type="button" id="toggle-pw"
+                            class="absolute right-0 top-1/2 -translate-y-1/2 opacity-20 hover:opacity-60 transition-opacity"
+                            aria-label="Toggle password visibility">
+                        <span class="material-symbols-outlined text-sm" id="pw-eye-icon">visibility</span>
+                    </button>
                 </div>
+                <!-- Caps Lock Warning -->
+                <p id="capslock-warn" class="precise-data text-[9px] text-amber-600 hidden">⚠ Caps Lock is on</p>
+            </div>
 
-                <button type="submit" class="saera-button w-full mt-6 group">
-                    <span class="flex items-center justify-center gap-4">
-                        <span class="material-symbols-outlined text-sm">sensor_occupied</span>
-                        <span class="uppercase tracking-[0.2em] font-bold text-[11px]">Begin Observation</span>
-                    </span>
+            <!-- Remember Me -->
+            <div class="flex items-center gap-3">
+                <input type="checkbox" id="remember_me" name="remember_me" class="accent-ink w-3 h-3">
+                <label for="remember_me" class="precise-data text-[9px] opacity-40 cursor-pointer">Remember this device</label>
+            </div>
+
+            <!-- Attempt progress bar (shows after first failure) -->
+            {% if failed_attempts >= 1 and not is_locked_out %}
+            <div class="space-y-1">
+                <div class="w-full h-px bg-ink/5 overflow-hidden">
+                    <div class="h-full bg-seal transition-all duration-500"
+                         style="width: {% widthratio failed_attempts max_attempts 100 %}%"></div>
+                </div>
+                <p class="precise-data text-[8px] text-seal/60">{{ failed_attempts }} / {{ max_attempts }} attempts used</p>
+            </div>
+            {% endif %}
+
+            <div class="pt-4">
+                <button type="submit" class="saera-action-btn w-full" {% if is_locked_out %}disabled{% endif %}>
+                    {% if is_locked_out %}Access Suspended{% else %}Authenticate{% endif %}
                 </button>
-            </form>
-
-            <div class="text-center pt-6 border-t border-ink/5">
-                <p class="text-xs text-ash font-serif italic">New analyst? <a href="{% url 'register' %}" class="text-ink hover:text-seal transition-colors font-bold underline decoration-ink/10 underline-offset-4">Request Clearance</a></p>
             </div>
-        </div>
+        </form>
 
-        <!-- Footer Note -->
-        <div class="text-center">
-            <p class="text-[9px] text-ash uppercase tracking-[0.5em] opacity-40">The Observatory is Watching</p>
+        <!-- Footer Links -->
+        <div class="flex flex-col items-center gap-5 pt-10 border-t border-ink/5">
+            <p class="font-serif italic text-xs text-ash">Only authorized operatives may access this system.</p>
+            <div class="flex gap-8">
+                <a href="{% url 'register' %}" class="precise-data text-[9px] hover:text-seal transition-colors opacity-40 hover:opacity-100">Request Access</a>
+                <a href="{% url 'password_reset' %}" class="precise-data text-[9px] hover:text-seal transition-colors opacity-40 hover:opacity-100">Reset Password</a>
+            </div>
         </div>
     </div>
+
+    <div class="fixed bottom-8 text-center">
+        <p class="precise-data text-[8px] opacity-15">SAERA 2.0 · Session Gateway · {% now "Y.m.d.H:i" %}</p>
+    </div>
 </div>
+
+{% block extra_js %}
+<script>
+    // Caps Lock detection
+    const pwField = document.getElementById('id_password');
+    const capsWarn = document.getElementById('capslock-warn');
+    if (pwField && capsWarn) {
+        pwField.addEventListener('keyup', function(e) {
+            capsWarn.classList.toggle('hidden', !e.getModifierState('CapsLock'));
+        });
+    }
+
+    // Password show/hide toggle
+    const toggleBtn = document.getElementById('toggle-pw');
+    const eyeIcon = document.getElementById('pw-eye-icon');
+    if (toggleBtn && pwField) {
+        toggleBtn.addEventListener('click', function () {
+            const isPassword = pwField.type === 'password';
+            pwField.type = isPassword ? 'text' : 'password';
+            eyeIcon.textContent = isPassword ? 'visibility_off' : 'visibility';
+        });
+    }
+
+    // Auto-focus first empty field
+    const usernameField = document.getElementById('id_username');
+    const submittedUsername = usernameField ? usernameField.value.trim() : '';
+    if (submittedUsername && pwField) {
+        pwField.focus();
+    } else if (usernameField) {
+        usernameField.focus();
+    }
+</script>
+{% endblock %}
 {% endblock %}

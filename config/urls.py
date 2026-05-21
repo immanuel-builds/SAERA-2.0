@@ -12,7 +12,6 @@ urlpatterns = [
     path('', include('apps.dashboard.urls')),
     path('accounts/', include('apps.accounts.urls')),
     path('scanner/', include('apps.scanner.urls')),
-    path('reports/', include('apps.reports.urls')),
     path('knowledge/', include('apps.knowledge.urls')),
     path('api/v1/', include('apps.api.urls')),
     
@@ -28,6 +27,6 @@ if settings.DEBUG:
     urlpatterns += static(settings.STATIC_URL, document_root=settings.STATIC_ROOT)
 
 # Customize admin site
-admin.site.site_header = "Network Vulnerability Scanner Admin"
-admin.site.site_title = "Vuln Scanner Admin"
-admin.site.index_title = "Administration Panel"
+admin.site.site_header = "SAERA Observatory Admin"
+admin.site.site_title = "SAERA Admin"
+admin.site.index_title = "Operational Intelligence Control"

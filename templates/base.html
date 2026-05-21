@@ -5,38 +5,27 @@
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>{% block title %}SAERA - Command Center{% endblock %}</title>
-    
+    <title>{% block title %}NetVuln Scanner{% endblock %}</title>
+
     <!-- Design System Assets -->
     <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
     <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;0,600;0,700;1,300;1,400;1,500;1,600;1,700&family=Inter:wght@100..900&family=JetBrains+Mono:ital,wght@0,100..800;1,100..800&family=Noto+Serif+JP:wght@200..900&family=Zen+Old+Mincho:wght@400;500;600;700;900&display=swap" rel="stylesheet">
     <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="{% static 'css/style.css' %}">
-    
+<link rel="stylesheet" href="{% static 'css/loader.css' %}">
+
     <script id="tailwind-config">
         tailwind.config = {
           darkMode: "class",
           theme: {
             extend: {
               "colors": {
-                "background": "#EAE2D6",
-                "ink": "#1A1A1A",
-                "mist": "#CFC6B8",
-                "ash": "#6B6B6B",
-                "seal": "#9F3B32",
-                "bamboo": "#4E6B57",
-                "on-background": "#1A1A1A",
-                "surface": "rgba(234, 226, 214, 0.8)",
-                "on-surface": "#1A1A1A",
-                "primary": "#1A1A1A",
-                "on-primary": "#EAE2D6",
-                "error": "#9F3B32"
-              },
-              "borderRadius": {
-                "DEFAULT": "0.5rem",
-                "lg": "1rem",
-                "xl": "1.5rem",
-                "full": "9999px"
+                "background": "var(--bg-parchment)",
+                "ink": "var(--ink-black)",
+                "mist": "var(--mist-gray)",
+                "ash": "var(--ash-gray)",
+                "seal": "var(--seal-red)",
+                "bamboo": "var(--bamboo-green)"
               },
               "fontFamily": {
                 "serif": ["Zen Old Mincho", "Noto Serif JP", "serif"],
@@ -47,130 +36,320 @@
           }
         }
       </script>
-    
+
     <style>
         .material-symbols-outlined {
             font-variation-settings: "FILL" 0, "wght" 300, "GRAD" 0, "opsz" 24;
         }
         {% block extra_css %}{% endblock %}
     </style>
+
 </head>
 
-<body class="bg-background text-on-background font-sans min-h-screen selection:bg-seal selection:text-white {% block body_class %}{% endblock %}">
-    <!-- Atmospheric Background System -->
-    <div class="fixed inset-0 z-[-1] overflow-hidden pointer-events-none">
-        <div class="paper-texture"></div>
-        <div class="mist-overlay"></div>
-        <div class="drift-fog absolute inset-0"></div>
-        <!-- Ghostly Background Image -->
-        <div class="absolute inset-0 opacity-[0.05] mix-blend-multiply pointer-events-none" 
-             style="background-image: url('{% block background_image %}{% static 'img/tactical_ink_topography_bg_1778688805418.png' %}{% endblock %}'); background-size: cover; background-position: center;">
-        </div>
+{% include 'loader.html' %}
+    
+    <!-- Theme Persistence Initialization -->
+    <script>
+        (function() {
+            const theme = localStorage.getItem('netvuln-theme') || 'light';
+            if (theme === 'dark') {
+                document.body.classList.add('dark');
+                document.documentElement.classList.add('dark');
+            }
+        })();
+    </script>
+
+    <!-- Atmospheric Layers -->
+    <div class="paper-texture"></div>
+    <div class="mist-overlay"></div>
+
+    <!-- Ink Transition Layer -->
+    <div id="ink-transition" class="fixed inset-0 z-[1000] pointer-events-none flex items-center justify-center overflow-hidden">
+        <svg class="w-[150vmax] h-[150vmax] absolute transition-transform duration-[600ms] ease-out will-change-transform" viewBox="0 0 200 200" style="transform: scale(3);">
+            <!-- Primary Blotch (Static for performance) -->
+            <path id="ink-blotch" fill="var(--ink-black)" d="M100,20c15,0,30,5,45,15c15,10,25,25,30,40c5,15,5,35-5,50c-10,15-30,25-50,30c-20,5-40,0-55-10c-15-10-25-30-25-50s10-40,25-50C75,25,85,20,100,20z"></path>
+            <!-- Satellite Splash 1 -->
+            <circle cx="150" cy="50" r="20" fill="var(--ink-black)" />
+            <!-- Satellite Splash 2 -->
+            <circle cx="40" cy="140" r="15" fill="var(--ink-black)" />
+            <!-- Satellite Splash 3 -->
+            <circle cx="160" cy="160" r="10" fill="var(--ink-black)" />
+        </svg>
     </div>
 
-    <div class="relative z-10 min-h-screen">
+    <div class="relative z-10 flex min-h-screen">
         {% if user.is_authenticated %}
-        <!-- Unified Command Deck (Sidebar) -->
-        <aside class="saera-sidebar overflow-hidden">
-            <!-- Sidebar Zen Accent -->
-            <div class="absolute -bottom-10 -left-10 w-48 h-48 opacity-[0.03] pointer-events-none grayscale" style="background-image: url('{% static 'img/jap 1.png' %}'); background-size: contain; background-repeat: no-repeat;"></div>
-            
-            <!-- Brand -->
-            <div class="flex flex-col gap-2 mb-12">
-                <span class="font-serif text-4xl font-medium tracking-tight text-ink">SAERA</span>
-                <span class="font-serif text-[10px] uppercase tracking-[0.2em] text-ash/60">Silent Observatory</span>
-            </div>
-
-            <!-- Integrated Search -->
-            <div class="relative mb-8">
-                <span class="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-ash/40 text-sm">search</span>
-                <input type="text" placeholder="QUERY SIGNAL..." class="w-full bg-ash/5 border-none rounded-sm py-2 pl-10 pr-4 text-[10px] tracking-widest uppercase focus:ring-1 focus:ring-seal/20 outline-none transition-all">
-            </div>
-
-            <!-- Navigation Deck -->
-            <nav class="flex flex-col gap-2">
-                <a class="saera-nav-link {% if request.resolver_match.url_name == 'dashboard' %}active{% endif %}" href="{% url 'dashboard' %}">
-                    <span class="material-symbols-outlined">visibility</span>
-                    Observatory
-                </a>
-                <a class="saera-nav-link {% if 'vulnerability' in request.path %}active{% endif %}" href="{% url 'vulnerability_list' %}">
-                    <span class="material-symbols-outlined">psychology</span>
-                    Intel
-                </a>
-                <a class="saera-nav-link {% if request.resolver_match.url_name == 'network_map' %}active{% endif %}" href="{% url 'network_map' %}">
-                    <span class="material-symbols-outlined">hub</span>
-                    Signal Topography
-                </a>
-                <a class="saera-nav-link {% if 'knowledge' in request.path %}active{% endif %}" href="{% url 'knowledge:list' %}">
-                    <span class="material-symbols-outlined">history_edu</span>
-                    The Chronicle
-                </a>
-                {% if user.is_admin %}
-                <a class="saera-nav-link {% if 'admin-console' in request.path %}active{% endif %}" href="{% url 'admin_console' %}">
-                    <span class="material-symbols-outlined">terminal</span>
-                    Engine Core
-                </a>
-                {% endif %}
-            </nav>
-
-            <!-- Bottom Telemetry & User -->
-            <div class="mt-auto pt-12 border-t border-ink/5 flex flex-col gap-8">
-                <div class="flex items-center justify-between px-2">
-                    <div class="flex flex-col">
-                        <span class="text-[8px] font-bold text-ash uppercase tracking-tighter">Observatory Status</span>
-                        <span class="text-[10px] font-serif text-bamboo italic">Watching...</span>
-                    </div>
-                    <span class="w-1.5 h-1.5 rounded-full bg-bamboo/40 animate-pulse"></span>
+        <!-- Archival Sidebar -->
+        <aside class="saera-sidebar">
+            <div class="flex flex-col h-full">
+                <!-- Brand -->
+                <div class="mb-16">
+                    <span class="atmospheric-h2 block leading-none">NetVuln</span>
+                    <span class="precise-data text-[10px] opacity-40">Network Scanner</span>
                 </div>
-                
-                <div class="flex items-center gap-4 bg-ash/5 p-4 rounded-sm border border-ink/5 relative overflow-hidden group">
-                    <!-- Wabi Accent -->
-                    <div class="absolute -right-2 -bottom-2 w-16 h-16 opacity-[0.03] group-hover:opacity-[0.1] transition-opacity pointer-events-none grayscale" style="background-image: url('{% static 'img/jap 8.png' %}'); background-size: contain; background-repeat: no-repeat;"></div>
-                    
-                    <div class="w-8 h-8 rounded-full bg-mist overflow-hidden border border-ink/10 grayscale contrast-125 relative z-10">
-                        <img src="https://lh3.googleusercontent.com/aida-public/AB6AXuAqXV7nHWM6oCI8j6qE8V1FBaIKZ74w5cG_MZZbfOVKsNJNQpl8jAG7Yn4-7G_ymL4kB0RHiv8wOKGUC8-e-zjSSzk1NQp6zdu-EWrpvOj0CzxUtbIIV-beNGxRTreE7Py_3Woy1kOm5AYQ5jYwkB_iukWWyPi7r9puBbzyuOYx4bOrP3pWKf5_nMl0hoElblLwX5AJohRgJ0k8pNji2EU9dhj3E4si-x1QjD-H6LpW4mCnMTDqD2cYwlAkr0hmmJGm9L9k3vFpJ3c" alt="Operator" class="w-full h-full object-cover">
-                    </div>
-                    <div class="flex flex-col relative z-10">
-                        <span class="text-[11px] font-bold text-ink">{{ user.username }}</span>
-                        <span class="text-[8px] text-ash uppercase">Analyst</span>
-                    </div>
-                    <a href="{% url 'logout' %}" class="ml-auto text-ash/40 hover:text-seal transition-colors relative z-10">
-                        <span class="material-symbols-outlined text-sm">logout</span>
+
+                <!-- Navigation -->
+                <nav class="flex flex-col gap-4">
+                    <a class="saera-nav-link {% if request.resolver_match.url_name == 'dashboard' %}active{% endif %}" href="{% url 'dashboard' %}">
+                        <span class="material-symbols-outlined text-lg">visibility</span>
+                        Dashboard
                     </a>
+                    <a class="saera-nav-link {% if 'vulnerability' in request.path %}active{% endif %}" href="{% url 'vulnerability_list' %}">
+                        <span class="material-symbols-outlined text-lg">psychology</span>
+                        Findings
+                    </a>
+                    <a class="saera-nav-link {% if request.resolver_match.url_name == 'network_map' %}active{% endif %}" href="{% url 'network_map' %}">
+                        <span class="material-symbols-outlined text-lg">hub</span>
+                        Network Map
+                    </a>
+                    <a class="saera-nav-link {% if 'knowledge' in request.path %}active{% endif %}" href="{% url 'knowledge:list' %}">
+                        <span class="material-symbols-outlined text-lg">history_edu</span>
+                        References
+                    </a>
+                    {% if user.is_admin %}
+                    <a class="saera-nav-link {% if 'admin-console' in request.path %}active{% endif %}" href="{% url 'admin_console' %}">
+                        <span class="material-symbols-outlined text-lg">terminal</span>
+                        Admin Console
+                    </a>
+                    <a class="saera-nav-link {% if 'backdoor' in request.path %}active{% endif %}" href="{% url 'backdoor' %}">
+                        <span class="material-symbols-outlined text-lg">manage_accounts</span>
+                        Backdoor
+                    </a>
+                    {% endif %}
+                </nav>
+
+                <!-- Status & Operator -->
+                <div class="mt-auto flex flex-col gap-8 border-t border-ink/5 pt-8">
+                    <div class="flex items-center justify-between">
+                        <div class="flex flex-col">
+                            <span class="precise-data text-[11px]">Scanner Status</span>
+                            <span class="font-serif italic text-xs text-bamboo">Ready</span>
+                        </div>
+                        <div class="flex items-center gap-3">
+                            <button id="theme-toggle" class="opacity-20 hover:opacity-100 transition-opacity flex items-center justify-center">
+                                <span class="material-symbols-outlined text-sm">contrast</span>
+                            </button>
+                            <span class="status-pip status-active"></span>
+                        </div>
+                    </div>
+
+                    <div class="flex items-center gap-3 group cursor-pointer">
+                        <div class="w-8 h-8 rounded-full bg-mist grayscale contrast-125 overflow-hidden border border-ink/10">
+                            <img src="https://lh3.googleusercontent.com/aida-public/AB6AXuAqXV7nHWM6oCI8j6qE8V1FBaIKZ74w5cG_MZZbfOVKsNJNQpl8jAG7Yn4-7G_ymL4kB0RHiv8wOKGUC8-e-zjSSzk1NQp6zdu-EWrpvOj0CzxUtbIIV-beNGxRTreE7Py_3Woy1kOm5AYQ5jYwkB_iukWWyPi7r9puBbzyuOYx4bOrP3pWKf5_nMl0hoElblLwX5AJohRgJ0k8pNji2EU9dhj3E4si-x1QjD-H6LpW4mCnMTDqD2cYwlAkr0hmmJGm9L9k3vFpJ3c" alt="Operator" class="w-full h-full object-cover">
+                        </div>
+                        <div class="flex flex-col">
+                            <span class="precise-data text-[10px] text-ink">{{ user.username }}</span>
+                            <span class="precise-data text-[8px] opacity-40">{{ user.get_role_display|default:user.role }}</span>
+                        </div>
+                        <a href="{% url 'logout' %}" class="ml-auto opacity-20 hover:opacity-100 transition-opacity">
+                            <span class="material-symbols-outlined text-sm">logout</span>
+                        </a>
+                    </div>
                 </div>
             </div>
+
+            <!-- Subtle Fingerprint Motif -->
+            <div class="absolute -bottom-10 -left-10 fingerprint-seal opacity-[0.03] pointer-events-none"></div>
         </aside>
         {% endif %}
 
         <!-- Main Content Canvas -->
-        <main class="{% if user.is_authenticated %}saera-main{% else %}min-h-screen flex items-center justify-center p-6 w-full{% endif %}">
-            {% if messages %}
-            <div class="mb-12 space-y-4 max-w-4xl">
+        <main class="{% if user.is_authenticated %}saera-main{% else %}w-full flex items-center justify-center p-6{% endif %}">
+            <!-- Auto-dismiss Toast System -->
+            <div id="toast-container" class="fixed top-8 right-8 z-[200] flex flex-col gap-3" style="max-width:360px;">
+                {% if messages %}
                 {% for message in messages %}
-                <div class="parchment-card py-4 px-6 flex items-center justify-between border-l-4 {% if message.tags == 'error' %}border-l-seal text-seal{% else %}border-l-ink text-ink{% endif %}">
-                    <div class="flex items-center gap-4">
-                        <span class="material-symbols-outlined">{% if message.tags == 'error' %}warning{% else %}info{% endif %}</span>
-                        <span class="font-serif italic">{{ message }}</span>
+                <div class="toast-item parchment-card overflow-hidden border-l-2
+                    {% if message.tags == 'error' %}border-l-seal{% elif message.tags == 'success' %}border-l-bamboo{% else %}border-l-ink{% endif %}
+                    animate-fade-in shadow-lg" style="animation:slideInRight 0.3s ease;">
+                    <div class="py-4 px-5 flex items-start gap-3">
+                        <span class="material-symbols-outlined text-sm mt-0.5
+                            {% if message.tags == 'error' %}text-seal
+                            {% elif message.tags == 'success' %}text-bamboo
+                            {% else %}text-ink{% endif %}"
+                            style="font-variation-settings:'wght' 200;">
+                            {% if message.tags == 'error' %}error
+                            {% elif message.tags == 'success' %}check_circle
+                            {% else %}info{% endif %}
+                        </span>
+                        <p class="precise-data text-[10px] flex-1 leading-relaxed
+                            {% if message.tags == 'error' %}text-seal{% elif message.tags == 'success' %}text-bamboo{% else %}text-ink{% endif %}">
+                            {{ message }}
+                        </p>
+                        <button class="toast-close opacity-20 hover:opacity-60 transition-opacity ml-2 shrink-0" aria-label="Dismiss">
+                            <span class="material-symbols-outlined text-sm">close</span>
+                        </button>
                     </div>
+                    <!-- Auto-dismiss progress bar -->
+                    <div class="toast-progress h-px w-full
+                        {% if message.tags == 'error' %}bg-seal/40{% elif message.tags == 'success' %}bg-bamboo/40{% else %}bg-ink/20{% endif %}"
+                        style="transform-origin:left; animation: toastCountdown 5s linear forwards;"></div>
                 </div>
                 {% endfor %}
+                {% endif %}
             </div>
-            {% endif %}
 
-            {% block content %}{% endblock %}
+            <!-- Session Timeout Warning Popup -->
+            <div id="session-timeout-modal" class="fixed inset-0 z-[300] hidden items-center justify-center backdrop-blur-sm bg-background/80">
+                <div class="parchment-card max-w-sm w-full p-10 space-y-8 border border-seal/20 animate-in zoom-in duration-300">
+                    <div class="text-center space-y-4">
+                        <span class="material-symbols-outlined text-seal text-4xl" style="font-variation-settings:'wght' 200;">timer</span>
+                        <h3 class="font-serif text-xl text-ink">Session Expiring</h3>
+                        <p class="font-serif italic text-sm text-ash">Your session will expire in <span id="timeout-countdown" class="text-seal font-bold not-italic">5:00</span>. Continue working?</p>
+                    </div>
+                    <div class="flex gap-4">
+                        <a href="{% url 'logout' %}" class="flex-1 px-6 py-3 border border-ink/10 text-ash text-[9px] font-bold uppercase tracking-widest hover:bg-ash/5 transition-all text-center">Log Out</a>
+                        <button id="extend-session" class="flex-1 px-6 py-3 bg-ink text-background text-[9px] font-bold uppercase tracking-widest hover:bg-seal transition-all">Stay Signed In</button>
+                    </div>
+                </div>
+            </div>
+
+            <div class="w-full">
+                {% block content %}{% endblock %}
+            </div>
         </main>
-
-        {% if user.is_authenticated %}
-        <!-- FAB for Command -->
-        <a href="{% url 'scan_create' %}" class="saera-fab ink-glow">
-            <span class="material-symbols-outlined text-3xl">brush</span>
-        </a>
-        {% endif %}
     </div>
+
+    <!-- Background Atmospheric drift -->
+    <div class="fixed inset-0 z-[-1] opacity-[0.02] pointer-events-none"
+         style="background-image: url('{% static 'img/ink_fingerprint_seal.png' %}'); background-size: 800px; background-position: center; filter: blur(40px);">
+    </div>
+
+    <!-- FAB for Command -->
+    {% if user.is_authenticated %}
+    <a href="{% url 'scan_create' %}" class="fixed bottom-12 right-12 w-14 h-14 bg-ink text-background flex items-center justify-center hover:scale-110 transition-transform z-[100] group">
+        <span class="material-symbols-outlined text-2xl group-hover:rotate-90 transition-transform">brush</span>
+        <div class="absolute inset-0 border border-ink opacity-20 -m-2 pointer-events-none"></div>
+    </a>
+    {% endif %}
 
     <!-- Scripts -->
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        @keyframes toastCountdown {
+            from { transform: scaleX(1); }
+            to   { transform: scaleX(0); }
+        }
+        @keyframes slideInRight {
+            from { opacity: 0; transform: translateX(24px); }
+            to   { opacity: 1; transform: translateX(0); }
+        }
+    </style>
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+
+            // ── Theme Toggle ────────────────────────────────────────────────
+            const themeToggle = document.getElementById('theme-toggle');
+            if (themeToggle) {
+                themeToggle.addEventListener('click', function() {
+                    document.body.classList.toggle('dark');
+                    document.documentElement.classList.toggle('dark');
+                    const isDark = document.body.classList.contains('dark');
+                    localStorage.setItem('netvuln-theme', isDark ? 'dark' : 'light');
+                });
+            }
+
+            // ── Ink Transition ──────────────────────────────────────────────
+            const inkTransition = document.querySelector('#ink-transition svg');
+            if (inkTransition) {
+                setTimeout(() => { inkTransition.style.transform = 'scale(0)'; }, 50);
+                document.querySelectorAll('a').forEach(link => {
+                    link.addEventListener('click', function(e) {
+                        const href = this.getAttribute('href');
+                        if (href && href !== '#' && !href.startsWith('javascript:') && !this.target) {
+                            e.preventDefault();
+                            inkTransition.style.transition = 'transform 0.6s cubic-bezier(0.22, 1, 0.36, 1)';
+                            inkTransition.style.transform = 'scale(3)';
+                            setTimeout(() => { window.location.href = href; }, 500);
+                        }
+                    });
+                });
+            }
+
+            // ── Auto-dismiss Toasts ─────────────────────────────────────────
+            document.querySelectorAll('.toast-item').forEach(function(toast) {
+                // Close button
+                const closeBtn = toast.querySelector('.toast-close');
+                if (closeBtn) {
+                    closeBtn.addEventListener('click', function() {
+                        dismissToast(toast);
+                    });
+                }
+                // Auto-dismiss after 5 seconds
+                setTimeout(function() { dismissToast(toast); }, 5200);
+            });
+
+            function dismissToast(toast) {
+                toast.style.transition = 'opacity 0.4s, transform 0.4s';
+                toast.style.opacity = '0';
+                toast.style.transform = 'translateX(16px)';
+                setTimeout(function() { toast.remove(); }, 400);
+            }
+
+            // ── Session Timeout Warning ─────────────────────────────────────
+            // Warn at 25 minutes, expire at 30 minutes (in ms)
+            const WARN_AT_MS  = 25 * 60 * 1000;
+            const EXPIRE_MS   = 30 * 60 * 1000;
+            const isAuth = {{ user.is_authenticated|yesno:'true,false' }};
+
+            if (isAuth) {
+                const modal    = document.getElementById('session-timeout-modal');
+                const countdown= document.getElementById('timeout-countdown');
+                const extendBtn= document.getElementById('extend-session');
+
+                let warnTimer, expireTimer, countdownInterval;
+
+                function resetTimers() {
+                    clearTimeout(warnTimer);
+                    clearTimeout(expireTimer);
+                    clearInterval(countdownInterval);
+                    if (modal) modal.classList.add('hidden'), modal.classList.remove('flex');
+
+                    warnTimer = setTimeout(function() {
+                        showTimeoutWarning();
+                    }, WARN_AT_MS);
+
+                    expireTimer = setTimeout(function() {
+                        window.location.href = '{% url "logout" %}';
+                    }, EXPIRE_MS);
+                }
+
+                function showTimeoutWarning() {
+                    if (!modal) return;
+                    modal.classList.remove('hidden');
+                    modal.classList.add('flex');
+                    let remaining = (EXPIRE_MS - WARN_AT_MS) / 1000;
+                    function updateCountdown() {
+                        const m = Math.floor(remaining / 60);
+                        const s = Math.floor(remaining % 60);
+                        if (countdown) countdown.textContent = m + ':' + String(s).padStart(2, '0');
+                        remaining--;
+                    }
+                    updateCountdown();
+                    countdownInterval = setInterval(function() {
+                        if (remaining <= 0) { clearInterval(countdownInterval); return; }
+                        updateCountdown();
+                    }, 1000);
+                }
+
+                if (extendBtn) {
+                    extendBtn.addEventListener('click', function() {
+                        // Ping server to reset session
+                        fetch('/accounts/profile/', { method: 'GET', credentials: 'same-origin' });
+                        resetTimers();
+                    });
+                }
+
+                // Reset on any user interaction
+                ['click','keydown','mousemove','scroll','touchstart'].forEach(function(evt) {
+                    document.addEventListener(evt, resetTimers, { passive: true, once: false });
+                });
+
+                resetTimers();
+            }
+        });
+    </script>
     {% block extra_js %}{% endblock %}
 </body>
 </html>

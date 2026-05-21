@@ -23,8 +23,7 @@ class ScanTargetForm(forms.ModelForm):
     
     def clean_target(self):
         target = self.cleaned_data.get('target')
-        validate_scan_target(target)
-        return target
+        return validate_scan_target(target)
 
 
 class QuickScanForm(forms.Form):
@@ -41,15 +40,13 @@ class QuickScanForm(forms.Form):
 
     def clean_target(self):
         target = self.cleaned_data.get('target')
-        validate_scan_target(target)
-        return target
+        return validate_scan_target(target)
     
     scan_type = forms.ChoiceField(
         label='Scan Type',
         choices=[
             ('quick', 'Quick Scan (Top 100 ports - ~30 sec)'),
             ('standard', 'Standard Scan (Top 1000 ports - ~2 min)'),
-            ('deep', 'Deep Scan (All ports - ~10 min)'),
         ],
         initial='standard',
         widget=forms.Select(attrs={'class': 'form-control'})

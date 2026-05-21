@@ -1,81 +1,152 @@
 {% extends 'base.html' %}
 {% load static %}
 
-{% block title %}Archives of Intent - SAERA{% endblock %}
-
-{% block body_class %}intel-page{% endblock %}
-
-{% block background_image %}{% static 'img/jap 21.png' %}{% endblock %}
+{% block title %}Doctrinal Archive - SAERA Knowledge Base{% endblock %}
 
 {% block content %}
-<div class="space-y-panel-gap">
-    <!-- Header -->
-    <div class="flex justify-between items-end border-b border-outline-variant/10 pb-8">
-        <div>
-            <span class="font-label-caps text-label-caps text-primary tracking-[0.3em]">THE DOCTRINE // INTEL-01</span>
-            <h1 class="font-headline-lg text-headline-lg mt-2">Archives of Intent</h1>
-            <p class="font-body-md text-sm text-on-surface-variant mt-2 italic max-w-xl">A comprehensive chronicle of known frailties within the observation grid, curated for surgical precision.</p>
+<div class="animate-fade-in space-y-16">
+
+    <!-- Archive Header -->
+    <div class="flex justify-between items-end border-b border-ink/5 pb-10">
+        <div class="space-y-3 max-w-xl">
+            <span class="precise-data text-[9px] opacity-40 uppercase tracking-widest">Doctrinal Archive</span>
+            <h1 class="atmospheric-h1">Knowledge Base</h1>
+            <p class="font-serif italic text-lg text-ash leading-relaxed">
+                A curated compendium of vulnerability intelligence, remediation doctrine, and analytical reference notes.
+            </p>
         </div>
-        <div class="flex items-center space-x-2">
-            <span class="material-symbols-outlined text-primary" style="font-variation-settings: 'FILL' 1;">auto_stories</span>
+        <div class="text-right">
+            <div class="precise-data text-[8px] opacity-40">Total Entries</div>
+            <div class="atmospheric-h1 text-5xl">{{ references.count }}</div>
         </div>
     </div>
 
-    <!-- Archives Grid -->
-    <div class="grid grid-cols-1 lg:grid-cols-12 gap-panel-gap">
-        <!-- Filter Sidebar -->
-        <aside class="lg:col-span-3 space-y-6">
-            <div class="glass-panel p-6 rounded-lg space-y-6">
-                <span class="font-label-caps text-[10px] text-on-surface-variant tracking-widest block">CHRONICLE CATEGORIES</span>
-                <nav class="space-y-2">
-                    <a href="#" class="block p-3 rounded-lg bg-primary/10 text-primary font-data-sm text-xs border border-primary/20">ALL ENTRIES</a>
+    <!-- Live Search Bar -->
+    <div class="max-w-xl">
+        <div class="flex items-center gap-4 border-b border-ink/10 pb-3">
+            <span class="material-symbols-outlined text-ash/40 text-sm">search</span>
+            <input
+                id="kb-search"
+                type="text"
+                placeholder="Search by title, category, or severity..."
+                class="w-full bg-transparent font-serif text-sm text-ink placeholder:text-ash/40 outline-none"
+                onkeyup="filterKnowledgeBase()"
+            >
+        </div>
+    </div>
+
+    <div class="grid grid-cols-12 gap-16">
+
+        <!-- Left: Category Nav -->
+        <aside class="col-span-3 space-y-10">
+            <div class="space-y-4">
+                <span class="precise-data text-[9px] opacity-40 uppercase tracking-widest">Filter by Category</span>
+                <nav class="flex flex-col gap-3">
+                    <button onclick="filterCategory('')" class="kb-cat-btn font-serif text-sm text-ink italic border-l-2 border-ink pl-4 text-left" data-active="true">
+                        All Entries
+                    </button>
                     {% for category in categories %}
-                    <a href="#" class="block p-3 rounded-lg text-on-surface-variant font-data-sm text-xs hover:bg-white/5 transition-all">{{ category|upper }}</a>
+                    <button onclick="filterCategory('{{ category }}')" class="kb-cat-btn font-serif text-sm text-ash hover:text-ink italic border-l border-ink/10 pl-4 text-left hover:border-ink transition-all" data-cat="{{ category }}">
+                        {{ category }}
+                    </button>
                     {% endfor %}
                 </nav>
             </div>
-            
-            <div class="glass-panel p-6 rounded-lg border-primary/10">
-                <p class="font-body-md text-[11px] text-on-surface-variant leading-relaxed">
-                    Intelligence gathered from the global grid is synthesized here to establish defensive doctrines.
+
+            <div class="parchment-card border-dashed p-6 space-y-3">
+                <span class="material-symbols-outlined text-ash/40 text-sm">lightbulb</span>
+                <p class="font-serif italic text-xs text-ash leading-relaxed">
+                    Reference entries explain technical findings in plain language. Consult during active investigations to document remediation steps.
                 </p>
             </div>
         </aside>
 
-        <!-- Main Grid -->
-        <main class="lg:col-span-9">
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+        <!-- Right: Archive Grid -->
+        <main class="col-span-9">
+            <div id="kb-grid" class="grid grid-cols-2 gap-6">
                 {% for ref in references %}
-                <div class="glass-panel p-8 rounded-lg flex flex-col justify-between space-y-6 group hover:border-primary/30 transition-all duration-500">
+                <div class="kb-entry parchment-card group hover:border-ink/20 transition-all flex flex-col justify-between"
+                     data-title="{{ ref.title|lower }}"
+                     data-category="{{ ref.category|lower }}"
+                     data-severity="{{ ref.severity|lower }}"
+                     data-cat="{{ ref.category }}">
                     <div class="space-y-4">
                         <div class="flex justify-between items-start">
-                            <span class="px-3 py-1 rounded-full font-label-caps text-[9px] border 
-                                {% if ref.severity == 'critical' %}border-error text-error bg-error/5
-                                {% elif ref.severity == 'high' %}border-tertiary text-tertiary bg-tertiary/5
-                                {% else %}border-primary-fixed-dim text-primary-fixed-dim bg-primary-fixed-dim/5{% endif %}">
-                                {{ ref.get_severity_display|upper }}
+                            <span class="severity-stamp {% if ref.severity == 'critical' %}text-seal border-seal{% elif ref.severity == 'high' %}text-amber-700 border-amber-700/40{% else %}opacity-40{% endif %}">
+                                {{ ref.get_severity_display }}
                             </span>
-                            <span class="font-data-sm text-[9px] text-on-surface-variant/40 uppercase">{{ ref.category }}</span>
+                            <span class="precise-data text-[8px] opacity-30 uppercase">{{ ref.category }}</span>
                         </div>
-                        <h3 class="font-headline-md text-xl text-on-surface group-hover:text-primary transition-colors leading-tight">{{ ref.title }}</h3>
-                        <p class="font-body-md text-sm text-on-surface-variant line-clamp-3">
+                        <h3 class="font-serif text-lg group-hover:text-seal transition-colors leading-snug">{{ ref.title }}</h3>
+                        <p class="font-serif italic text-sm text-ash leading-relaxed line-clamp-3 opacity-70">
                             {{ ref.description }}
                         </p>
                     </div>
-                    
-                    <a href="{% url 'knowledge:detail' ref.slug %}" class="flex items-center justify-between group/link">
-                        <span class="font-label-caps text-[10px] text-primary group-hover/link:tracking-widest transition-all">EXAMINE ENTRY</span>
-                        <span class="material-symbols-outlined text-primary group-hover/link:translate-x-2 transition-transform">arrow_right_alt</span>
-                    </a>
+
+                    <div class="mt-6 pt-4 border-t border-ink/5">
+                        <a href="{% url 'knowledge:detail' ref.slug %}" class="flex items-center justify-between group/link">
+                            <span class="precise-data text-[9px] text-ink/40 group-hover/link:text-ink transition-colors uppercase tracking-[0.2em]">Examine Entry</span>
+                            <span class="material-symbols-outlined text-ash/20 group-hover/link:text-ink group-hover/link:translate-x-2 transition-all">arrow_right_alt</span>
+                        </a>
+                    </div>
                 </div>
                 {% empty %}
-                <div class="col-span-2 glass-panel p-20 rounded-lg text-center flex flex-col items-center justify-center space-y-4">
-                    <span class="material-symbols-outlined text-on-surface-variant/20 text-6xl" style="font-variation-settings: 'wght' 100;">edit_note</span>
-                    <p class="font-body-md text-on-surface-variant italic">The archives are currently being transcribed by the automated synchronizer.</p>
+                <div class="col-span-2 py-32 text-center parchment-card opacity-40">
+                    <span class="material-symbols-outlined text-4xl mb-4 block">menu_book</span>
+                    <p class="font-serif italic text-sm">The knowledge archive is empty.</p>
+                    <p class="precise-data text-[9px] mt-2 opacity-60">Seed entries via the Django admin panel.</p>
                 </div>
                 {% endfor %}
+            </div>
+
+            <!-- No Results State -->
+            <div id="kb-no-results" class="hidden py-32 text-center opacity-40">
+                <span class="material-symbols-outlined text-4xl mb-4 block">search_off</span>
+                <p class="font-serif italic text-sm">No matching entries found.</p>
             </div>
         </main>
     </div>
 </div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    let activeCategory = '';
+
+    function filterKnowledgeBase() {
+        const query = document.getElementById('kb-search').value.toLowerCase();
+        applyFilters(query, activeCategory);
+    }
+
+    function filterCategory(cat) {
+        activeCategory = cat;
+        document.querySelectorAll('.kb-cat-btn').forEach(btn => {
+            const isActive = (cat === '' && btn.dataset.active === 'true') || btn.dataset.cat === cat;
+            btn.classList.toggle('text-ink', isActive);
+            btn.classList.toggle('border-l-2', isActive);
+            btn.classList.toggle('border-ink', isActive);
+            btn.classList.toggle('text-ash', !isActive);
+            btn.classList.toggle('border-l', !isActive);
+            btn.classList.toggle('border-ink/10', !isActive);
+        });
+        const query = document.getElementById('kb-search').value.toLowerCase();
+        applyFilters(query, cat);
+    }
+
+    function applyFilters(query, category) {
+        const entries = document.querySelectorAll('.kb-entry');
+        let visibleCount = 0;
+
+        entries.forEach(entry => {
+            const titleMatch = entry.dataset.title.includes(query);
+            const catSearchMatch = entry.dataset.category.includes(query) || entry.dataset.severity.includes(query);
+            const catMatch = !category || entry.dataset.cat === category;
+            const visible = (titleMatch || catSearchMatch) && catMatch;
+            entry.style.display = visible ? '' : 'none';
+            if (visible) visibleCount++;
+        });
+
+        document.getElementById('kb-no-results').classList.toggle('hidden', visibleCount > 0);
+    }
+</script>
 {% endblock %}

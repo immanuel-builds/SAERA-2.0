@@ -1,82 +1,134 @@
 {% extends 'base.html' %}
+{% load static %}
 
-{% block title %}{{ reference.title }} - Knowledge Base{% endblock %}
+{% block title %}{{ reference.title }} - SAERA Knowledge Base{% endblock %}
 
 {% block content %}
-<div class="container py-5">
-    <div class="row justify-content-center">
-        <div class="col-lg-10">
-            <!-- Navigation -->
-            <nav aria-label="breadcrumb" class="mb-4">
-                <ol class="breadcrumb">
-                    <li class="breadcrumb-item"><a href="{% url 'dashboard' %}">Dashboard</a></li>
-                    <li class="breadcrumb-item"><a href="{% url 'knowledge:list' %}">Knowledge Base</a></li>
-                    <li class="breadcrumb-item active text-white" aria-current="page">{{ reference.title }}</li>
-                </ol>
-            </nav>
+<div class="animate-fade-in space-y-12">
 
-            <!-- Header Card -->
-            <div class="card bg-dark text-white border-secondary mb-4 shadow-lg overflow-hidden">
-                <div class="card-header bg-gradient py-4 px-4 border-secondary d-flex justify-content-between align-items-center">
-                    <div>
-                        <span class="badge {% if reference.severity == 'critical' %}bg-danger{% elif reference.severity == 'high' %}bg-warning text-dark{% elif reference.severity == 'medium' %}bg-info text-dark{% else %}bg-secondary{% endif %} mb-2">
-                            {{ reference.get_severity_display }}
-                        </span>
-                        <h1 class="h2 mb-0 fw-bold">{{ reference.title }}</h1>
-                    </div>
-                    <div class="text-end">
-                        <span class="d-block text-muted small">Category</span>
-                        <span class="fw-bold">{{ reference.category }}</span>
+    <!-- Breadcrumb Trail -->
+    <div class="flex items-center gap-3 precise-data text-[9px] opacity-40">
+        <a href="{% url 'dashboard' %}" class="hover:opacity-100 transition-opacity">Observatory</a>
+        <span class="material-symbols-outlined text-xs">chevron_right</span>
+        <a href="{% url 'knowledge:list' %}" class="hover:opacity-100 transition-opacity">Knowledge Base</a>
+        <span class="material-symbols-outlined text-xs">chevron_right</span>
+        <span class="opacity-100 text-ink">{{ reference.title }}</span>
+    </div>
+
+    <!-- Header -->
+    <div class="flex justify-between items-start border-b border-ink/5 pb-10">
+        <div class="space-y-4 max-w-2xl">
+            <div class="flex items-center gap-4">
+                <span class="severity-stamp {% if reference.severity == 'critical' %}text-seal border-seal{% elif reference.severity == 'high' %}text-amber-700 border-amber-700/40{% else %}opacity-40{% endif %}">
+                    {{ reference.get_severity_display }}
+                </span>
+                <span class="precise-data text-[9px] opacity-40 uppercase">{{ reference.category }}</span>
+            </div>
+            <h1 class="atmospheric-h1">{{ reference.title }}</h1>
+        </div>
+        <div class="text-right space-y-2">
+            <span class="precise-data text-[8px] opacity-40 block">Last Updated</span>
+            <span class="font-serif italic text-sm text-ash">{{ reference.created_at|date:"Y.m.d" }}</span>
+        </div>
+    </div>
+
+    <!-- Two-Column Content Layout -->
+    <div class="grid grid-cols-12 gap-16">
+
+        <!-- Left: Core Content -->
+        <div class="col-span-8 space-y-12">
+
+            <!-- Description -->
+            <section class="space-y-6">
+                <div class="flex items-center gap-4">
+                    <span class="material-symbols-outlined text-ash/40 text-sm">description</span>
+                    <h2 class="font-serif italic text-xl">Vulnerability Overview</h2>
+                </div>
+                <div class="parchment-card border-l-2 border-l-ink/20 p-8">
+                    <div class="font-serif text-base text-ash leading-relaxed space-y-4">
+                        {{ reference.description|linebreaksbr }}
                     </div>
                 </div>
-                <div class="card-body p-4">
-                    <div class="row">
-                        <div class="col-md-12 mb-4">
-                            <h4 class="text-primary h5 fw-bold mb-3"><i class="fas fa-info-circle me-2"></i>Description</h4>
-                            <div class="text-light-gray fs-6 lh-lg">
-                                {{ reference.description|linebreaks }}
-                            </div>
-                        </div>
-                        
-                        <div class="col-md-12 mb-4">
-                            <h4 class="text-success h5 fw-bold mb-3"><i class="fas fa-tools me-2"></i>Remediation & Mitigation</h4>
-                            <div class="bg-black bg-opacity-50 p-4 rounded border border-secondary text-light-gray fs-6 lh-lg">
-                                {{ reference.remediation|linebreaks }}
-                            </div>
-                        </div>
+            </section>
 
-                        {% if reference.references %}
-                        <div class="col-md-12">
-                            <h4 class="text-info h5 fw-bold mb-3"><i class="fas fa-external-link-alt me-2"></i>External References</h4>
-                            <div class="text-muted small">
-                                {{ reference.references|linebreaks }}
-                            </div>
-                        </div>
-                        {% endif %}
+            <!-- Remediation -->
+            <section class="space-y-6">
+                <div class="flex items-center gap-4">
+                    <span class="material-symbols-outlined text-bamboo/60 text-sm">build</span>
+                    <h2 class="font-serif italic text-xl">Remediation Doctrine</h2>
+                </div>
+                <div class="parchment-card border-l-2 border-l-bamboo/30 p-8">
+                    <div class="font-serif text-base text-ash leading-relaxed space-y-4">
+                        {{ reference.remediation|linebreaksbr }}
                     </div>
                 </div>
-                <div class="card-footer bg-transparent border-secondary p-4">
-                    <div class="d-flex justify-content-between align-items-center">
-                        <span class="text-muted small">Last updated: {{ reference.created_at|date:"F d, Y" }}</span>
-                        <button class="btn btn-outline-secondary btn-sm" onclick="window.print()">
-                            <i class="fas fa-print me-2"></i>Print Reference
-                        </button>
+            </section>
+
+            <!-- External References -->
+            {% if reference.references %}
+            <section class="space-y-6">
+                <div class="flex items-center gap-4">
+                    <span class="material-symbols-outlined text-ash/40 text-sm">link</span>
+                    <h2 class="font-serif italic text-xl">External Citations</h2>
+                </div>
+                <div class="parchment-card p-8 space-y-3">
+                    {% for line in reference.references.splitlines %}
+                    {% if line.strip %}
+                    <div class="flex items-start gap-3">
+                        <span class="material-symbols-outlined text-ash/20 text-xs mt-0.5">open_in_new</span>
+                        <span class="font-mono text-xs text-ash leading-relaxed break-all">{{ line.strip }}</span>
+                    </div>
+                    {% endif %}
+                    {% endfor %}
+                </div>
+            </section>
+            {% endif %}
+
+        </div>
+
+        <!-- Right: Operational Sidebar -->
+        <aside class="col-span-4 space-y-8">
+
+            <!-- Quick Reference Card -->
+            <div class="parchment-card bg-ink text-background p-6 space-y-6">
+                <span class="precise-data text-[9px] text-background/40 uppercase tracking-widest">Quick Reference</span>
+                <div class="space-y-5 border-t border-background/10 pt-6">
+                    <div class="flex justify-between items-center">
+                        <span class="precise-data text-[8px] text-background/40 uppercase">Severity</span>
+                        <span class="font-serif text-sm text-background">{{ reference.get_severity_display }}</span>
+                    </div>
+                    <div class="flex justify-between items-center">
+                        <span class="precise-data text-[8px] text-background/40 uppercase">Category</span>
+                        <span class="font-serif text-sm text-background">{{ reference.category }}</span>
+                    </div>
+                    <div class="flex justify-between items-center">
+                        <span class="precise-data text-[8px] text-background/40 uppercase">Archive ID</span>
+                        <span class="font-mono text-xs text-background/60">{{ reference.slug }}</span>
                     </div>
                 </div>
             </div>
-        </div>
+
+            <!-- Analyst Guidance -->
+            <div class="parchment-card border-dashed p-6 space-y-4">
+                <span class="material-symbols-outlined text-ash/40 text-sm">psychology</span>
+                <h4 class="font-serif italic text-base">Analyst Guidance</h4>
+                <p class="font-serif italic text-xs text-ash leading-relaxed">
+                    When encountering this vulnerability, cross-reference with active scan findings and apply the remediation steps documented above. Update the investigation state in the Threat Dossier to reflect operational progress.
+                </p>
+            </div>
+
+            <!-- Navigation -->
+            <div class="space-y-4">
+                <a href="{% url 'knowledge:list' %}" class="flex items-center gap-3 group text-ash hover:text-ink transition-colors">
+                    <span class="material-symbols-outlined text-sm group-hover:-translate-x-1 transition-transform">arrow_back</span>
+                    <span class="precise-data text-[9px] uppercase tracking-widest">Return to Archive</span>
+                </a>
+                <a href="{% url 'dashboard' %}" class="flex items-center gap-3 group text-ash hover:text-ink transition-colors">
+                    <span class="material-symbols-outlined text-sm">radar</span>
+                    <span class="precise-data text-[9px] uppercase tracking-widest">Go to Observatory</span>
+                </a>
+            </div>
+        </aside>
     </div>
 </div>
-
-<style>
-    .text-light-gray {
-        color: #e0e0e0;
-    }
-    .bg-gradient {
-        background: linear-gradient(135deg, #1a1a1a 0%, #2c2c2c 100%);
-    }
-    .breadcrumb-item + .breadcrumb-item::before {
-        color: #6c757d;
-    }
-</style>
 {% endblock %}

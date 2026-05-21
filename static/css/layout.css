@@ -1,0 +1,61 @@
+/* 
+   SAERA 2.2 - Layout CSS
+   Governs container grids, sidebars, main observation canvas, and responsive frameworks.
+*/
+
+.saera-sidebar {
+    position: fixed;
+    left: 0;
+    top: 0;
+    bottom: 0;
+    width: 320px;
+    background: rgba(234, 226, 214, 0.95);
+    border-right: 1px solid var(--border-subtle);
+    display: flex;
+    flex-direction: column;
+    padding: var(--space-xl) var(--space-lg);
+    z-index: var(--z-sidebar, 100);
+    backdrop-filter: blur(8px);
+    transition: var(--transition-slow);
+}
+
+body.dark .saera-sidebar {
+    background: rgba(6, 6, 6, 0.99);
+}
+
+.saera-main {
+    margin-left: 320px;
+    padding: var(--space-xl) var(--space-2xl);
+    min-height: 100vh;
+    transition: var(--transition-slow);
+    position: relative;
+    z-index: var(--z-base, 1);
+}
+
+/* Sidebar Responsive Actions */
+@media (max-width: 1024px) {
+    .saera-sidebar {
+        transform: translateX(-100%);
+    }
+    .saera-sidebar.active {
+        transform: translateX(0);
+    }
+    .saera-main {
+        margin-left: 0;
+        padding: var(--space-lg) var(--space-md);
+    }
+}
+
+/* Base Responsive Grids */
+.observatory-grid {
+    display: grid;
+    grid-template-columns: repeat(12, 1fr);
+    gap: var(--space-lg);
+}
+
+@media (max-width: 768px) {
+    .observatory-grid {
+        grid-template-columns: 1fr;
+        gap: var(--space-md);
+    }
+}

@@ -31,7 +31,9 @@ class TopologyBuilderService:
                 "label": f"{svc.port}/{svc.protocol}",
                 "group": "service",
                 "title": f"Service: {svc.service}\nVersion: {svc.service_version or 'Unknown'}",
-                "value": 15
+                "value": 15,
+                "is_suppressed": svc.is_suppressed,
+                "lifecycle_state": svc.lifecycle_state
             })
             # Connect vector to target
             edges.append({
@@ -62,7 +64,9 @@ class TopologyBuilderService:
                     "group": "vulnerability",
                     "title": f"[{vuln.severity.upper()}] {vuln.title}\nCVSS: {vuln.cvss_score or 'N/A'}",
                     "color": severity_colors.get(vuln.severity, '#6B6B6B'),
-                    "value": 10 + (vuln.cvss_score or 0)
+                    "value": 10 + (vuln.cvss_score or 0),
+                    "is_suppressed": vuln.is_suppressed,
+                    "lifecycle_state": vuln.lifecycle_state
                 })
                 # Connect finding to vector
                 edges.append({

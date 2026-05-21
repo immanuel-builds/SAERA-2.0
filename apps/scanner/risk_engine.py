@@ -1,41 +1,39 @@
 """
 Risk Scoring Engine for SAERA
-Calculates vulnerability risk based on multiple factors:
-- CVSS Score
-- Service Criticality
-- Exposure
-- Misconfiguration patterns
+Calculates vulnerability risk based on the industry standard CVSS + EPSS methodology.
 """
 
-def calculate_risk(cvss, service=None, is_public=False, has_default_creds=False, misconfigs=None):
+def get_epss_score(cve_id=None):
     """
-    Calculate a weighted risk score (0-10)
-    Formula: (CVSS * 0.45) + (Exposure * 0.25) + (ServiceCriticality * 0.2) + (Misconfiguration * 0.1)
+    Mock EPSS lookup for demonstration.
+    In a production system, this would query the FIRST EPSS API or a local Redis cache.
+    Returns a probability score (0.0 to 1.0) of exploitation within 30 days.
     """
-    score = 0
-    
-    # 1. Base CVSS contribution (max 4.5)
-    score += (cvss or 0) * 0.45
-    
-    # 2. Exposure contribution (max 2.5)
-    if is_public:
-        score += 2.5
+    if not cve_id:
+        return 0.05  # Baseline probability if no CVE is specified
         
-    # 3. Service Criticality contribution (max 2.0)
-    critical_services = ["ssh", "rdp", "smb", "ftp", "telnet", "database", "redis", "mongodb"]
-    if service and any(s in service.lower() for s in critical_services):
-        score += 2.0
-        
-    # 4. Misconfiguration contribution (max 1.0)
-    if has_default_creds:
-        score += 1.0  # Significant misconfig
-    elif misconfigs and len(misconfigs) > 0:
-        score += 0.5
-        
-    # Clamp score to 0-10 range
-    final_score = round(min(score, 10), 1)
+    # Seeded examples for academic demonstration
+    epss_database = {
+        "CVE-2021-44228": 0.95,  # Log4Shell - Highly exploited
+        "CVE-2023-23397": 0.82,  # Outlook EoP
+        "CVE-2020-1472": 0.88,   # Zerologon
+    }
     
-    # Determine risk level
+    return epss_database.get(cve_id, 0.15)  # Default moderate probability
+
+def calculate_risk(vulnerability):
+    """
+    Calculate risk using CVSS * (1 + EPSS)
+    """
+    # Assuming vulnerability is a Django model instance or namedtuple that has cvss_score and optionally cve_id.
+    cvss_base = getattr(vulnerability, 'cvss_score', 0.0) or 0.0
+    cve_id = getattr(vulnerability, 'cve_id', None)
+    
+    epss_score = get_epss_score(cve_id)
+    
+    risk = min(cvss_base * (1 + epss_score), 10.0)
+    final_score = round(risk, 1)
+    
     if final_score >= 9.0:
         level = "Critical"
     elif final_score >= 7.0:
@@ -46,17 +44,3 @@ def calculate_risk(cvss, service=None, is_public=False, has_default_creds=False,
         level = "Low"
         
     return final_score, level
-
-def get_exploitability_factor(cvss, cve_id=None):
-    """
-    Determine exploitability factor (0-10)
-    In a real scenario, this would query a threat intel feed.
-    For now, we use CVSS exploitability subscore or heuristics.
-    """
-    if cvss >= 9.0:
-        return 9
-    if cvss >= 7.0:
-        return 7
-    if cvss >= 4.0:
-        return 5
-    return 2

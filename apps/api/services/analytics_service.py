@@ -1,11 +1,11 @@
 from django.db.models import Count, Avg
-from django.db.models.functions import TruncDate
 from apps.scanner.models import ScanJob, Vulnerability
+from apps.scanner.services.analytics_service import AnalyticsService as ScannerAnalyticsService
 
 class AnalyticsService:
     """
     Synthesizes historical scan data into actionable security trends.
-    Powers the time-series charts and prediction precursors.
+    Delegates to the authoritative core scanner services.
     """
 
     @staticmethod
@@ -13,24 +13,15 @@ class AnalyticsService:
         """
         Retrieves the risk posture trajectory for a specific asset.
         """
-        scans = ScanJob.objects.filter(
-            target_id=target_id, 
-            status='completed'
-        ).order_by('-created_at')[:limit]
-        
-        history = []
-        for scan in reversed(scans):
-            # Calculate avg risk for this scan
-            avg_risk = Vulnerability.objects.filter(scan_job=scan).aggregate(Avg('risk_score'))['risk_score__avg'] or 0
-            
-            history.append({
-                "date": scan.created_at.strftime("%Y-%m-%d"),
-                "scan_id": scan.id,
-                "risk_score": round(avg_risk, 2),
-                "threat_count": scan.vulnerabilities_found
-            })
-            
-        return history
+        tide = ScannerAnalyticsService.get_risk_tide_series(target_id, limit=limit)
+        return [
+            {
+                "date": item["date"],
+                "scan_id": item["scan_id"],
+                "risk_score": item["score"],
+                "threat_count": item["threats"]
+            } for item in tide
+        ]
 
     @staticmethod
     def get_global_threat_distribution():
@@ -46,28 +37,14 @@ class AnalyticsService:
     @staticmethod
     def get_drift_analysis(target_id):
         """
-        Performs a differential analysis between the last two scans 
-        to identify emergent and resolved threats.
+        Performs a differential analysis between the last two scans.
         """
-        last_two_scans = ScanJob.objects.filter(
-            target_id=target_id, 
-            status='completed'
-        ).order_by('-created_at')[:2]
-        
-        if last_two_scans.count() < 2:
+        drift = ScannerAnalyticsService.get_risk_drift(target_id)
+        if drift.get("status") == "insufficient_data":
             return {"status": "insufficient_data"}
             
-        current = last_two_scans[0]
-        previous = last_two_scans[1]
-        
-        curr_titles = set(current.vulnerabilities.values_list('title', flat=True))
-        prev_titles = set(previous.vulnerabilities.values_list('title', flat=True))
-        
-        new_threats = curr_titles - prev_titles
-        resolved_threats = prev_titles - curr_titles
-        
         return {
-            "emergent": list(new_threats),
-            "resolved": list(resolved_threats),
-            "count_delta": len(new_threats) - len(resolved_threats)
+            "emergent": [e["title"] for e in drift.get("new_exposures", [])],
+            "resolved": [r["title"] for r in drift.get("resolved_exposures", [])],
+            "count_delta": drift.get("threats_delta", 0)
         }

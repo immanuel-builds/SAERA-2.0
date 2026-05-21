@@ -1,143 +1,304 @@
 {% extends 'base.html' %}
 {% load static %}
 
-{% block title %}The Observatory - SAERA{% endblock %}
+{% block title %}Operational Observatory - SAERA{% endblock %}
 
 {% block content %}
-<div class="animate-in fade-in slide-in-from-bottom-8 duration-1000 space-y-12">
-    <!-- Hero: Intelligence Overview (Mountain Heatmap) -->
-    <div class="parchment-card p-0 overflow-hidden relative h-[400px] group">
-        <!-- The Asset: Mountain Peaks with Red Nodes -->
-        <div class="absolute inset-0 opacity-40 mix-blend-multiply transition-transform duration-[10s] group-hover:scale-110" 
-             style="background-image: url('{% static 'img/jap 2.png' %}'); background-size: cover; background-position: center;"></div>
-        
-        <!-- Intelligence Overlay -->
-        <div class="relative z-10 h-full p-12 flex flex-col justify-between">
-            <div class="flex justify-between items-start">
-                <div>
-                    <span class="text-[10px] font-bold text-ink uppercase tracking-[0.4em] block mb-2">Executive Overview</span>
-                    <h1 class="text-5xl text-ink font-serif tracking-tighter">Security Intelligence Pulse</h1>
-                </div>
-                <div class="text-right">
-                    <span class="text-[10px] font-bold text-seal uppercase tracking-[0.3em] block mb-2">Attack Surface Score</span>
-                    <div class="text-6xl text-seal font-serif tracking-tighter">{{ attack_surface_score|default:100 }}<span class="text-2xl text-ink/40">/100</span></div>
-                </div>
+<div class="animate-fade-in space-y-16">
+    <!-- Observatory Header: Analytical Storytelling -->
+    <div class="flex justify-between items-end border-b border-ink/5 pb-12">
+        <div class="space-y-4 max-w-2xl">
+            <h1 class="atmospheric-h1">Operational Observatory</h1>
+            <!-- Analytical Storytelling Synthesis -->
+            <p class="font-serif italic text-lg text-ash leading-relaxed">
+                {% if drift.direction == 'increasing' %}
+                Postural integrity has degraded by {{ drift.drift_percentage }}% across the operational fleet, primarily driven by recurring service exposures. Immediate remediation is advised.
+                {% elif drift.direction == 'decreasing' %}
+                Postural integrity has improved by {{ drift.drift_percentage }}%. Remediation efforts are successfully reducing critical exposure concentrations across primary targets.
+                {% else %}
+                Operational posture remains stabilized. Risk density is concentrated, but temporal drift indicates no significant immediate escalation.
+                {% endif %}
+            </p>
+        </div>
+        <div class="text-right space-y-2">
+            <span class="precise-data text-[9px] opacity-40">Temporal Risk Drift</span>
+            <div class="flex items-center justify-end gap-3">
+                <span class="atmospheric-h2 {% if drift.direction == 'increasing' %}text-seal{% elif drift.direction == 'decreasing' %}text-bamboo{% else %}text-ash{% endif %}">
+                    {% if drift.direction == 'increasing' %}+{% endif %}{{ drift.score_delta|default:"0.0" }}
+                </span>
+                <span class="material-symbols-outlined {% if drift.direction == 'increasing' %}text-seal{% elif drift.direction == 'decreasing' %}text-bamboo{% endif %}">
+                    {% if drift.direction == 'increasing' %}north_east{% elif drift.direction == 'decreasing' %}south_east{% else %}trending_flat{% endif %}
+                </span>
             </div>
-
-            <div class="grid grid-cols-4 gap-12 border-t border-ink/10 pt-8">
-                <div>
-                    <span class="text-[9px] font-bold text-ash uppercase tracking-widest block">Observation Depth</span>
-                    <span class="text-2xl text-ink font-serif">{{ total_scans|default:0 }} <span class="text-xs text-ash/40">Sectors</span></span>
-                </div>
-                <div>
-                    <span class="text-[9px] font-bold text-ash uppercase tracking-widest block">Avg Risk Level</span>
-                    <span class="text-2xl text-ink font-serif">{{ avg_risk_score|default:0 }} <span class="text-xs text-ash/40">Score</span></span>
-                </div>
-                <div>
-                    <span class="text-[9px] font-bold text-seal uppercase tracking-widest block">High Risk Hosts</span>
-                    <span class="text-2xl text-seal font-serif">{{ high_risk_hosts|default:0 }} <span class="text-xs text-seal/40">Alerts</span></span>
-                </div>
-                <div class="flex items-end justify-end">
-                    <a href="{% url 'scan_create' %}" class="saera-button px-8 py-3">
-                        <span class="text-[9px] font-bold uppercase tracking-widest">New Sweep</span>
-                    </a>
-                </div>
-            </div>
+            <p class="font-serif italic text-xs text-ash">Aggregate shift over prior sweep</p>
         </div>
     </div>
 
-    <!-- Middle Layer: Flow & Distribution -->
-    <div class="grid grid-cols-12 gap-12">
-        <!-- Flow Rhythm Chart -->
-        <div class="col-span-8 parchment-card p-10 flex flex-col h-[350px]">
-            <div class="flex justify-between items-start mb-12">
-                <div>
-                    <span class="text-[10px] font-bold text-ash uppercase tracking-[0.2em] block">Observation Flow Rhythm</span>
-                    <span class="text-sm text-ink font-serif italic">A 24-hour cycle of digital vigilance</span>
-                </div>
-                <div class="flex gap-6">
-                    <div class="flex items-center gap-2">
-                        <span class="w-1.5 h-1.5 rounded-full bg-ink"></span>
-                        <span class="text-[9px] font-bold text-ash uppercase tracking-widest">Baseline</span>
-                    </div>
-                    <div class="flex items-center gap-2">
-                        <span class="w-1.5 h-1.5 rounded-full bg-seal animate-pulse"></span>
-                        <span class="text-[9px] font-bold text-seal uppercase tracking-widest">Threats</span>
-                    </div>
-                </div>
+    <!-- HIERARCHY 1: Temporal Trend (Macro View) & Lifecycle Flow -->
+    <div class="grid grid-cols-12 gap-16">
+        <!-- Temporal Risk Evolution -->
+        <div class="col-span-8 space-y-8">
+            <div class="flex justify-between items-center">
+                <h3 class="font-serif italic text-xl">Temporal Posture Evolution</h3>
+                <span class="precise-data text-[9px] opacity-40">Historical Trajectory</span>
             </div>
-            <!-- Brushstroke Style Chart -->
-            <div class="flex-grow w-full relative">
-                <svg class="w-full h-full overflow-visible" viewBox="0 0 800 120">
-                    <path d="M0,100 Q150,95 300,40 T500,20 T650,80 T800,90" fill="none" stroke="currentColor" stroke-width="2" class="text-ink/20"></path>
-                    <path d="M0,110 Q200,105 400,30 T600,10 T800,100" fill="none" stroke="currentColor" stroke-width="1.5" stroke-dasharray="4 4" class="text-seal/60"></path>
-                    <circle cx="600" cy="10" fill="currentColor" r="3" class="text-seal"></circle>
-                </svg>
-                <div class="flex justify-between mt-8 border-t border-ink/5 pt-4">
-                    <span class="text-[9px] font-mono text-ash/40">DAWN</span>
-                    <span class="text-[9px] font-mono text-ash/40">NOON</span>
-                    <span class="text-[9px] font-mono text-ash/40">DUSK</span>
-                    <span class="text-[9px] font-mono text-ash/40">MIDNIGHT</span>
+            <div class="parchment-card p-6 h-[320px] relative">
+                <!-- Subtle overlay for context -->
+                <div class="absolute top-4 right-6 text-right">
+                    <span class="precise-data text-[8px] opacity-20">Aggregated Risk Index (0-10)</span>
                 </div>
+                <canvas id="riskTidesChart"></canvas>
             </div>
         </div>
 
-        <!-- Risk Gauge (Enso Circle) -->
-        <div class="col-span-4 parchment-card p-10 flex flex-col items-center justify-center text-center relative overflow-hidden group h-[350px]">
-            <!-- Enso Circle Asset -->
-            <div class="absolute inset-0 opacity-[0.03] group-hover:opacity-[0.08] transition-opacity duration-1000 mix-blend-multiply" 
-                 style="background-image: url('{% static 'img/jap 4.png' %}'); background-size: cover; background-position: center;"></div>
+        <!-- Lifecycle Analytics Flow -->
+        <div class="col-span-4 space-y-8">
+            <div class="flex justify-between items-center">
+                <h3 class="font-serif italic text-xl">Lifecycle Pipeline</h3>
+                <span class="precise-data text-[9px] opacity-40">Exposure State Movement</span>
+            </div>
             
-            <div class="relative z-10 flex flex-col items-center">
-                <div class="size-32 border-2 border-ink/5 rounded-full flex items-center justify-center mb-6 relative">
-                    <div class="absolute inset-2 border border-seal/20 rounded-full animate-ping opacity-20"></div>
-                    <span class="text-4xl text-ink font-serif">{{ avg_risk_score|default:0 }}</span>
+            <div class="parchment-card p-6 space-y-8">
+                <!-- Transition Flow -->
+                <div class="space-y-6">
+                    <div class="flex justify-between items-center border-b border-ink/5 pb-2">
+                        <span class="precise-data text-[9px] opacity-60">Active Discovery</span>
+                        <span class="font-serif text-2xl text-ink">{{ lifecycle_flow.active|default:0 }}</span>
+                    </div>
+                    
+                    <div class="pl-4 border-l border-ink/10 space-y-4">
+                        <div class="flex justify-between items-center">
+                            <span class="precise-data text-[9px] text-seal">Escalated</span>
+                            <span class="font-serif text-lg text-seal">{{ lifecycle_flow.escalated|default:0 }}</span>
+                        </div>
+                        <div class="flex justify-between items-center">
+                            <span class="precise-data text-[9px] text-amber-600">Recurring Persistent</span>
+                            <span class="font-serif text-lg text-amber-600">{{ lifecycle_flow.recurring|default:0 }}</span>
+                        </div>
+                    </div>
+
+                    <div class="flex justify-between items-center pt-4 border-t border-ink/5">
+                        <span class="precise-data text-[9px] text-bamboo">Successfully Resolved</span>
+                        <span class="font-serif text-2xl text-bamboo">{{ lifecycle_flow.resolved|default:0 }}</span>
+                    </div>
                 </div>
-                <span class="text-[10px] font-bold text-ash uppercase tracking-[0.3em] block mb-2">Aggregate Risk</span>
-                <p class="text-sm text-ink/60 font-serif italic max-w-[150px] mb-6">Weighted environmental threat score</p>
-                
-                <div class="pt-4 border-t border-ink/5 w-full">
-                    <span class="text-[9px] font-bold text-seal uppercase tracking-widest block mb-1">Threat Likelihood</span>
-                    <span class="text-xl text-seal font-mono">{{ threat_likelihood|default:0 }}%</span>
+
+                <div class="pt-6 border-t border-ink/5">
+                    <p class="font-serif italic text-xs text-ash opacity-60">
+                        Measures the velocity and persistence of exposures moving from discovery to remediation.
+                    </p>
                 </div>
             </div>
         </div>
     </div>
 
-    <!-- Bottom Layer: The Ledger -->
-    <div class="parchment-card p-0 overflow-hidden relative">
-        <!-- Crane Accent Background -->
-        <div class="absolute -bottom-20 -right-20 w-80 h-80 opacity-[0.03] pointer-events-none grayscale" style="background-image: url('{% static 'img/jap 15.png' %}'); background-size: contain; background-repeat: no-repeat;"></div>
+    <!-- HIERARCHY 2: Risk Concentration & Actionable Intelligence -->
+    <div class="grid grid-cols-12 gap-16">
         
-        <div class="p-10 border-b border-ink/5 flex justify-between items-center bg-ash/5 relative z-10">
-            <div>
-                <h3 class="text-2xl text-ink font-serif italic">Intelligence Chronicle</h3>
-                <p class="text-[9px] font-bold text-ash uppercase tracking-widest mt-1">Real-time anomaly ingestion</p>
+        <!-- Concentration Postures (Heatmap style logic) -->
+        <div class="col-span-6 space-y-8">
+            <div class="flex justify-between items-center border-b border-ink/5 pb-6">
+                <div class="space-y-1">
+                    <h3 class="font-serif italic text-xl">Exposure Concentration Matrix</h3>
+                    <p class="precise-data text-[9px] opacity-40">Nodes with highest aggregated risk density</p>
+                </div>
+                <a href="{% url 'vulnerability_list' %}" class="precise-data text-[10px] hover:text-seal transition-colors">Analyze Nodes</a>
             </div>
-            <a href="{% url 'vulnerability_list' %}" class="text-[10px] font-bold text-ash uppercase tracking-widest border-b border-ash/20 pb-1 hover:text-ink transition-all">Open Archives</a>
-        </div>
-        <div class="divide-y divide-ink/5">
-            {% for vuln in recent_vulns %}
-            <div class="flex items-center justify-between py-8 px-10 hover:bg-ash/5 transition-all group">
-                <div class="flex items-center gap-12">
-                    <span class="text-[10px] font-mono text-ash/40">{{ vuln.created_at|date:"H:i:s" }}</span>
-                    <div class="flex flex-col">
-                        <span class="text-sm font-serif text-ink group-hover:translate-x-2 transition-transform duration-500">{{ vuln.title }}</span>
-                        <span class="text-[9px] font-mono text-ash/40 uppercase tracking-widest mt-1">{{ vuln.scan_job.target.target }}</span>
+
+            <div class="space-y-4">
+                {% for target in high_risk_targets %}
+                <div class="parchment-card p-5 group flex justify-between items-center">
+                    <div class="space-y-1 w-1/3">
+                        <h4 class="font-serif text-sm truncate">{{ target.target.name }}</h4>
+                        <p class="precise-data text-[9px] opacity-40 truncate">{{ target.target.target }}</p>
+                    </div>
+                    
+                    <!-- Density Indicator (Visual Math) -->
+                    <div class="w-1/3 px-4">
+                        <div class="w-full h-1.5 bg-ink/5 rounded-none overflow-hidden relative group-hover:h-2 transition-all">
+                            <div class="absolute left-0 top-0 bottom-0 bg-seal/80 transition-all duration-1000" style="width: {% widthratio target.aggregate_risk_score 1 10 %}%"></div>
+                        </div>
+                        <p class="precise-data text-[8px] opacity-30 mt-2 text-center">Score: {{ target.aggregate_risk_score|floatformat:1 }}</p>
+                    </div>
+
+                    <div class="w-1/3 text-right">
+                        <a href="{% url 'scan_detail' target.id %}" class="precise-data text-[9px] opacity-40 group-hover:opacity-100 group-hover:text-ink transition-colors flex items-center justify-end gap-1">
+                            Inspect Telemetry
+                            <span class="material-symbols-outlined text-xs">arrow_right_alt</span>
+                        </a>
                     </div>
                 </div>
-                <div class="flex items-center gap-8">
-                    <span class="text-[9px] font-bold text-ink uppercase tracking-widest opacity-20">{{ vuln.risk_score|default:0 }} RISK</span>
-                    <span class="severity-seal text-[9px]">{{ vuln.severity|upper }}</span>
-                    <span class="material-symbols-outlined text-ash/20 group-hover:text-ink transition-all">chevron_right</span>
+                {% empty %}
+                <div class="p-12 text-center parchment-card opacity-40">
+                    <p class="font-serif italic text-xs">No critical target concentrations observed.</p>
                 </div>
+                {% endfor %}
             </div>
-            {% empty %}
-            <div class="p-20 text-center">
-                <p class="text-ash/40 italic font-serif py-4 text-sm">The silence remains unbroken. No anomalies recorded in this cycle.</p>
+        </div>
+
+        <!-- Priority Queue (Actionable Intelligence) -->
+        <div class="col-span-6 space-y-8">
+            <div class="flex justify-between items-center border-b border-ink/5 pb-6">
+                <div class="space-y-1">
+                    <h3 class="font-serif italic text-xl">Actionable Priority Queue</h3>
+                    <p class="precise-data text-[9px] opacity-40">Deterministic prioritization for remediation</p>
+                </div>
+                <span class="precise-data text-[9px] px-2 py-0.5 bg-seal/10 text-seal">Top 5 Capped</span>
             </div>
-            {% endfor %}
+
+            <div class="space-y-4">
+                {% for vuln in priority_vulns %}
+                <div class="parchment-card p-4 hover:border-ink/20 transition-all">
+                    <div class="flex justify-between items-start mb-3">
+                        <div class="flex items-center gap-3">
+                            <span class="precise-data text-[9px] px-2 py-0.5 font-bold uppercase
+                                {% if vuln.priority_score >= 75.0 %}bg-seal/10 text-seal border border-seal/20
+                                {% elif vuln.priority_score >= 50.0 %}bg-amber-600/10 text-amber-600 border border-amber-600/20
+                                {% else %}bg-ink/5 text-ash border border-ink/10{% endif %}">
+                                PR-Index: {{ vuln.priority_score|floatformat:1 }}
+                            </span>
+                            <span class="precise-data text-[9px] uppercase tracking-wider opacity-60">
+                                {{ vuln.lifecycle_state }}
+                            </span>
+                        </div>
+                        <span class="precise-data text-[10px] uppercase opacity-40">{{ vuln.severity }}</span>
+                    </div>
+                    
+                    <h4 class="font-serif text-sm mb-2 text-ink line-clamp-1">{{ vuln.title }}</h4>
+                    
+                    <div class="flex justify-between items-center pt-3 border-t border-ink/5">
+                        <p class="precise-data text-[9px] opacity-40">
+                            Node: {{ vuln.scan_job.target.target }} | Port: {{ vuln.port|default:"N/A" }}
+                        </p>
+                        <!-- Integration with Knowledge Base Link (If applicable) -->
+                        <a href="{% url 'knowledge:list' %}" class="precise-data text-[8px] text-seal/70 hover:text-seal transition-colors">
+                            Read Doctrine
+                        </a>
+                    </div>
+                </div>
+                {% empty %}
+                <div class="p-12 text-center parchment-card opacity-40">
+                    <p class="font-serif italic text-xs">No active high-priority exposures detected.</p>
+                </div>
+                {% endfor %}
+            </div>
         </div>
     </div>
 </div>
+
+{% block extra_js %}
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        const ctx = document.getElementById('riskTidesChart').getContext('2d');
+        const style = getComputedStyle(document.body);
+
+        // Strict Minimalist Styling (No Radar Soup)
+        const getChartColors = () => {
+            const ink = style.getPropertyValue('--ink-black').trim() || '#1A1A1A';
+            const seal = style.getPropertyValue('--seal-red').trim() || '#9F3B32';
+            const borderSubtle = style.getPropertyValue('--border-subtle').trim() || 'rgba(0, 0, 0, 0.05)';
+            return { ink, seal, borderSubtle };
+        };
+
+        let colors = getChartColors();
+        const dates = [{% for trend in risk_trends %}"{{ trend.date }}"{% if not forloop.last %}, {% endif %}{% endfor %}];
+        const scores = [{% for trend in risk_trends %}{{ trend.score }}{% if not forloop.last %}, {% endif %}{% endfor %}];
+
+        let gradient = ctx.createLinearGradient(0, 0, 0, 300);
+        gradient.addColorStop(0, colors.ink + '11');
+        gradient.addColorStop(1, 'transparent');
+
+        const config = {
+            type: 'line',
+            data: {
+                labels: dates,
+                datasets: [{
+                    data: scores,
+                    borderColor: colors.ink,
+                    borderWidth: 1.5,
+                    backgroundColor: gradient,
+                    fill: true,
+                    tension: 0.4, // Smooth curve
+                    pointBackgroundColor: colors.ink,
+                    pointBorderColor: 'transparent',
+                    pointHoverRadius: 4,
+                    pointRadius: 0 // Hide points to show analytical curve movement
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                scales: {
+                    x: {
+                        grid: { display: false },
+                        ticks: {
+                            color: colors.ink + '55',
+                            font: { family: 'JetBrains Mono', size: 9 }
+                        }
+                    },
+                    y: {
+                        min: 0,
+                        max: 10,
+                        grid: { 
+                            color: colors.borderSubtle,
+                            drawBorder: false 
+                        },
+                        ticks: {
+                            color: colors.ink + '55',
+                            font: { family: 'JetBrains Mono', size: 9 },
+                            stepSize: 2,
+                            padding: 10
+                        }
+                    }
+                },
+                plugins: {
+                    legend: { display: false },
+                    tooltip: {
+                        enabled: true,
+                        backgroundColor: colors.ink,
+                        titleColor: '#EAE2D6',
+                        bodyColor: '#EAE2D6',
+                        titleFont: { family: 'Zen Old Mincho', size: 12 },
+                        bodyFont: { family: 'JetBrains Mono', size: 10 },
+                        cornerRadius: 0,
+                        padding: 12,
+                        displayColors: false,
+                        callbacks: {
+                            label: function(context) {
+                                return `Risk Density: ${context.parsed.y}`;
+                            }
+                        }
+                    }
+                },
+                interaction: {
+                    mode: 'index',
+                    intersect: false,
+                }
+            }
+        };
+
+        const riskTidesChart = new Chart(ctx, config);
+
+        // Theme switching observer
+        const observer = new MutationObserver(() => {
+            const newColors = getChartColors();
+            let newGradient = ctx.createLinearGradient(0, 0, 0, 300);
+            newGradient.addColorStop(0, newColors.ink + '11');
+            newGradient.addColorStop(1, 'transparent');
+
+            riskTidesChart.data.datasets[0].borderColor = newColors.ink;
+            riskTidesChart.data.datasets[0].backgroundColor = newGradient;
+            riskTidesChart.data.datasets[0].pointBackgroundColor = newColors.ink;
+
+            riskTidesChart.options.scales.x.ticks.color = newColors.ink + '55';
+            riskTidesChart.options.scales.y.ticks.color = newColors.ink + '55';
+            riskTidesChart.options.scales.y.grid.color = newColors.borderSubtle;
+
+            riskTidesChart.update();
+        });
+
+        observer.observe(document.body, { attributes: true, attributeFilter: ['class'] });
+    });
+</script>
+{% endblock %}
 {% endblock %}

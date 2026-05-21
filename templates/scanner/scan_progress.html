@@ -1,13 +1,13 @@
 {% extends 'base.html' %}
 {% load static %}
 
-{% block title %}Tactical Observation - SAERA{% endblock %}
+{% block title %}Scan Progress - NetVuln{% endblock %}
 
 {% block body_class %}ops-page{% endblock %}
 
 {% block content %}
 <main class="flex-1 flex flex-col gap-16 py-12 px-10 animate-in fade-in duration-1000 max-w-6xl">
-    <!-- Top Row: The Enso & Anomaly Ingest -->
+    <!-- Top Row: Progress & Findings -->
     <div class="grid grid-cols-1 lg:grid-cols-12 gap-16 items-center">
         <!-- The Enso Circle: Progress Visualization -->
         <div class="lg:col-span-7 flex flex-col items-center justify-center relative p-12">
@@ -23,36 +23,36 @@
                 
                 <div class="absolute flex flex-col items-center justify-center text-center">
                     <span id="progress-percent" class="text-7xl text-ink font-serif font-medium tracking-tighter">0%</span>
-                    <span id="scan-status" class="text-[10px] font-bold text-ash uppercase tracking-[0.4em] mt-6">Observing...</span>
+                    <span id="scan-status" class="text-[10px] font-bold text-ash uppercase tracking-[0.4em] mt-6">Scanning...</span>
                 </div>
             </div>
             <div class="mt-12 flex flex-col items-center gap-4">
-                <h3 class="text-2xl text-ink font-serif italic">The Recursive Trace</h3>
-                <p class="text-sm text-ash font-serif italic text-center max-w-sm leading-relaxed">Watching the digital ripples for <span class="text-ink font-bold">{{ scan_job.target.target }}</span>.</p>
+                <h3 class="text-2xl text-ink font-serif italic">Scan Progress</h3>
+                <p class="text-sm text-ash font-serif italic text-center max-w-sm leading-relaxed">Scanning <span class="text-ink font-bold">{{ scan.target.target }}</span>.</p>
             </div>
         </div>
         
-        <!-- Anomaly Ingest Archive -->
+        <!-- Finding Counter -->
         <div class="lg:col-span-5 flex flex-col gap-12">
             <div class="parchment-card p-10 relative overflow-hidden">
                 <div class="flex justify-between items-start mb-8">
                     <div>
-                        <span class="text-[10px] font-bold text-ash uppercase tracking-widest block mb-4">Anomaly Ingest</span>
-                        <h4 class="text-2xl text-ink font-serif italic">The Evidence Counter</h4>
+                        <span class="text-[10px] font-bold text-ash uppercase tracking-widest block mb-4">Findings</span>
+                        <h4 class="text-2xl text-ink font-serif italic">Finding Counter</h4>
                     </div>
                     <span class="material-symbols-outlined text-seal text-3xl">brush</span>
                 </div>
                 
                 <div class="mt-12 flex items-baseline gap-6">
-                    <span id="vulnerability-count" class="text-8xl text-seal font-serif tracking-tighter">{{ scan_job.vulnerabilities.count }}</span>
+                    <span id="vulnerability-count" class="text-8xl text-seal font-serif tracking-tighter">{{ scan.vulnerabilities.count }}</span>
                     <div class="flex flex-col">
-                        <span class="text-[10px] font-bold text-ash uppercase tracking-widest">Anomalies</span>
-                        <span class="text-xs text-ash/40 font-serif italic">Found in this sweep</span>
+                        <span class="text-[10px] font-bold text-ash uppercase tracking-widest">Findings</span>
+                        <span class="text-xs text-ash/40 font-serif italic">Found in this scan</span>
                     </div>
                 </div>
 
                 <div id="anomaly-list" class="mt-12 space-y-6">
-                    {% for vuln in scan_job.vulnerabilities.all|slice:":3" %}
+                    {% for vuln in scan.vulnerabilities.all|slice:":3" %}
                     <div class="flex items-center justify-between py-4 border-b border-ink/5 animate-in slide-in-from-right duration-700">
                         <div class="flex items-center gap-4">
                             <span class="severity-seal text-[8px]">{{ vuln.severity|upper }}</span>
@@ -66,12 +66,12 @@
         </div>
     </div>
 
-    <!-- The Investigator's Journal: Terminal Output -->
+    <!-- Scan Log -->
     <div class="flex flex-col gap-6 mt-8">
         <div class="flex justify-between items-center px-2">
-            <h3 class="text-2xl text-ink font-serif">Investigator's Journal</h3>
+            <h3 class="text-2xl text-ink font-serif">Scan Log</h3>
             <div class="flex items-center gap-6">
-                <span class="text-[10px] font-bold text-ash uppercase tracking-widest">Sector Session: {{ scan_job.id|truncatechars:8 }}</span>
+                <span class="text-[10px] font-bold text-ash uppercase tracking-widest">Scan ID: {{ scan.id|truncatechars:8 }}</span>
                 <span class="w-1.5 h-1.5 rounded-full bg-bamboo animate-pulse"></span>
             </div>
         </div>
@@ -85,73 +85,123 @@
                 {% endfor %}
                 <div class="flex gap-4 active-line text-seal animate-pulse">
                     <span class="text-seal/40">[{{ "now"|date:"H:i:s" }}]</span>
-                    <span>&gt; THE OBSERVATORY IS WATCHING THE DARK WATER...</span>
+                    <span>&gt; SCAN IS RUNNING...</span>
                 </div>
             </div>
         </div>
     </div>
 </main>
+{% endblock %}
 
+{% block extra_js %}
 <script>
-    function updateProgress() {
-        $.ajax({
-            url: "{% url 'scan_progress_api' scan_job.id %}",
-            success: function(data) {
-                const progress = data.progress;
-                const status = data.status;
-                const ring = document.getElementById('progress-ring');
-                const percent = document.getElementById('progress-percent');
-                const statusText = document.getElementById('scan-status');
-                
-                // Update Progress Ring (Circumference is 282.7 for r=45)
-                const offset = 282.7 - (progress / 100 * 282.7);
-                ring.style.strokeDashoffset = offset;
-                percent.innerText = progress + '%';
-                statusText.innerText = status.toUpperCase() + '...';
+    (function() {
+        const progressApiUrl = "{% url 'scan_progress_api' scan_id %}";
+        const scanDetailUrl = "{% url 'scan_detail' scan_id %}";
+        const pollDelayMs = 3000;
+        const circumference = 282.7;
 
-                // Update Stats
-                const countElem = $('#vulnerability-count');
-                const currentCount = parseInt(countElem.text());
-                if (parseInt(data.vulnerability_count) > currentCount) {
-                    countElem.addClass('animate-bounce text-seal');
-                    setTimeout(() => countElem.removeClass('animate-bounce'), 1000);
+        function appendActiveLine(logContainer) {
+            const activeDiv = document.createElement('div');
+            activeDiv.className = 'flex gap-4 active-line text-seal animate-pulse mt-4';
+
+            const timestamp = document.createElement('span');
+            timestamp.className = 'text-seal/40';
+            timestamp.textContent = `[${new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', second: '2-digit' })}]`;
+
+            const message = document.createElement('span');
+            message.textContent = '> SCAN IS RUNNING...';
+
+            activeDiv.append(timestamp, message);
+            logContainer.appendChild(activeDiv);
+        }
+
+        function renderLogs(logs) {
+            if (!logs || logs.length === 0) {
+                return;
+            }
+
+            const logContainer = document.getElementById('log-container');
+            logContainer.innerHTML = '';
+
+            logs.forEach(log => {
+                const div = document.createElement('div');
+                div.className = 'flex gap-4 animate-in fade-in duration-[1200ms] text-ash/80';
+
+                const span = document.createElement('span');
+                span.textContent = log;
+                div.appendChild(span);
+
+                logContainer.appendChild(div);
+            });
+
+            appendActiveLine(logContainer);
+            logContainer.scrollTop = logContainer.scrollHeight;
+        }
+
+        function renderVulnerabilityCount(vulnerabilityCount) {
+            const countElem = document.getElementById('vulnerability-count');
+            const currentCount = Number.parseInt(countElem.textContent, 10) || 0;
+            const nextCount = Number.parseInt(vulnerabilityCount, 10) || 0;
+
+            if (nextCount > currentCount) {
+                countElem.style.transition = 'all 1.5s cubic-bezier(0.22, 1, 0.36, 1)';
+                countElem.classList.add('text-seal');
+                window.setTimeout(() => countElem.classList.remove('text-seal'), 2000);
+            }
+
+            countElem.textContent = nextCount;
+        }
+
+        async function updateProgress() {
+            const ring = document.getElementById('progress-ring');
+            const percent = document.getElementById('progress-percent');
+            const statusText = document.getElementById('scan-status');
+
+            try {
+                const response = await fetch(progressApiUrl, {
+                    headers: {
+                        'Accept': 'application/json',
+                        'X-Requested-With': 'XMLHttpRequest',
+                    },
+                });
+
+                if (!response.ok) {
+                    throw new Error(`Progress request failed with ${response.status}`);
                 }
-                countElem.text(data.vulnerability_count);
-                
-                // Update Logs
-                if (data.logs && data.logs.length > 0) {
-                    const logContainer = document.getElementById('log-container');
-                    const activeLine = logContainer.querySelector('.active-line');
-                    
-                    data.logs.forEach(log => {
-                        const div = document.createElement('div');
-                        div.className = 'flex gap-4 animate-in slide-in-from-left duration-500 text-ash/80';
-                        div.innerHTML = `<span class="text-ash/40">[${new Date().toLocaleTimeString()}]</span><span>${log}</span>`;
-                        logContainer.insertBefore(div, activeLine);
-                    });
-                    
-                    logContainer.scrollTop = logContainer.scrollHeight;
-                }
+
+                const data = await response.json();
+                const progress = Number(data.progress) || 0;
+                const phase = data.current_phase || 'Scanning...';
+                const status = data.status;
+                const offset = circumference - (progress / 100 * circumference);
+
+                ring.style.strokeDashoffset = offset;
+                percent.textContent = `${progress}%`;
+                statusText.textContent = phase.toUpperCase();
+
+                renderVulnerabilityCount(data.vulnerability_count);
+                renderLogs(data.logs);
 
                 if (status === 'completed' || status === 'failed') {
-                    statusText.innerText = status.toUpperCase();
+                    statusText.textContent = status === 'completed' ? 'SCAN COMPLETE' : 'SCAN FAILED';
                     if (status === 'completed') {
-                        percent.innerText = '100%';
+                        percent.textContent = '100%';
                         ring.style.strokeDashoffset = 0;
-                        setTimeout(() => {
-                            window.location.href = "{% url 'scan_detail' scan_job.id %}";
-                        }, 2500);
+                        window.setTimeout(() => {
+                            window.location.href = scanDetailUrl;
+                        }, pollDelayMs);
                     }
-                } else {
-                    setTimeout(updateProgress, 3000);
+                    return;
                 }
+            } catch (error) {
+                statusText.textContent = 'SCAN INTERRUPTED';
             }
-        });
-    }
 
-    $(document).ready(function() {
-        updateProgress();
-    });
+            window.setTimeout(updateProgress, pollDelayMs);
+        }
+
+        document.addEventListener('DOMContentLoaded', updateProgress);
+    })();
 </script>
-{% endblock %}
 {% endblock %}

@@ -1,0 +1,53 @@
+/* 
+   SAERA 2.2 - Motion CSS
+   Governs meditative transitions, slow timing curves, and sub-conscious telemetry pulses.
+*/
+
+/* Meditative Fade In */
+.animate-fade-in {
+    animation: meditativeLoad 1400ms cubic-bezier(0.22, 1, 0.36, 1) forwards;
+}
+
+@keyframes meditativeLoad {
+    0% {
+        opacity: 0;
+        transform: translateY(12px);
+    }
+    100% {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+/* Telemetry Signal Pulse Loop */
+.telemetry-pulse {
+    animation: telemetryPulse 3200ms cubic-bezier(0.4, 0, 0.2, 1) infinite;
+}
+
+@keyframes telemetryPulse {
+    0%, 100% {
+        opacity: 0.2;
+    }
+    50% {
+        opacity: 0.9;
+        transform: scale(1.05);
+    }
+}
+
+/* Subtle Hover Drift */
+.hover-drift {
+    transition: var(--transition-slow);
+}
+
+.hover-drift:hover {
+    transform: translateY(-4px) scale(1.01);
+}
+
+/* Reduced Motion System Overrides */
+@media (prefers-reduced-motion: reduce) {
+    .animate-fade-in, .telemetry-pulse, .hover-drift {
+        animation: none !important;
+        transform: none !important;
+        transition: none !important;
+    }
+}

@@ -1,7 +1,8 @@
 from django.db.models import Count, Avg, Q
+from django.core.cache import cache
 from apps.scanner.models import ScanJob, Vulnerability
-from apps.scanner.prediction_engine import predictor
-from apps.api.services.analytics_service import AnalyticsService
+from apps.api.services.risk_service import RiskService
+from apps.api.services.temporal_service import TemporalService
 
 class DashboardService:
     """
@@ -14,6 +15,11 @@ class DashboardService:
         """
         Synthesizes the complete dashboard intelligence context for a user.
         """
+        cache_key = f"dashboard_context_{user.id}"
+        cached_data = cache.get(cache_key)
+        if cached_data:
+            return cached_data
+
         # 1. Base Querysets
         if user.is_admin:
             scans = ScanJob.objects.all()
@@ -22,65 +28,63 @@ class DashboardService:
             scans = ScanJob.objects.filter(initiated_by=user)
             vulns = Vulnerability.objects.filter(scan_job__initiated_by=user)
 
-        # 2. Key Metrics
+        # 2. Key Metrics (Intelligence-Driven)
         total_scans = scans.count()
         completed_scans = scans.filter(status='completed').count()
         running_scans = scans.filter(status='running').count()
-        total_vulnerabilities = vulns.count()
-        
-        avg_risk_score = vulns.aggregate(avg=Avg('risk_score'))['avg'] or 0
-        high_risk_hosts = vulns.filter(risk_score__gte=7.0).values('scan_job__target').distinct().count()
-        
-        # 3. Recent Activity
-        recent_scans = scans.select_related('target')[:5]
-        recent_vulns = vulns.filter(severity='critical').select_related('scan_job', 'scan_job__target').order_by('-created_at')[:10]
 
-        # 4. Threat Distribution
-        vuln_distribution = vulns.values('severity').annotate(count=Count('id'))
-        severity_counts = {s: 0 for s, _ in Vulnerability.SEVERITY_CHOICES}
-        for item in vuln_distribution:
-            severity_counts[item['severity']] = item['count']
+        # 3. Host-Centric Posture
+        # Identify top high-risk hosts using aggregated risk
+        # Note: In production, we'd have a 'Host' model, here we use 'ScanTarget'
+        high_risk_targets = scans.filter(status='completed').select_related('target').prefetch_related('vulnerabilities', 'port_results').order_by('-aggregate_risk_score')[:5]
 
-        # 5. Predictive Analytics
-        has_critical = vulns.filter(severity='critical').exists()
-        prediction_likelihood = predictor.predict_risk_probability(
-            num_ports=vulns.filter(vuln_type='port').count(),
-            num_services=vulns.filter(vuln_type='service').count(),
-            has_critical=has_critical,
-            avg_risk=avg_risk_score
-        )
+        avg_risk_score = scans.filter(status='completed').aggregate(avg=Avg('aggregate_risk_score'))['avg'] or 0
 
-        attack_surface_score = round(max(0, 100 - (avg_risk_score * 10)), 1)
+        # 4. Temporal Intelligence (Global Drift)
+        latest_scan = scans.filter(status='completed').order_by('-completed_at').first()
+        drift_data = TemporalService.analyze_risk_drift(latest_scan) if latest_scan else {}
 
-        # 6. Trend Data (Flow Rhythm)
-        # We'll take the global trend or the user's trend
-        if user.is_admin:
-            # For simplicity, we aggregate recent scans
-            latest_scans = ScanJob.objects.filter(status='completed').order_by('-created_at')[:10]
-            risk_trends = []
-            for s in reversed(latest_scans):
-                risk_trends.append({
-                    "date": s.created_at.strftime("%H:%M"),
-                    "score": s.vulnerabilities.aggregate(avg=Avg('risk_score'))['avg'] or 0
-                })
-        else:
-            # User specific trends
-            latest_scans = scans.filter(status='completed').order_by('-created_at')[:10]
-            risk_trends = [{"date": s.created_at.strftime("%H:%M"), "score": s.vulnerabilities.aggregate(avg=Avg('risk_score'))['avg'] or 0} for s in reversed(latest_scans)]
+        # 5. Risk Distribution
+        severity_counts = vulns.values('severity').annotate(count=Count('id'))
+        severity_map = {s: 0 for s, _ in Vulnerability.SEVERITY_CHOICES}
+        for item in severity_counts:
+            severity_map[item['severity']] = item['count']
 
-        return {
+        # 6. Trend Data (Temporal Flow)
+        recent_history = scans.filter(status='completed', completed_at__isnull=False).order_by('-completed_at')[:12]
+        risk_trends = [
+            {"date": s.completed_at.strftime("%m.%d"), "score": s.aggregate_risk_score}
+            for s in reversed(recent_history)
+        ]
+
+        # 7. Recent Critical Intelligence (For UI & Tests)
+        recent_vulns = vulns.filter(severity='critical').select_related('scan_job', 'scan_job__target').order_by('-created_at')[:5]
+
+        # 8. Operational Priority Queue (Top 5 Capped, Persistent & Recurring)
+        priority_vulns = vulns.filter(resolved=False, is_suppressed=False).select_related('scan_job', 'scan_job__target').order_by('-priority_score')[:5]
+
+        # 9. Lifecycle Analytics (Operational Flow)
+        lifecycle_counts = vulns.values('lifecycle_state').annotate(count=Count('id'))
+        lifecycle_map = {'active': 0, 'recurring': 0, 'escalated': 0, 'resolved': 0, 'suppressed': 0}
+        for item in lifecycle_counts:
+            lifecycle_map[item['lifecycle_state']] = item['count']
+
+        context = {
             'total_scans': total_scans,
             'completed_scans': completed_scans,
             'running_scans': running_scans,
-            'total_vulnerabilities': total_vulnerabilities,
-            'critical_vulns': severity_counts.get('critical', 0),
-            'high_vulns': severity_counts.get('high', 0),
-            'recent_scans': recent_scans,
-            'recent_vulns': recent_vulns,
-            'severity_counts': severity_counts,
             'avg_risk_score': round(avg_risk_score, 1),
-            'high_risk_hosts': high_risk_hosts,
-            'attack_surface_score': attack_surface_score,
-            'threat_likelihood': prediction_likelihood,
+            'drift': drift_data,
+            'high_risk_targets': high_risk_targets,
+            'severity_counts': severity_map,
             'risk_trends': risk_trends,
+            'recent_scans': scans.select_related('target')[:8],
+            'recent_vulns': recent_vulns,
+            'priority_vulns': priority_vulns,
+            'total_vulns': vulns.count(),
+            'lifecycle_flow': lifecycle_map
         }
+
+        # Cache the operational context dashboard context for 30 seconds to optimize DB loading
+        cache.set(cache_key, context, 30)
+        return context

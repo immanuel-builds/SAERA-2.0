@@ -1,0 +1,58 @@
+/* 
+   SAERA 2.2 - Design Tokens CSS
+   Establishes the core visual tokens and colors for both Light and Dark Observatory Modes.
+*/
+
+:root {
+    /* --- The Observatory Palette (Light Mode Baseline) --- */
+    --bg-parchment: #EAE2D6;
+    --ink-black: #1A1A1A;
+    --ash-gray: #6B6B6B;
+    --mist-gray: #CFC6B8;
+    
+    /* Ceremonial Seals & Accents */
+    --seal-red: #9F3B32;       /* Dried Wax Crimson */
+    --bamboo-green: #4E6B57;   /* Bamboo Lichen Green */
+    --amber-brass: #B88E52;    /* Antique Brass */
+    --mist-blue: #5D6B75;      /* Moonlit Slate */
+    
+    --surface: rgba(234, 226, 214, 0.7);
+    --surface-variant: rgba(207, 198, 184, 0.4);
+    --border-subtle: rgba(26, 26, 26, 0.08);
+    
+    /* --- Font Stacks --- */
+    --font-serif: 'Zen Old Mincho', serif;
+    --font-sans: 'Inter', sans-serif;
+    --font-mono: 'JetBrains Mono', monospace;
+    
+    /* --- Spacing Scale (8px Grid Based) --- */
+    --space-2xs: 4px;
+    --space-xs: 8px;
+    --space-sm: 16px;
+    --space-md: 24px;
+    --space-lg: 32px;
+    --space-xl: 64px;
+    --space-2xl: 128px;
+    
+    /* --- Transition Timings (Underwater Cadence) --- */
+    --transition-slow: 1200ms cubic-bezier(0.22, 1, 0.36, 1);
+    --transition-fast: 600ms cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+/* --- Midnight Observatory (Dark Mode Overrides) --- */
+body.dark {
+    --bg-parchment: #111315;    /* Deep Lacquered Obsidian Charcoal */
+    --ink-black: #E8E3D9;       /* Aged Parchment White */
+    --ash-gray: #9A948B;        /* Ash Slate Gray */
+    --mist-gray: #171A1D;       /* Obsidian Surface Base */
+    
+    /* Low-Intensity Threat Seals */
+    --seal-red: #8C4036;        /* Dried Clotted Crimson (Critical) */
+    --bamboo-green: #506556;    /* Moss Moss Lichen Green (Low) */
+    --amber-brass: #8A6A3B;     /* Antique Brass (High) */
+    --mist-blue: #5D6B75;       /* Cloudy Night Blue (Medium) */
+    
+    --surface: rgba(23, 26, 29, 0.76);
+    --surface-variant: rgba(29, 33, 37, 0.86);
+    --border-subtle: rgba(232, 227, 217, 0.08);
+}

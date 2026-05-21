@@ -1,169 +1,372 @@
 {% extends 'base.html' %}
 {% load static %}
 
-{% block title %}Observation Findings - {{ scan.target.name }}{% endblock %}
-
-{% block body_class %}ops-page{% endblock %}
+{% block title %}Operational Dossier - {{ scan.target.name }}{% endblock %}
 
 {% block content %}
-<div class="row">
-    <div class="col-12 mb-5">
-        <a href="{% url 'scan_list' %}" class="btn btn-outline-cyan">
-            <i class="bi bi-arrow-left"></i> Return to Archives
-        </a>
-    </div>
-
-    <!-- Findings Summary -->
-    <div class="col-12">
-        <div class="cyber-card mb-4">
-            <div class="card-header border-bottom border-subtle">
-                <h4 class="mb-0">Observation Findings: {{ scan.target.name }}</h4>
+<div class="animate-fade-in space-y-12">
+    <!-- Header -->
+    <div class="flex justify-between items-end border-b border-ink/5 pb-8">
+        <div class="space-y-2">
+            <span class="precise-data text-[9px] opacity-40">Dossier ID: {{ scan.id }} // Node: {{ scan.target.target }}</span>
+            <h1 class="atmospheric-h1">{{ scan.target.name }}</h1>
+            <p class="font-serif italic text-lg text-ash">Target Analytics & Telemetry Dossier</p>
+        </div>
+        <div class="text-right space-y-4">
+            <div class="flex items-center justify-end gap-3">
+                <span class="precise-data text-[9px]">State:</span>
+                <span class="status-pip status-active"></span>
+                <span class="precise-data text-[9px] uppercase opacity-80">{{ scan.status }}</span>
             </div>
-            <div class="card-body">
-                <div class="row">
-                    <div class="col-md-6">
-                        <dl class="row mb-0">
-                            <dt class="col-sm-4 text-muted small text-uppercase">Target Vector</dt>
-                            <dd class="col-sm-8 fw-bold">{{ scan.target.target }}</dd>
-
-                            <dt class="col-sm-4 text-muted small text-uppercase">Pulse Type</dt>
-                            <dd class="col-sm-8">{{ scan.configuration.get_scan_type_display }}</dd>
-
-                            <dt class="col-sm-4 text-muted small text-uppercase">Current State</dt>
-                            <dd class="col-sm-8">
-                                <span class="badge {% if scan.status == 'completed' %}bg-success{% elif scan.status == 'running' %}bg-info{% elif scan.status == 'failed' %}bg-danger{% else %}bg-secondary{% endif %}">
-                                    {{ scan.status|upper }}
-                                </span>
-                            </dd>
-                        </dl>
-                    </div>
-                    <div class="col-md-6">
-                        <dl class="row mb-0">
-                            <dt class="col-sm-4 text-muted small text-uppercase">Pulse Initiation</dt>
-                            <dd class="col-sm-8">{{ scan.started_at|date:"M d, Y H:i" }}</dd>
-
-                            <dt class="col-sm-4 text-muted small text-uppercase">Intelligence Yield</dt>
-                            <dd class="col-sm-8">
-                                <strong class="text-danger">{{ scan.vulnerabilities_found }} Threats</strong>
-                                <span class="text-muted small ms-2">(C:{{ scan.critical_vulns }} H:{{ scan.high_vulns }} M:{{ scan.medium_vulns }})</span>
-                            </dd>
-
-                            <dt class="col-sm-4 text-muted small text-uppercase">Execution Time</dt>
-                            <dd class="col-sm-8">{{ scan.duration|default:"N/A" }}s</dd>
-                        </dl>
-                    </div>
-                </div>
-
-                {% if scan.status == 'completed' and user.can_export_reports %}
-                <div class="mt-4 pt-4 border-top border-subtle">
-                    <a href="{% url 'report_generate' scan.id %}" class="btn btn-primary">
-                        <i class="bi bi-file-earmark-pdf"></i> Extract Intelligence Dossier
-                    </a>
-                </div>
-                {% endif %}
+            <div class="flex items-center justify-end gap-2 text-ash">
+                <span class="material-symbols-outlined text-sm">schedule</span>
+                <span class="precise-data text-[9px]">{{ scan.completed_at|date:"Y.m.d H:i" }}</span>
             </div>
         </div>
     </div>
 
-    <!-- Vulnerability Feed -->
-    <div class="col-12">
-        <div class="cyber-card mb-4">
-            <div class="card-header d-flex justify-content-between align-items-center border-bottom border-subtle">
-                <h5 class="mb-0">Threat Corridor</h5>
-                <span class="badge bg-danger">{{ vulnerabilities.count }}</span>
+    <!-- HIERARCHY: Comparative Intelligence (Delta Analysis) -->
+    <div class="grid grid-cols-3 gap-8">
+        <!-- Posture Delta -->
+        <div class="parchment-card p-6 flex flex-col justify-between">
+            <span class="precise-data text-[9px] opacity-40 uppercase">Target Posture Index</span>
+            <div class="pt-6 flex justify-between items-end">
+                <span class="atmospheric-h1">{{ posture.current_posture.score|floatformat:1 }}</span>
+                
+                <div class="text-right">
+                    <span class="precise-data text-[8px] uppercase opacity-40">Drift vs Baseline</span>
+                    <div class="flex items-center justify-end gap-1 mt-1">
+                        <span class="material-symbols-outlined text-sm {% if posture.risk_drift.direction == 'increasing' %}text-seal{% elif posture.risk_drift.direction == 'decreasing' %}text-bamboo{% else %}text-ash{% endif %}">
+                            {% if posture.risk_drift.direction == 'increasing' %}trending_up{% elif posture.risk_drift.direction == 'decreasing' %}trending_down{% else %}trending_flat{% endif %}
+                        </span>
+                        <span class="font-mono text-sm {% if posture.risk_drift.direction == 'increasing' %}text-seal{% elif posture.risk_drift.direction == 'decreasing' %}text-bamboo{% else %}text-ash{% endif %}">
+                            {% if posture.risk_drift.direction == 'increasing' %}+{% endif %}{{ posture.risk_drift.score_delta|default:"0.0" }}
+                        </span>
+                    </div>
+                </div>
             </div>
-            <div class="card-body p-0">
-                {% if vulnerabilities %}
-                <div class="accordion accordion-flush" id="vulnAccordion">
-                    {% for vuln in vulnerabilities %}
-                    <div class="accordion-item bg-transparent border-bottom border-subtle">
-                        <h2 class="accordion-header">
-                            <button class="accordion-button bg-transparent text-white {% if not forloop.first %}collapsed{% endif %}"
-                                type="button" data-bs-toggle="collapse" data-bs-target="#vuln{{ vuln.id }}" style="box-shadow: none;">
-                                <span class="badge severity-{{ vuln.severity }} me-3">{{ vuln.severity|upper }}</span>
-                                <span class="fw-medium">{{ vuln.title }}</span>
-                                {% if vuln.cvss_score %}
-                                <span class="badge bg-secondary ms-3">CVSS {{ vuln.cvss_score }}</span>
-                                {% endif %}
-                            </button>
-                        </h2>
-                        <div id="vuln{{ vuln.id }}"
-                            class="accordion-collapse collapse {% if forloop.first %}show{% endif %}"
-                            data-bs-parent="#vulnAccordion">
-                            <div class="accordion-body text-secondary" style="background: rgba(255,255,255,0.01);">
-                                <div class="row g-4">
-                                    <div class="col-md-3">
-                                        <div class="text-muted small text-uppercase mb-1">Point of Entry</div>
-                                        <div class="text-white">{{ vuln.port|default:"N/A" }} / {{ vuln.service|default:"N/A" }}</div>
-                                    </div>
-                                    <div class="col-md-9">
-                                        <div class="text-muted small text-uppercase mb-1">Analysis</div>
-                                        <p class="mb-3">{{ vuln.description }}</p>
-                                        
-                                        <div class="text-muted small text-uppercase mb-1">Countermeasures</div>
-                                        <p class="mb-3 text-white">{{ vuln.recommendation }}</p>
+        </div>
 
-                                        {% if vuln.cve_id %}
-                                        <div class="mt-3">
-                                            <a href="{{ vuln.cve_url }}" target="_blank" class="text-cyan text-decoration-none small">
-                                                Registry: {{ vuln.cve_id }} <i class="bi bi-box-arrow-up-right ms-1"></i>
-                                            </a>
-                                        </div>
-                                        {% endif %}
+        <!-- Threat Delta -->
+        <div class="parchment-card p-6 flex flex-col justify-between">
+            <span class="precise-data text-[9px] opacity-40 uppercase">Exposure Yield</span>
+            <div class="pt-6 flex justify-between items-end">
+                <span class="atmospheric-h1">{{ vulnerabilities.count }}</span>
+                
+                <div class="text-right">
+                    <span class="precise-data text-[8px] uppercase opacity-40">Emergent Exposures</span>
+                    <div class="font-mono text-sm text-seal mt-1">
+                        +{{ posture.risk_drift.new_exposures|length }}
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Lifecycle Movement -->
+        <div class="parchment-card p-6 flex flex-col justify-between bg-ink text-background">
+            <span class="precise-data text-[9px] opacity-40 uppercase">Remediation Velocity</span>
+            <div class="pt-6 flex justify-between items-end">
+                <span class="atmospheric-h1 text-bamboo">{{ posture.risk_drift.resolved_exposures|length }}</span>
+                
+                <div class="text-right">
+                    <span class="precise-data text-[8px] uppercase opacity-40">Resolved vectors</span>
+                    <div class="font-mono text-sm mt-1 text-background/60">
+                        Past 30 Days
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Main Analytics Grid -->
+    <div class="grid grid-cols-12 gap-12 pt-8">
+
+        <!-- Left Column: Concentrations & Operations -->
+        <div class="col-span-4 space-y-8">
+            
+            <!-- Analytical Storytelling Synthesis -->
+            <div class="parchment-card border-dashed p-6 space-y-4 bg-ink/5">
+                <span class="precise-data text-[9px] opacity-40 uppercase">Operational Synthesis</span>
+                <p class="font-serif italic text-sm text-ash leading-relaxed">
+                    {{ posture.operational_summary }}
+                </p>
+            </div>
+
+            <!-- Service Concentration Analysis -->
+            <div class="parchment-card space-y-6">
+                <div class="border-b border-ink/5 pb-4">
+                    <h3 class="font-serif italic text-lg">Service Concentration</h3>
+                    <p class="precise-data text-[9px] opacity-40">Observed active listening vectors</p>
+                </div>
+                
+                <div class="space-y-4">
+                    {% for conc in posture.service_concentration %}
+                    <div class="space-y-2">
+                        <div class="flex justify-between items-end">
+                            <span class="font-mono text-xs uppercase">{{ conc.service }}</span>
+                            <span class="precise-data text-[9px] opacity-40">Vol: {{ conc.count }}</span>
+                        </div>
+                        <div class="w-full h-1 bg-ink/5 rounded-none overflow-hidden">
+                            <div class="h-full bg-ash transition-all" style="width: {% widthratio conc.count open_ports.count|default:1 100 %}%"></div>
+                        </div>
+                    </div>
+                    {% empty %}
+                    <p class="font-serif italic text-xs text-ash opacity-40">No significant service concentration observed.</p>
+                    {% endfor %}
+                </div>
+            </div>
+            
+            <!-- Active Node Discovery -->
+            <div class="parchment-card space-y-4">
+                <h3 class="precise-data text-[10px] border-b border-ink/5 pb-3">Node Fingerprint</h3>
+                <div class="flex justify-between items-center py-2 border-b border-ink/5 last:border-0">
+                    <span class="precise-data text-[9px] opacity-40">OS Inference</span>
+                    <span class="font-serif text-sm">{{ scan.os_detected|default:"Ambiguous" }}</span>
+                </div>
+                <div class="flex justify-between items-center py-2 border-b border-ink/5 last:border-0">
+                    <span class="precise-data text-[9px] opacity-40">Total Scanned Ports</span>
+                    <span class="font-mono text-xs">{{ scan.total_ports_scanned }}</span>
+                </div>
+                <div class="flex justify-between items-center py-2 border-b border-ink/5 last:border-0">
+                    <span class="precise-data text-[9px] opacity-40">Engine Profile</span>
+                    <span class="font-mono text-xs uppercase">{{ scan.configuration.name }}</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- Right Column: Specific Lifecycle Telemetry -->
+        <div class="col-span-8 space-y-8">
+            
+            <div class="flex justify-between items-center border-b border-ink/5 pb-4">
+                <div class="space-y-1">
+                    <h3 class="font-serif italic text-xl">Exposure Telemetry</h3>
+                    <p class="precise-data text-[9px] opacity-40">Detected threat vectors ordered by severity concentration</p>
+                </div>
+                <!-- Sort/Filter placeholder (academic UI flex) -->
+                <span class="material-symbols-outlined text-ash/40 text-sm">filter_list</span>
+            </div>
+
+            <!-- Vulnerabilities Pipeline -->
+            <div class="space-y-4">
+                {% for vuln in vulnerabilities %}
+                <div class="parchment-card p-5 group hover:border-ink/20 transition-all flex flex-col gap-4">
+                    <div class="flex justify-between items-start">
+                        <div class="space-y-2 max-w-xl">
+                            <div class="flex items-center gap-3">
+                                <span class="severity-stamp {% if vuln.severity == 'critical' %}text-seal border-seal{% endif %}">{{ vuln.severity }}</span>
+                                <h4 class="font-serif text-base text-ink line-clamp-1">{{ vuln.title }}</h4>
+                            </div>
+                            <p class="font-serif italic text-xs text-ash line-clamp-2">{{ vuln.description }}</p>
+                        </div>
+                        
+                        <div class="text-right space-y-1">
+                            <span class="precise-data text-[8px] opacity-40 uppercase">Lifecycle</span>
+                            <div class="flex items-center justify-end gap-2">
+                                <span class="status-pip {% if vuln.lifecycle_state == 'recurring' %}bg-amber-500{% elif vuln.lifecycle_state == 'active' %}bg-seal{% else %}bg-ink/20{% endif %}"></span>
+                                <span class="precise-data text-[9px] uppercase">{{ vuln.lifecycle_state }}</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Telemetry Metrics Bar -->
+                    <div class="flex gap-8 pt-4 border-t border-ink/5">
+                        <div class="space-y-1">
+                            <span class="precise-data text-[8px] opacity-40">PORT VECTOR</span>
+                            <p class="font-mono text-[10px]">{{ vuln.port|default:"HOST" }}</p>
+                        </div>
+                        <div class="space-y-1">
+                            <span class="precise-data text-[8px] opacity-40">SERVICE</span>
+                            <p class="font-mono text-[10px] uppercase">{{ vuln.service|default:"N/A" }}</p>
+                        </div>
+                        <div class="space-y-1">
+                            <span class="precise-data text-[8px] opacity-40">CVE INDEX</span>
+                            <p class="font-mono text-[10px]">{{ vuln.cve_id|default:"INTERNAL" }}</p>
+                        </div>
+                        <div class="space-y-1">
+                            <span class="precise-data text-[8px] opacity-40">EPSS SCORE</span>
+                            <p class="font-mono text-[10px] text-seal">{{ vuln.epss_score|default:"N/A" }}</p>
+                        </div>
+                        <div class="space-y-1">
+                            <span class="precise-data text-[8px] opacity-40">OBSERVATIONS</span>
+                            <p class="font-mono text-[10px]">{{ vuln.observation_count }} Sweeps</p>
+                        </div>
+                        
+                        <!-- Safe Check & Expander action -->
+                        <div class="ml-auto mt-auto flex items-center gap-4">
+                            {% if vuln.cve_id and not vuln.is_verified %}
+                            <button onclick="requestSafeCheck('{{ vuln.id }}')" class="precise-data text-[9px] text-seal hover:text-seal/80 transition-colors flex items-center gap-1 border border-seal/20 px-2 py-1 rounded-sm bg-seal/5">
+                                <span class="material-symbols-outlined text-[10px]">shield_check</span> Request Safe Check
+                            </button>
+                            {% elif vuln.is_verified %}
+                            <span class="precise-data text-[9px] text-bamboo flex items-center gap-1 border border-bamboo/20 px-2 py-1 rounded-sm bg-bamboo/5">
+                                <span class="material-symbols-outlined text-[10px]">verified</span> Verified Safe Check
+                            </span>
+                            {% endif %}
+                            <button onclick="toggleActionPanel('panel-{{ vuln.id }}')" class="precise-data text-[9px] text-ash hover:text-ink transition-colors flex items-center gap-1">
+                                Analyst Controls <span class="material-symbols-outlined text-xs">expand_more</span>
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Hidden Analyst Action Panel -->
+                    <div id="panel-{{ vuln.id }}" class="hidden pt-4 mt-2 border-t border-ink/5 bg-ink/5 p-4 space-y-6 rounded-sm">
+                        
+                        <div class="grid grid-cols-2 gap-6">
+                            <!-- Left: Investigation State -->
+                            <div class="space-y-4">
+                                <div class="space-y-2">
+                                    <label class="precise-data text-[8px] opacity-60 uppercase tracking-widest block">Investigation Status</label>
+                                    <select id="state-{{ vuln.id }}" class="w-full bg-background border border-ink/10 text-xs px-3 py-2 font-serif text-ink outline-none focus:border-seal">
+                                        <option value="active" {% if vuln.lifecycle_state == 'active' %}selected{% endif %}>Active Discovery</option>
+                                        <option value="escalated" {% if vuln.lifecycle_state == 'escalated' %}selected{% endif %}>Escalated</option>
+                                        <option value="mitigated" {% if vuln.lifecycle_state == 'mitigated' %}selected{% endif %}>Mitigated</option>
+                                        <option value="resolved" {% if vuln.lifecycle_state == 'resolved' %}selected{% endif %}>Resolved</option>
+                                    </select>
+                                </div>
+                                <div class="space-y-2">
+                                    <label class="precise-data text-[8px] opacity-60 uppercase tracking-widest block">Suppress Finding</label>
+                                    <div class="flex items-center gap-3 mt-1">
+                                        <input type="checkbox" id="suppressed-{{ vuln.id }}" {% if vuln.is_suppressed %}checked{% endif %} class="accent-seal">
+                                        <span class="font-serif text-xs text-ash">Remove from dashboard aggregation</span>
                                     </div>
                                 </div>
                             </div>
+                            
+                            <!-- Right: Documentation -->
+                            <div class="space-y-4">
+                                <div class="space-y-2">
+                                    <label class="precise-data text-[8px] opacity-60 uppercase tracking-widest block">Analyst Log</label>
+                                    <textarea id="annotation-{{ vuln.id }}" rows="3" class="w-full bg-background border border-ink/10 font-serif text-sm p-3 outline-none focus:border-seal text-ink resize-none">{{ vuln.analyst_annotation|default:'' }}</textarea>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="flex justify-between items-center pt-4 border-t border-ink/5">
+                            <a href="{% url 'knowledge:list' %}" class="precise-data text-[9px] text-seal/80 hover:text-seal transition-colors flex items-center gap-2">
+                                <span class="material-symbols-outlined text-xs">menu_book</span> Consult Knowledge Base
+                            </a>
+                            <button onclick="saveWorkflow('{{ vuln.id }}')" class="saera-action-btn text-[9px] py-2 px-6 bg-ink text-background hover:bg-seal transition-colors">
+                                Update Telemetry
+                            </button>
+                        </div>
+                    </div>
+                </div>
+                {% empty %}
+                <div class="parchment-card p-16 text-center opacity-40">
+                    <span class="material-symbols-outlined text-3xl mb-4">check_circle</span>
+                    <p class="font-serif italic text-sm">Node is operating within acceptable risk parameters. No exposures detected.</p>
+                </div>
+                {% endfor %}
+            </div>
+
+            <!-- Lifecycle Resolved (Mitigation Tracking) -->
+            {% if posture.resolved_findings %}
+            <div class="pt-8">
+                <div class="flex justify-between items-center border-b border-ink/5 pb-4 mb-4">
+                    <h3 class="font-serif italic text-lg text-bamboo">Mitigated Threat Vectors</h3>
+                    <span class="precise-data text-[9px] opacity-40">Verified resolved exposures</span>
+                </div>
+                
+                <div class="space-y-3">
+                    {% for item in posture.resolved_findings %}
+                    <div class="flex justify-between items-center p-3 bg-bamboo/5 border border-bamboo/10">
+                        <div>
+                            <span class="font-serif text-sm block">{{ item.title }}</span>
+                            <span class="font-mono text-[9px] opacity-60 mt-1 block">Vector: Port {{ item.port|default:"Host-level" }}</span>
+                        </div>
+                        <div class="text-right">
+                            <span class="precise-data text-[8px] opacity-40 block mb-1">Time of verification</span>
+                            <span class="precise-data text-[9px] text-bamboo">{{ item.resolved_at }}</span>
                         </div>
                     </div>
                     {% endfor %}
                 </div>
-                {% else %}
-                <div class="p-5 text-center text-muted">
-                    <i class="bi bi-shield-check fs-1 d-block mb-3 opacity-25"></i>
-                    No threats detected in this sector.
-                </div>
-                {% endif %}
             </div>
-        </div>
-    </div>
-
-    <!-- Active Vectors -->
-    <div class="col-12">
-        <div class="cyber-card">
-            <div class="card-header border-bottom border-subtle">
-                <h5 class="mb-0">Active Vectors (Ports)</h5>
-            </div>
-            <div class="card-body p-0">
-                {% if open_ports %}
-                <div class="table-responsive">
-                    <table class="table table-hover mb-0">
-                        <thead>
-                            <tr>
-                                <th class="ps-4">Port</th>
-                                <th>Protocol</th>
-                                <th>State</th>
-                                <th>Service</th>
-                                <th class="pe-4">Version</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            {% for port in open_ports %}
-                            <tr>
-                                <td class="ps-4 text-white fw-bold">{{ port.port }}</td>
-                                <td class="text-muted small">{{ port.protocol|upper }}</td>
-                                <td><span class="badge bg-success">ACTIVE</span></td>
-                                <td>{{ port.service|default:"Unknown" }}</td>
-                                <td class="pe-4 text-muted small">{{ port.service_version|default:"N/A" }}</td>
-                            </tr>
-                            {% endfor %}
-                        </tbody>
-                    </table>
-                </div>
-                {% else %}
-                <div class="p-4 text-center text-muted small">No active vectors identified.</div>
-                {% endif %}
-            </div>
+            {% endif %}
+            
         </div>
     </div>
 </div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    function toggleActionPanel(id) {
+        const el = document.getElementById(id);
+        if (el.classList.contains('hidden')) {
+            el.classList.remove('hidden');
+            el.classList.add('animate-fade-in');
+        } else {
+            el.classList.add('hidden');
+        }
+    }
+
+    async function saveWorkflow(vulnId) {
+        const stateSelect = document.getElementById(`state-${vulnId}`);
+        const suppressedCheck = document.getElementById(`suppressed-${vulnId}`);
+        const annotationInput = document.getElementById(`annotation-${vulnId}`);
+
+        const investigationState = stateSelect.value;
+        const suppressed = suppressedCheck.checked;
+        const analystAnnotation = annotationInput.value;
+
+        const csrfToken = document.querySelector('[name=csrfmiddlewaretoken]')?.value || '';
+
+        try {
+            // Annotations
+            const annResponse = await fetch(`/api/v1/workflows/vulnerability/${vulnId}/annotate/`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json', 'X-CSRFToken': csrfToken },
+                body: JSON.stringify({ analyst_annotation: analystAnnotation, remediation_note: '' })
+            });
+            if (!annResponse.ok) throw new Error('Failed to save annotations');
+
+            // Suppression
+            const supResponse = await fetch(`/api/v1/workflows/vulnerability/${vulnId}/suppress/`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json', 'X-CSRFToken': csrfToken },
+                body: JSON.stringify({ suppressed: suppressed, reason: 'Modified via Dossier UI' })
+            });
+            if (!supResponse.ok) throw new Error('Failed to toggle suppression');
+
+            // State
+            const stateResponse = await fetch(`/api/v1/workflows/vulnerability/${vulnId}/state/`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json', 'X-CSRFToken': csrfToken },
+                body: JSON.stringify({ investigation_state: investigationState })
+            });
+            if (!stateResponse.ok) throw new Error('Failed to update investigation state');
+
+            window.location.reload();
+        } catch (err) {
+            console.error(err);
+            alert(`Error updating telemetry: ${err.message}`);
+        }
+    }
+    async function requestSafeCheck(vulnId) {
+        const csrfToken = document.querySelector('[name=csrfmiddlewaretoken]')?.value || '';
+        try {
+            const btn = event.currentTarget;
+            const originalHTML = btn.innerHTML;
+            btn.innerHTML = `<span class="material-symbols-outlined text-[10px] animate-spin">refresh</span> Verifying...`;
+            btn.disabled = true;
+
+            const response = await fetch(`/scanner/verify-finding/${vulnId}/`, {
+                method: 'POST',
+                headers: { 'X-CSRFToken': csrfToken }
+            });
+
+            if (!response.ok) throw new Error('Failed to verify finding');
+            
+            // Reload page to show verified state
+            window.location.reload();
+        } catch (err) {
+            console.error(err);
+            alert(`Error during safe check: ${err.message}`);
+            // Revert button on error
+            btn.innerHTML = originalHTML;
+            btn.disabled = false;
+        }
+    }
+</script>
 {% endblock %}
