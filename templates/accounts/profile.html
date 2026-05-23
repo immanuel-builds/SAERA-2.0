@@ -1,119 +1,180 @@
 {% extends 'base.html' %}
 {% load static %}
 
-{% block title %}Profile - NetVuln{% endblock %}
+{% block title %}Operative Dossier - SAERA{% endblock %}
 
 {% block content %}
-<div class="row g-4">
-    <div class="col-md-4">
-        <div class="cyber-card h-100">
-            <div class="card-body text-center p-5">
-                <div class="position-relative d-inline-block mb-4">
-                    <div class="rounded-circle d-flex align-items-center justify-content-center text-white"
-                        style="width: 120px; height: 120px; background: linear-gradient(135deg, var(--primary-color), var(--accent-red)); font-size: 3rem; font-weight: 800; box-shadow: 0 0 30px rgba(168, 85, 247, 0.3);">
-                        {{ user.username|make_list|first|upper }}
-                    </div>
-                    <div class="position-absolute bottom-0 end-0 bg-success rounded-circle border border-dark" style="width: 25px; height: 25px;"></div>
-                </div>
-                
-                <h3 class="h4 mb-1 text-white">{{ user.get_full_name|default:user.username }}</h3>
-                <p class="text-primary small text-uppercase tracking-wider fw-bold mb-4">{{ user.get_role_display }}</p>
-                
-                <div class="text-start mt-5 border-top border-secondary pt-4 opacity-75">
-                    <div class="mb-3">
-                        <label class="text-muted small text-uppercase fw-bold">Email Address</label>
-                        <div class="text-white">{{ user.email }}</div>
-                    </div>
-                    <div class="mb-3">
-                        <label class="text-muted small text-uppercase fw-bold">Organization Unit</label>
-                        <div class="text-white">{{ user.organization|default:"Not specified" }}</div>
-                    </div>
-                    <div class="mb-3">
-                        <label class="text-muted small text-uppercase fw-bold">Department</label>
-                        <div class="text-white">{{ user.department|default:"Not specified" }}</div>
-                    </div>
-                    <div class="mb-0">
-                        <label class="text-muted small text-uppercase fw-bold">Commissioned Date</label>
-                        <div class="text-white">{{ user.date_joined|date:"M d, Y" }}</div>
-                    </div>
-                </div>
-            </div>
+<div class="animate-fade-in space-y-16 max-w-6xl mx-auto py-12 px-6">
+    <!-- Observatory Header -->
+    <div class="border-b border-ink/5 pb-12">
+        <div class="space-y-4">
+            <span class="precise-data text-[10px] opacity-40">Intelligence Registry</span>
+            <h1 class="atmospheric-h1">Operative Dossier</h1>
+            <p class="font-serif italic text-lg text-ash leading-relaxed">
+                Verification of active clearance credentials, systemic audit history, and recent target assessment details.
+            </p>
         </div>
     </div>
 
-    <div class="col-md-8">
-        <div class="cyber-card mb-4">
-            <div class="card-header d-flex justify-content-between align-items-center">
-                <h5 class="mb-0 text-white"><i class="bi bi-activity me-2"></i> Operational History</h5>
-                <span class="badge bg-info">Recent Logs</span>
-            </div>
-            <div class="card-body p-0">
-                <div class="table-responsive">
-                    <table class="table table-hover align-middle">
-                        <thead>
-                            <tr>
-                                <th>Directive</th>
-                                <th>Scan Output</th>
-                                <th>Timestamp</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            {% for log in audit_logs %}
-                            <tr>
-                                <td><span class="badge bg-secondary">{{ log.get_action_display }}</span></td>
-                                <td class="text-white small">{{ log.description|truncatewords:10 }}</td>
-                                <td class="text-muted small">{{ log.created_at|date:"M d, H:i" }}</td>
-                            </tr>
-                            {% empty %}
-                            <tr>
-                                <td colspan="3" class="text-center py-5 text-muted">No operational data available</td>
-                            </tr>
-                            {% endfor %}
-                        </tbody>
-                    </table>
+    <!-- Main Grid -->
+    <div class="grid grid-cols-1 lg:grid-cols-12 gap-12 items-start">
+        <!-- LEFT COLUMN: Operative Identity Card (col-span-4) -->
+        <div class="lg:col-span-4 space-y-8">
+            <div class="parchment-card p-8 flex flex-col items-center justify-center text-center relative overflow-hidden">
+                <!-- Sumi-e Brushed Avatar Circle -->
+                <div class="relative w-32 h-32 flex items-center justify-center mb-6">
+                    <!-- Brushstroke Enso Background -->
+                    <div class="absolute inset-0 opacity-15 mix-blend-multiply pointer-events-none" style="background-image: url('{% static 'img/zen_enso.png' %}'); background-size: contain; background-repeat: no-repeat; background-position: center;"></div>
+                    <div class="w-24 h-24 rounded-full border border-ink/10 flex items-center justify-center text-ink text-4xl font-serif bg-background shadow-inner relative z-10">
+                        {{ user.username|make_list|first|upper }}
+                    </div>
+                    <!-- Active Status Pip -->
+                    <span class="absolute bottom-2 right-2 w-3.5 h-3.5 bg-bamboo border-2 border-background rounded-full z-25"></span>
+                </div>
+
+                <h3 class="font-serif text-2xl text-ink leading-tight mb-2 font-medium">{{ user.get_full_name|default:user.username }}</h3>
+                <span class="severity-seal low text-[9px] mb-8 font-semibold tracking-widest">{{ user.get_role_display|upper }}</span>
+
+                <!-- Metadata List Details -->
+                <div class="w-full text-left border-t border-ink/5 pt-6 space-y-4">
+                    <div class="flex flex-col gap-1">
+                        <span class="precise-data text-[8px] opacity-40">Security Identifier (Email)</span>
+                        <span class="font-mono text-sm text-ink break-all font-medium">{{ user.email }}</span>
+                    </div>
+                    <div class="flex flex-col gap-1">
+                        <span class="precise-data text-[8px] opacity-40">Organization Unit</span>
+                        <span class="font-serif text-sm text-ink font-medium">{{ user.organization|default:"Central Command" }}</span>
+                    </div>
+                    <div class="flex flex-col gap-1">
+                        <span class="precise-data text-[8px] opacity-40">Department</span>
+                        <span class="font-serif text-sm text-ink font-medium">{{ user.department|default:"Observatory Intelligence" }}</span>
+                    </div>
+                    <div class="flex flex-col gap-1">
+                        <span class="precise-data text-[8px] opacity-40">Commissioned Date</span>
+                        <span class="font-serif text-sm text-ink font-medium">{{ user.date_joined|date:"M d, Y" }}</span>
+                    </div>
+                </div>
+
+                <!-- Stats summary -->
+                <div class="w-full grid grid-cols-3 gap-2 mt-8 pt-6 border-t border-ink/5 text-center">
+                    <div class="flex flex-col">
+                        <span class="precise-data text-[7px] opacity-40">Total</span>
+                        <span class="font-serif text-xl font-bold text-ink">{{ scan_stats.total|default:0 }}</span>
+                    </div>
+                    <div class="flex flex-col">
+                        <span class="precise-data text-[7px] opacity-40 text-bamboo">Cleared</span>
+                        <span class="font-serif text-xl font-bold text-bamboo">{{ scan_stats.completed|default:0 }}</span>
+                    </div>
+                    <div class="flex flex-col">
+                        <span class="precise-data text-[7px] opacity-40 text-seal">Failed</span>
+                        <span class="font-serif text-xl font-bold text-seal">{{ scan_stats.failed|default:0 }}</span>
+                    </div>
                 </div>
             </div>
         </div>
 
-        <div class="cyber-card">
-            <div class="card-header d-flex justify-content-between align-items-center">
-                <h5 class="mb-0 text-white"><i class="bi bi-shield-check me-2"></i> Security Assessments</h5>
-                <a href="{% url 'scan_list' %}" class="btn btn-sm btn-outline-cyan">View Scans</a>
+        <!-- RIGHT COLUMN: Operational History & Security Assessments (col-span-8) -->
+        <div class="lg:col-span-8 space-y-12">
+            <!-- Section 1: Security Assessments -->
+            <div class="space-y-6">
+                <div class="flex justify-between items-end border-b border-ink/5 pb-4">
+                    <div class="space-y-1">
+                        <h3 class="font-serif italic text-xl">Recent Target Assessments</h3>
+                        <p class="precise-data text-[8px] opacity-40">Clearance status on recently evaluated tactical nodes</p>
+                    </div>
+                    <a href="{% url 'scan_list' %}" class="precise-data text-[9px] px-3 py-1 bg-ink text-background hover:bg-seal hover:scale-[1.02] transition-all text-center">View All Scans</a>
+                </div>
+
+                <div class="parchment-card p-0 overflow-hidden">
+                    <div class="overflow-x-auto">
+                        <table class="w-full text-left border-collapse">
+                            <thead>
+                                <tr class="border-b border-ink/5">
+                                    <th class="p-5 precise-data text-[8px] opacity-40">Strategic Target</th>
+                                    <th class="p-5 precise-data text-[8px] opacity-40">Integrity Status</th>
+                                    <th class="p-5 precise-data text-[8px] opacity-40 text-center">Threat Count</th>
+                                    <th class="p-5 precise-data text-[8px] opacity-40 text-right">Date</th>
+                                </tr>
+                            </thead>
+                            <tbody class="divide-y divide-ink/[0.03]">
+                                {% for scan in recent_scans %}
+                                <tr class="hover:bg-ink/[0.02] transition-colors">
+                                    <td class="p-5">
+                                        <a href="{% url 'scan_detail' scan.id %}" class="font-serif font-bold text-sm text-ink hover:text-seal transition-colors block">{{ scan.target.name }}</a>
+                                        <span class="font-mono text-[9px] text-ash block mt-1">{{ scan.target.target }}</span>
+                                    </td>
+                                    <td class="p-5">
+                                        <span class="severity-seal {% if scan.status == 'completed' %}low{% else %}medium{% endif %} text-[8px] font-bold">
+                                            {{ scan.status|upper }}
+                                        </span>
+                                    </td>
+                                    <td class="p-5 text-center">
+                                        <span class="text-sm font-serif font-bold {% if scan.vulnerabilities.count > 0 %}text-seal{% else %}text-bamboo{% endif %}">
+                                            {{ scan.vulnerabilities.count }}
+                                        </span>
+                                    </td>
+                                    <td class="p-5 text-right font-mono text-[10px] text-ash font-medium">
+                                        {{ scan.created_at|date:"M d, H:i" }}
+                                    </td>
+                                </tr>
+                                {% empty %}
+                                <tr>
+                                    <td colspan="4" class="p-12 text-center font-serif italic text-sm text-ash opacity-60">
+                                        No recent target assessments initiated.
+                                    </td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
             </div>
-            <div class="card-body p-0">
-                <div class="table-responsive">
-                    <table class="table table-hover align-middle">
-                        <thead>
-                            <tr>
-                                <th>Strategic Target</th>
-                                <th>Integrity Status</th>
-                                <th>Threat Count</th>
-                                <th>Date</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            {% for scan in recent_scans %}
-                            <tr>
-                                <td><a href="{% url 'scan_detail' scan.id %}" class="text-white fw-bold text-decoration-none hover-primary">{{ scan.target.name }}</a></td>
-                                <td>
-                                    <span class="badge {% if scan.status == 'completed' %}bg-success{% else %}bg-info{% endif %}">
-                                        {{ scan.status|upper }}
-                                    </span>
-                                </td>
-                                <td class="text-center">
-                                    <span class="{% if scan.vulnerabilities_found > 0 %}text-danger fw-bold{% else %}text-success{% endif %}">
-                                        {{ scan.vulnerabilities_found }}
-                                    </span>
-                                </td>
-                                <td class="text-muted small">{{ scan.created_at|date:"M d" }}</td>
-                            </tr>
-                            {% empty %}
-                            <tr>
-                                <td colspan="4" class="text-center py-5 text-muted">No assessments initiated</td>
-                            </tr>
-                            {% endfor %}
-                        </tbody>
-                    </table>
+
+            <!-- Section 2: Operational History (Audit Logs) -->
+            <div class="space-y-6">
+                <div class="flex justify-between items-end border-b border-ink/5 pb-4">
+                    <div class="space-y-1">
+                        <h3 class="font-serif italic text-xl">Operational History</h3>
+                        <p class="precise-data text-[8px] opacity-40">System actions executed by your security profile</p>
+                    </div>
+                    <span class="precise-data text-[9px] opacity-40">Recent Logs</span>
+                </div>
+
+                <div class="parchment-card p-0 overflow-hidden">
+                    <div class="overflow-x-auto">
+                        <table class="w-full text-left border-collapse">
+                            <thead>
+                                <tr class="border-b border-ink/5">
+                                    <th class="p-5 precise-data text-[8px] opacity-40">Directive</th>
+                                    <th class="p-5 precise-data text-[8px] opacity-40">Scan Output / System Event</th>
+                                    <th class="p-5 precise-data text-[8px] opacity-40 text-right">Timestamp</th>
+                                </tr>
+                            </thead>
+                            <tbody class="divide-y divide-ink/[0.03]">
+                                {% for log in audit_logs %}
+                                <tr class="hover:bg-ink/[0.02] transition-colors">
+                                    <td class="p-5">
+                                        <span class="precise-data text-[8px] px-2 py-0.5 bg-ink/5 border border-ink/10 text-ink">
+                                            {{ log.get_action_display|upper }}
+                                        </span>
+                                    </td>
+                                    <td class="p-5 font-serif italic text-sm text-ink leading-relaxed">
+                                        {{ log.description }}
+                                    </td>
+                                    <td class="p-5 text-right font-mono text-[10px] text-ash font-medium whitespace-nowrap">
+                                        {{ log.created_at|date:"M d, H:i" }}
+                                    </td>
+                                </tr>
+                                {% empty %}
+                                <tr>
+                                    <td colspan="3" class="p-12 text-center font-serif italic text-sm text-ash opacity-60">
+                                        No operational action logs found.
+                                    </td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
                 </div>
             </div>
         </div>

@@ -124,6 +124,11 @@ class ScanCreateTests(TestCase):
                 "enable_vuln_detection": "on",
             },
         )
+        
+        # Clear the rate limit cache key to allow the second request
+        from django.core.cache import cache
+        cache.clear()
+
         second_response = self.client.post(
             reverse("scan_create"),
             {

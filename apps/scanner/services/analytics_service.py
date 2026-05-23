@@ -4,6 +4,7 @@ Calculates math-based risk drift, chronological risk tides, and exposed service 
 """
 import logging
 from django.db.models import Count, Avg
+from django.utils import timezone
 from apps.scanner.models import ScanJob, Vulnerability, PortScanResult
 
 logger = logging.getLogger(__name__)
@@ -91,7 +92,7 @@ class AnalyticsService:
                 "title": r.title,
                 "port": r.port,
                 "service": r.service,
-                "resolved_at": r.resolved_at.strftime("%Y-%m-%d %H:%M:%S") if r.resolved_at else None
+                "resolved_at": timezone.localtime(r.resolved_at).strftime("%Y-%m-%d %H:%M:%S") if r.resolved_at else None
             } for r in resolved_findings
         ]
         
@@ -119,7 +120,7 @@ class AnalyticsService:
             date_val = scan.completed_at or scan.created_at
             series.append({
                 "scan_id": scan.id,
-                "date": date_val.strftime("%Y-%m-%d") if date_val else "Unknown",
+                "date": timezone.localtime(date_val).strftime("%Y-%m-%d") if date_val else "Unknown",
                 "score": scan.aggregate_risk_score or 0.0,
                 "threats": scan.vulnerabilities_found,
                 "phase": f"Observation {index + 1}" if index > 0 else "Baseline"

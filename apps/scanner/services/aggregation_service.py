@@ -68,7 +68,7 @@ class AggregationService:
                 "title": v.title,
                 "port": v.port,
                 "severity": v.severity,
-                "first_seen": first_seen.strftime("%Y-%m-%d %H:%M:%S"),
+                "first_seen": timezone.localtime(first_seen).strftime("%Y-%m-%d %H:%M:%S"),
                 "observation_count": v.observation_count,
                 "exposure_duration_days": max(0.1, duration_days),
                 "recurring": v.recurring
@@ -85,7 +85,7 @@ class AggregationService:
                 "title": r.title,
                 "port": r.port,
                 "severity": r.severity,
-                "resolved_at": r.resolved_at.strftime("%Y-%m-%d %H:%M:%S") if r.resolved_at else None,
+                "resolved_at": timezone.localtime(r.resolved_at).strftime("%Y-%m-%d %H:%M:%S") if r.resolved_at else None,
                 "total_observations": r.observation_count
             } for r in resolved_vulns
         ]

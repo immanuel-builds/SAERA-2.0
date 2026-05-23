@@ -49,6 +49,75 @@
                 </div>
                 <canvas id="riskTidesChart"></canvas>
             </div>
+
+            <!-- Tactile Posture Resonance Simulator -->
+            <div class="parchment-card p-6 space-y-6">
+                <div class="flex justify-between items-center border-b border-ink/5 pb-4">
+                    <div class="space-y-1">
+                        <h4 class="font-serif italic text-base text-ink">Tactile Posture Resonance Simulator</h4>
+                        <p class="precise-data text-[8px] opacity-60">Open/close target ports to watch risk wave curvature respond organically</p>
+                    </div>
+                    <div class="flex gap-4">
+                        <button id="btn-auto-wave" class="precise-data text-[9px] px-3 py-1 bg-ink text-background hover:bg-seal transition-all flex items-center gap-2">
+                            <span class="material-symbols-outlined text-xs">sync</span>
+                            <span id="txt-auto-wave">Auto Wave Sweep</span>
+                        </button>
+                    </div>
+                </div>
+
+                <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-6 gap-4">
+                    <!-- Port 22 SSH -->
+                    <button class="port-node-btn p-3 border border-ink/10 flex flex-col items-center gap-2 transition-all duration-300 relative overflow-hidden" data-port="22" data-weight="2.8" data-service="SSH">
+                        <span class="precise-data text-[8px] opacity-50">Port 22</span>
+                        <span class="font-mono text-sm font-bold text-ink">SSH</span>
+                        <span class="precise-data text-[7px] text-bamboo font-bold status-lbl">CLOSED</span>
+                        <div class="indicator-bar absolute bottom-0 left-0 right-0 h-1 bg-bamboo transition-colors duration-300"></div>
+                    </button>
+                    <!-- Port 80 HTTP -->
+                    <button class="port-node-btn p-3 border border-ink/10 flex flex-col items-center gap-2 transition-all duration-300 relative overflow-hidden" data-port="80" data-weight="1.2" data-service="HTTP">
+                        <span class="precise-data text-[8px] opacity-50">Port 80</span>
+                        <span class="font-mono text-sm font-bold text-ink">HTTP</span>
+                        <span class="precise-data text-[7px] text-bamboo font-bold status-lbl">CLOSED</span>
+                        <div class="indicator-bar absolute bottom-0 left-0 right-0 h-1 bg-bamboo transition-colors duration-300"></div>
+                    </button>
+                    <!-- Port 443 HTTPS -->
+                    <button class="port-node-btn p-3 border border-ink/10 flex flex-col items-center gap-2 transition-all duration-300 relative overflow-hidden" data-port="443" data-weight="0.8" data-service="HTTPS">
+                        <span class="precise-data text-[8px] opacity-50">Port 443</span>
+                        <span class="font-mono text-sm font-bold text-ink">HTTPS</span>
+                        <span class="precise-data text-[7px] text-bamboo font-bold status-lbl">CLOSED</span>
+                        <div class="indicator-bar absolute bottom-0 left-0 right-0 h-1 bg-bamboo transition-colors duration-300"></div>
+                    </button>
+                    <!-- Port 1433 MSSQL -->
+                    <button class="port-node-btn p-3 border border-ink/10 flex flex-col items-center gap-2 transition-all duration-300 relative overflow-hidden" data-port="1433" data-weight="2.5" data-service="MSSQL">
+                        <span class="precise-data text-[8px] opacity-50">Port 1433</span>
+                        <span class="font-mono text-sm font-bold text-ink">MSSQL</span>
+                        <span class="precise-data text-[7px] text-bamboo font-bold status-lbl">CLOSED</span>
+                        <div class="indicator-bar absolute bottom-0 left-0 right-0 h-1 bg-bamboo transition-colors duration-300"></div>
+                    </button>
+                    <!-- Port 3306 MySQL -->
+                    <button class="port-node-btn p-3 border border-ink/10 flex flex-col items-center gap-2 transition-all duration-300 relative overflow-hidden" data-port="3306" data-weight="1.8" data-service="MySQL">
+                        <span class="precise-data text-[8px] opacity-50">Port 3306</span>
+                        <span class="font-mono text-sm font-bold text-ink">MySQL</span>
+                        <span class="precise-data text-[7px] text-bamboo font-bold status-lbl">CLOSED</span>
+                        <div class="indicator-bar absolute bottom-0 left-0 right-0 h-1 bg-bamboo transition-colors duration-300"></div>
+                    </button>
+                    <!-- Port 8080 HTTP-Alt -->
+                    <button class="port-node-btn p-3 border border-ink/10 flex flex-col items-center gap-2 transition-all duration-300 relative overflow-hidden" data-port="8080" data-weight="1.5" data-service="HTTP-Alt">
+                        <span class="precise-data text-[8px] opacity-50">Port 8080</span>
+                        <span class="font-mono text-sm font-bold text-ink">HTTP-Alt</span>
+                        <span class="precise-data text-[7px] text-bamboo font-bold status-lbl">CLOSED</span>
+                        <div class="indicator-bar absolute bottom-0 left-0 right-0 h-1 bg-bamboo transition-colors duration-300"></div>
+                    </button>
+                </div>
+
+                <div class="flex justify-between items-center text-[10px] font-mono text-ash pt-4 border-t border-ink/5">
+                    <div class="flex gap-6">
+                        <span>Active Exposures: <strong id="sim-active-ports" class="text-ink">0</strong></span>
+                        <span>Resonance Influence: <strong id="sim-risk-impact" class="text-ink">+0.0</strong></span>
+                    </div>
+                    <span>Simulated Posture Index: <strong id="sim-total-risk" class="text-seal">0.0</strong> / 10</span>
+                </div>
+            </div>
         </div>
 
         <!-- Lifecycle Analytics Flow -->
@@ -278,6 +347,113 @@
         };
 
         const riskTidesChart = new Chart(ctx, config);
+
+        // ── Tactile Posture Resonance Simulator Logic ─────────────────────
+        const portBtns = document.querySelectorAll('.port-node-btn');
+        const activePortsSpan = document.getElementById('sim-active-ports');
+        const riskImpactSpan = document.getElementById('sim-risk-impact');
+        const totalRiskSpan = document.getElementById('sim-total-risk');
+        const btnAutoWave = document.getElementById('btn-auto-wave');
+        const txtAutoWave = document.getElementById('txt-auto-wave');
+
+        let baseRisk = scores.length > 0 ? parseFloat(scores[scores.length - 1]) : 2.5;
+        let autoWaveInterval = null;
+
+        // Initialize label
+        totalRiskSpan.textContent = baseRisk.toFixed(1);
+
+        function updateSimulation() {
+            let activeCount = 0;
+            let sumWeight = 0;
+
+            portBtns.forEach(btn => {
+                const isActive = btn.classList.contains('active-port');
+                const weight = parseFloat(btn.dataset.weight);
+                const statusLbl = btn.querySelector('.status-lbl');
+                const bar = btn.querySelector('.indicator-bar');
+
+                if (isActive) {
+                    activeCount++;
+                    sumWeight += weight;
+                    statusLbl.textContent = 'OPEN';
+                    statusLbl.className = 'precise-data text-[7px] text-seal font-bold status-lbl';
+                    btn.classList.add('border-seal/40', 'bg-seal/5');
+                    btn.classList.remove('border-ink/10');
+                    bar.className = 'indicator-bar absolute bottom-0 left-0 right-0 h-1 bg-seal';
+                } else {
+                    statusLbl.textContent = 'CLOSED';
+                    statusLbl.className = 'precise-data text-[7px] text-bamboo font-bold status-lbl';
+                    btn.classList.remove('border-seal/40', 'bg-seal/5');
+                    btn.classList.add('border-ink/10');
+                    bar.className = 'indicator-bar absolute bottom-0 left-0 right-0 h-1 bg-bamboo';
+                }
+            });
+
+            activePortsSpan.textContent = activeCount;
+            riskImpactSpan.textContent = `+${sumWeight.toFixed(1)}`;
+            
+            // Calculate simulated score: clamp between 1.0 and 9.8
+            let simScore = baseRisk + sumWeight;
+            if (simScore > 9.8) simScore = 9.8;
+            totalRiskSpan.textContent = simScore.toFixed(1);
+
+            // Update the last element of riskTidesChart organically!
+            if (riskTidesChart && riskTidesChart.data.datasets[0].data.length > 0) {
+                const lastIdx = riskTidesChart.data.datasets[0].data.length - 1;
+                riskTidesChart.data.datasets[0].data[lastIdx] = simScore;
+                
+                // Also add a minor waving ripple to previous 2 points to simulate dynamic posture curvature resonance!
+                const len = riskTidesChart.data.datasets[0].data.length;
+                if (len > 2) {
+                    riskTidesChart.data.datasets[0].data[len - 2] = parseFloat(scores[len - 2]) + (sumWeight * 0.15);
+                }
+                if (len > 3) {
+                    riskTidesChart.data.datasets[0].data[len - 3] = parseFloat(scores[len - 3]) + (sumWeight * 0.05);
+                }
+                
+                riskTidesChart.update('active'); // Chart.js organic update animation
+            }
+        }
+
+        portBtns.forEach(btn => {
+            btn.addEventListener('click', () => {
+                if (autoWaveInterval) {
+                    stopAutoWave();
+                }
+                btn.classList.toggle('active-port');
+                updateSimulation();
+            });
+        });
+
+        function stopAutoWave() {
+            clearInterval(autoWaveInterval);
+            autoWaveInterval = null;
+            txtAutoWave.textContent = 'Auto Wave Sweep';
+            btnAutoWave.classList.remove('bg-seal');
+            btnAutoWave.classList.add('bg-ink');
+        }
+
+        function startAutoWave() {
+            txtAutoWave.textContent = 'Sweeping...';
+            btnAutoWave.classList.remove('bg-ink');
+            btnAutoWave.classList.add('bg-seal');
+
+            let index = 0;
+            autoWaveInterval = setInterval(() => {
+                const btn = portBtns[index % portBtns.length];
+                btn.classList.toggle('active-port');
+                updateSimulation();
+                index++;
+            }, 1200);
+        }
+
+        btnAutoWave.addEventListener('click', () => {
+            if (autoWaveInterval) {
+                stopAutoWave();
+            } else {
+                startAutoWave();
+            }
+        });
 
         // Theme switching observer
         const observer = new MutationObserver(() => {

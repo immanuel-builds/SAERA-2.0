@@ -7,6 +7,7 @@ from django.contrib import messages
 from django.http import JsonResponse, HttpResponseForbidden
 from django.views.decorators.http import require_http_methods
 from django.db.models import Q, Count
+from django.utils import timezone
 from .models import ScanTarget, ScanJob, Vulnerability, ScanConfiguration
 from .forms import QuickScanForm
 from .tasks import run_scan_job
@@ -255,7 +256,7 @@ def scan_progress_api(request, scan_id):
         'open_ports_found': scan.open_ports_found,
         'vulnerability_count': scan.vulnerabilities.count(),
         'error_message': scan.error_message,
-        'logs': [f"[{log.timestamp.strftime('%H:%M:%S')}] {log.message}" for log in scan.logs.all().order_by('timestamp')]
+        'logs': [f"[{timezone.localtime(log.timestamp).strftime('%H:%M:%S')}] {log.message}" for log in scan.logs.all().order_by('timestamp')]
     }
 
     return JsonResponse(data)

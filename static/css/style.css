@@ -15,7 +15,7 @@
     /* The Observatory Palette (Light Mode) */
     --bg-parchment: #EAE2D6;
     --ink-black: #1A1A1A;
-    --ash-gray: #6B6B6B;
+    --ash-gray: #4A4744;
     --mist-gray: #CFC6B8;
     --seal-red: #9F3B32;
     --bamboo-green: #4E6B57;
@@ -177,6 +177,7 @@ h3, .atmospheric-h3 {
 .precise-data {
     font-family: 'Inter', sans-serif;
     font-size: 0.85rem; /* Increased from 0.75 */
+    font-weight: 600;
     text-transform: uppercase;
     letter-spacing: 0.2em;
     color: var(--ash-gray);
@@ -354,7 +355,7 @@ body.dark .terminal-window {
 }
 
 #log-container div {
-    opacity: 0.6;
+    opacity: 0.85;
     transition: opacity 0.8s ease;
 }
 

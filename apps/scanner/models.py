@@ -3,6 +3,7 @@ Scanner Models for Vulnerability Detection and Scanning
 """
 from django.db import models
 from django.conf import settings
+from django.utils import timezone
 import json
 
 
@@ -308,4 +309,4 @@ class ScanLog(models.Model):
         ordering = ['timestamp']
 
     def __str__(self):
-        return f"[{self.timestamp.strftime('%H:%M:%S')}] {self.message}"
+        return f"[{timezone.localtime(self.timestamp).strftime('%H:%M:%S')}] {self.message}"
